@@ -1,0 +1,244 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* OfiKai Design System - Professional workspace marketplace */
+
+@layer base {
+  :root {
+    /* Core OfiKai Brand Colors */
+    --primary: 216 63% 35%; /* #2A4B8C */
+    --primary-dark: 220 72% 24%; /* #1E3A6E */
+    --primary-light: 214 55% 52%; /* #3A63B8 */
+    --primary-foreground: 0 0% 98%;
+
+    /* Neutral Colors */
+    --background: 0 0% 100%;
+    --foreground: 210 11% 15%; /* #212529 */
+    --muted: 210 9% 31%; /* #6C757D */
+    --muted-foreground: 210 9% 31%;
+
+    /* UI Elements */
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 15%;
+    --border: 210 20% 88%;
+    --input: 210 20% 93%;
+    --ring: 216 63% 35%;
+
+    /* Interactive States */
+    --accent: 216 63% 35%;
+    --accent-foreground: 0 0% 98%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 210 11% 15%;
+
+    /* Status Colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 98%;
+
+    /* Design System Values */
+    --radius: 0.75rem;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
+    --gradient-hero: linear-gradient(135deg, hsl(var(--primary-dark) / 0.9), hsl(var(--primary) / 0.8));
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s ease-out;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Navigation Styles */
+  .navbar-sticky {
+    @apply fixed top-0 w-full z-50 bg-background/95 backdrop-blur-sm border-b transition-all duration-300;
+  }
+
+  /* Hero Section */
+  .hero-section {
+    @apply relative min-h-screen flex items-center justify-center text-white;
+    background: linear-gradient(135deg, hsl(var(--primary-dark) / 0.9), hsl(var(--primary) / 0.8));
+  }
+
+  .hero-overlay {
+    @apply absolute inset-0 bg-gradient-to-r from-black/60 to-black/40;
+  }
+
+  /* Card Styles */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .feature-card {
+    @apply bg-card rounded-xl p-6 shadow-sm border hover:shadow-lg transition-all duration-300;
+  }
+
+  /* Button Styles */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-md;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 rounded-lg font-medium transition-all duration-300;
+  }
+
+  .btn-search {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg;
+  }
+
+  /* Search Bar */
+  .search-container {
+    @apply bg-white rounded-2xl p-2 shadow-xl max-w-2xl w-full flex items-center gap-4;
+  }
+
+  .search-input {
+    @apply flex-1 px-6 py-4 bg-transparent text-foreground placeholder:text-muted-foreground border-none outline-none text-lg;
+  }
+
+  /* Animation Classes */
+  .fade-in-up {
+    @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
+  }
+
+  .fade-in-up.animate {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+
+  /* Category Grid */
+  .category-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+
+  .category-card {
+    @apply relative overflow-hidden rounded-xl bg-white shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer;
+  }
+
+  .category-image {
+    @apply w-full h-48 object-cover transition-transform duration-300;
+  }
+
+  /* Featured Spaces Grid */
+  .spaces-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
+  }
+
+  .space-card {
+    @apply bg-card rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden;
+  }
+
+  .space-image {
+    @apply w-full h-48 object-cover transition-transform duration-300;
+  }
+
+  /* How It Works Section */
+  .steps-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-8;
+  }
+
+  .step-card {
+    @apply text-center p-8 bg-card rounded-xl shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .step-icon {
+    @apply w-16 h-16 mx-auto mb-6 bg-primary/10 rounded-full flex items-center justify-center text-primary text-2xl;
+  }
+
+  /* Footer */
+  .footer-section {
+    @apply bg-foreground text-white py-16;
+  }
+
+  .footer-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8;
+  }
+
+  .footer-title {
+    @apply text-lg font-semibold mb-4;
+  }
+
+  .footer-link {
+    @apply text-gray-300 hover:text-white transition-colors duration-300 block mb-2;
+  }
+
+  /* Mobile Menu */
+  .mobile-menu {
+    @apply absolute top-full left-0 w-full bg-background border-b shadow-lg transform transition-all duration-300 ease-in-out;
+  }
+
+  .mobile-menu.open {
+    @apply opacity-100 visible translate-y-0;
+  }
+
+  .mobile-menu.closed {
+    @apply opacity-0 invisible -translate-y-4;
+  }
+  .category-card:hover .category-image {
+    transform: scale(1.1);
+  }
+
+  .space-card:hover .space-image {
+    transform: scale(1.05);
+  }
+}
