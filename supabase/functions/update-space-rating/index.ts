@@ -1,14 +1,14 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
   // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -16,13 +16,13 @@ serve(async (req) => {
     const { space_id } = await req.json();
 
     if (!space_id) {
-      throw new Error("space_id is required");
+      throw new Error('space_id is required');
     }
 
     // Create Supabase client using service role for full access
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { persistSession: false } }
     );
 
@@ -35,7 +35,7 @@ serve(async (req) => {
       .eq('space_id', space_id);
 
     if (reviewsError) {
-      console.error("Error fetching reviews:", reviewsError);
+      console.error('Error fetching reviews:', reviewsError);
       throw reviewsError;
     }
 
@@ -62,11 +62,13 @@ serve(async (req) => {
       .eq('id', space_id);
 
     if (updateError) {
-      console.error("Error updating space:", updateError);
+      console.error('Error updating space:', updateError);
       throw updateError;
     }
 
-    console.log(`Successfully updated space ${space_id} with rating ${averageRating} and ${totalReviews} reviews`);
+    console.log(
+      `Successfully updated space ${space_id} with rating ${averageRating} and ${totalReviews} reviews`
+    );
 
     return new Response(
       JSON.stringify({
@@ -76,19 +78,16 @@ serve(async (req) => {
         total_reviews: totalReviews,
       }),
       {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       }
     );
   } catch (error) {
-    console.error("Error in update-space-rating:", error);
+    console.error('Error in update-space-rating:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500,
+    });
   }
 });
