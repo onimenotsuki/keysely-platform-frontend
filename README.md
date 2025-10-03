@@ -36,6 +36,11 @@ npm i
 npm run dev
 ```
 
+Before run the development server
+
+1. Obtain the required environment variables and create a `.env` file in the root directory of the project.
+2. Refer to the `.env.example` file to ensure all variables are correctly specified.
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
