@@ -6,47 +6,49 @@
 
 @layer base {
   :root {
-    /* Core OfiKai Brand Colors */
-    --primary: 216 63% 35%; /* #2A4B8C */
-    --primary-dark: 220 72% 24%; /* #1E3A6E */
-    --primary-light: 214 55% 52%; /* #3A63B8 */
-    --primary-foreground: 0 0% 98%;
+    /* Core OfiKai Brand Colors - Nueva Paleta */
+    --primary: 214 44% 18%; /* Navy Blue #1A2B42 - Color principal del logo */
+    --primary-dark: 214 44% 14%; /* Navy Blue más oscuro para hover */
+    --primary-light: 217 91% 60%; /* Action Blue #3B82F6 - Azul de acento */
+    --primary-foreground: 210 17% 98%; /* Blanco suave para texto sobre primary */
 
     /* Neutral Colors */
-    --background: 0 0% 100%;
-    --foreground: 210 11% 15%; /* #212529 */
-    --muted: 210 9% 31%; /* #6C757D */
-    --muted-foreground: 210 9% 31%;
+    --background: 210 17% 98%; /* Off-White #F8F9FA - Fondo principal */
+    --foreground: 210 9% 18%; /* Dark Gray #343A40 - Texto principal */
+    --muted: 210 7% 46%; /* Medium Gray #6C757D - Texto secundario */
+    --muted-foreground: 210 7% 46%;
 
     /* UI Elements */
-    --card: 0 0% 100%;
-    --card-foreground: 210 11% 15%;
-    --border: 210 20% 88%;
-    --input: 210 20% 93%;
-    --ring: 216 63% 35%;
+    --card: 0 0% 100%; /* Blanco puro para tarjetas */
+    --card-foreground: 210 9% 18%;
+    --border: 210 14% 89%; /* Border sutil */
+    --input: 210 17% 95%; /* Inputs con fondo muy claro */
+    --ring: 217 91% 60%; /* Action Blue para focus ring */
 
     /* Interactive States */
-    --accent: 216 63% 35%;
-    --accent-foreground: 0 0% 98%;
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 210 11% 15%;
+    --accent: 217 91% 60%; /* Action Blue #3B82F6 - CTAs y elementos interactivos */
+    --accent-foreground: 0 0% 100%; /* Blanco para texto sobre accent */
+    --secondary: 210 7% 46%; /* Medium Gray para elementos secundarios */
+    --secondary-foreground: 0 0% 100%;
 
-    /* Status Colors */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --success: 142 71% 45%;
-    --success-foreground: 0 0% 98%;
+    /* Status Colors - Colores Semánticos */
+    --destructive: 354 70% 54%; /* Error Red #DC3545 */
+    --destructive-foreground: 0 0% 100%;
+    --success: 151 69% 31%; /* Success Green #198754 */
+    --success-foreground: 0 0% 100%;
+    --warning: 45 100% 51%; /* Warning Yellow #FFC107 */
+    --warning-foreground: 210 9% 18%; /* Texto oscuro sobre warning */
 
     /* Design System Values */
     --radius: 0.75rem;
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary-dark) / 0.9), hsl(var(--primary) / 0.8));
-    
+    --gradient-hero: linear-gradient(135deg, hsl(214 44% 14% / 0.95), hsl(214 44% 18% / 0.9));
+
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: all 0.15s ease-out;
