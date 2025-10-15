@@ -1,14 +1,15 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ArrowLeft } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import logoImage from '../assets/logo.png';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -88,10 +89,10 @@ const Auth = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">OfiKai</CardTitle>
-          <CardDescription>
-            Accede a tu cuenta o regístrate para empezar
-          </CardDescription>
+          <div className="flex justify-center mb-4">
+            <img src={logoImage} alt="OfiKai Logo" className="h-12 w-auto" />
+          </div>
+          <CardDescription>Accede a tu cuenta o regístrate para empezar</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
@@ -175,9 +176,9 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
-      
-      <Button 
-        variant="outline" 
+
+      <Button
+        variant="outline"
         onClick={() => navigate('/')}
         className="mt-4 text-sm"
         disabled={isLoading}
