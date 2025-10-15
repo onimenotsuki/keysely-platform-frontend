@@ -1,18 +1,18 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Star, MessageSquare, Edit, Eye, Trash2 } from 'lucide-react';
-import { useUserReviews, useUpdateReview, Review } from '@/hooks/useReviews';
-import { useAuth } from '@/contexts/AuthContext';
 import ReviewCard from '@/components/ReviewCard';
 import ReviewForm from '@/components/ReviewForm';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { Review, useUpdateReview, useUserReviews } from '@/hooks/useReviews';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Edit, Eye, MessageSquare, Star, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Footer } from '../components/layout/Footer';
+import { Header } from '../components/layout/Header';
 
 const MyReviews = () => {
   const { user } = useAuth();
@@ -25,9 +25,7 @@ const MyReviews = () => {
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Acceso denegado</h1>
-          <p className="text-muted-foreground mb-4">
-            Debes iniciar sesión para ver tus reviews.
-          </p>
+          <p className="text-muted-foreground mb-4">Debes iniciar sesión para ver tus reviews.</p>
           <Link to="/auth">
             <Button>Iniciar Sesión</Button>
           </Link>
@@ -78,22 +76,22 @@ const MyReviews = () => {
     );
   }
 
-  const averageRating = reviews.length > 0 
-    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
-    : '0.0';
+  const averageRating =
+    reviews.length > 0
+      ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
+      : '0.0';
 
-  const ratingCounts = [5, 4, 3, 2, 1].map(rating => ({
+  const ratingCounts = [5, 4, 3, 2, 1].map((rating) => ({
     rating,
-    count: reviews.filter(review => review.rating === rating).length
+    count: reviews.filter((review) => review.rating === rating).length,
   }));
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
-          
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Mis Reviews</h1>
@@ -115,12 +113,8 @@ const MyReviews = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Total Reviews */}
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-primary mb-2">
-                      {reviews.length}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Total de Reviews
-                    </p>
+                    <div className="text-3xl font-bold text-primary mb-2">{reviews.length}</div>
+                    <p className="text-sm text-muted-foreground">Total de Reviews</p>
                   </div>
 
                   {/* Average Rating */}
@@ -129,9 +123,7 @@ const MyReviews = () => {
                       <span className="text-3xl font-bold">{averageRating}</span>
                       <Star className="h-6 w-6 text-yellow-400 fill-yellow-400" />
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Calificación Promedio
-                    </p>
+                    <p className="text-sm text-muted-foreground">Calificación Promedio</p>
                   </div>
 
                   {/* Rating Distribution */}
@@ -143,8 +135,9 @@ const MyReviews = () => {
                         <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-yellow-400 transition-all duration-300"
-                            style={{ 
-                              width: reviews.length > 0 ? `${(count / reviews.length) * 100}%` : '0%' 
+                            style={{
+                              width:
+                                reviews.length > 0 ? `${(count / reviews.length) * 100}%` : '0%',
                             }}
                           />
                         </div>
@@ -173,11 +166,9 @@ const MyReviews = () => {
           {reviews.length > 0 ? (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">
-                  Tus Reviews ({reviews.length})
-                </h2>
+                <h2 className="text-xl font-semibold">Tus Reviews ({reviews.length})</h2>
               </div>
-              
+
               <div className="space-y-4">
                 {reviews.map((review) => (
                   <Card key={review.id} className="relative">
@@ -187,7 +178,7 @@ const MyReviews = () => {
                           {/* Space Info */}
                           {review.spaces && (
                             <div className="mb-3">
-                              <Link 
+                              <Link
                                 to={`/space/${review.space_id}`}
                                 className="text-lg font-medium hover:text-primary transition-colors"
                               >
@@ -203,16 +194,14 @@ const MyReviews = () => {
                                 <Star
                                   key={i}
                                   className={`h-4 w-4 ${
-                                    i < review.rating 
-                                      ? 'text-yellow-400 fill-yellow-400' 
+                                    i < review.rating
+                                      ? 'text-yellow-400 fill-yellow-400'
                                       : 'text-gray-300'
                                   }`}
                                 />
                               ))}
                             </div>
-                            <Badge variant="outline">
-                              {review.rating}.0
-                            </Badge>
+                            <Badge variant="outline">{review.rating}.0</Badge>
                             <span className="text-sm text-muted-foreground">
                               {format(new Date(review.created_at), 'dd MMM yyyy', { locale: es })}
                             </span>
@@ -236,11 +225,7 @@ const MyReviews = () => {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            asChild
-                          >
+                          <Button variant="outline" size="sm" asChild>
                             <Link to={`/space/${review.space_id}`}>
                               <Eye className="h-4 w-4" />
                             </Link>
@@ -257,16 +242,12 @@ const MyReviews = () => {
             <Card>
               <CardContent className="p-12 text-center">
                 <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">
-                  Aún no has escrito ninguna review
-                </h3>
+                <h3 className="text-lg font-medium mb-2">Aún no has escrito ninguna review</h3>
                 <p className="text-muted-foreground mb-6">
                   Después de completar una reserva, podrás escribir una review sobre tu experiencia.
                 </p>
                 <Button asChild>
-                  <Link to="/explore">
-                    Explorar Espacios
-                  </Link>
+                  <Link to="/explore">Explorar Espacios</Link>
                 </Button>
               </CardContent>
             </Card>

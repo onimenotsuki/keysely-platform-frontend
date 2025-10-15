@@ -1,28 +1,34 @@
-import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useSpace } from '@/hooks/useSpaces';
-import { useAuth } from '@/contexts/AuthContext';
-import { useFavorites, useToggleFavorite, useIsFavorite } from '@/hooks/useFavorites';
-import { useCreateBooking } from '@/hooks/useBookings';
-import { useBookingsBySpace } from '@/hooks/useBookingsBySpace';
-import { useMarketplacePayment } from '@/hooks/useMarketplacePayment';
-import { useTranslation } from '@/hooks/useTranslation';
 import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import ContactOwnerButton from '@/components/ContactOwnerButton';
 import ReviewsSection from '@/components/ReviewsSection';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Heart } from "lucide-react";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { useCreateBooking } from '@/hooks/useBookings';
+import { useBookingsBySpace } from '@/hooks/useBookingsBySpace';
+import { useFavorites, useIsFavorite, useToggleFavorite } from '@/hooks/useFavorites';
+import { useMarketplacePayment } from '@/hooks/useMarketplacePayment';
+import { useSpace } from '@/hooks/useSpaces';
+import { useTranslation } from '@/hooks/useTranslation';
+import { Heart } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { Footer } from '../components/layout/Footer';
+import { Header } from '../components/layout/Header';
 
 const SpaceDetail = () => {
   const { id } = useParams();
@@ -38,7 +44,7 @@ const SpaceDetail = () => {
   const getCurrencySymbol = () => {
     return t('common.currency');
   };
-  
+
   const { data: space, isLoading } = useSpace(id!);
   const { data: spaceBookings } = useBookingsBySpace(id!);
   const favoritesQuery = useFavorites();
@@ -46,26 +52,26 @@ const SpaceDetail = () => {
   const { data: isFavorite } = useIsFavorite(id!);
   const createBooking = useCreateBooking();
   const { createPayment, isCreatingPayment } = useMarketplacePayment();
-  
+
   const handleBooking = async () => {
     if (!user) {
-      toast({ title: t('spaceDetail.pleaseSignIn'), variant: "destructive" });
+      toast({ title: t('spaceDetail.pleaseSignIn'), variant: 'destructive' });
       return;
     }
-    
+
     if (!selectedDate || !space) return;
-    
+
     const startDateTime = new Date(selectedDate);
     const [startHour, startMinute] = startTime.split(':').map(Number);
     startDateTime.setHours(startHour, startMinute);
-    
+
     const endDateTime = new Date(selectedDate);
     const [endHour, endMinute] = endTime.split(':').map(Number);
     endDateTime.setHours(endHour, endMinute);
-    
+
     const totalHours = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60);
     const totalAmount = totalHours * space.price_per_hour;
-    
+
     try {
       // First create the booking
       const booking = await createBooking.mutateAsync({
@@ -76,29 +82,29 @@ const SpaceDetail = () => {
         end_time: endTime,
         total_hours: Math.round(totalHours),
         total_amount: totalAmount,
-        guests_count: guestsCount
+        guests_count: guestsCount,
       });
-      
+
       // Then create the marketplace payment session
       if (booking) {
         createPayment({
           booking_id: booking.id,
-          space_id: id!
+          space_id: id!,
         });
       }
     } catch (error) {
-      toast({ title: t('spaceDetail.failedBooking'), variant: "destructive" });
+      toast({ title: t('spaceDetail.failedBooking'), variant: 'destructive' });
     }
   };
-  
+
   const handleToggleFavorite = () => {
     if (!user) {
-      toast({ title: t('spaceDetail.signInFavorites'), variant: "destructive" });
+      toast({ title: t('spaceDetail.signInFavorites'), variant: 'destructive' });
       return;
     }
     toggleFavorite.mutate(id!);
   };
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -118,7 +124,7 @@ const SpaceDetail = () => {
       </div>
     );
   }
-  
+
   if (!space) {
     return (
       <div className="min-h-screen bg-background">
@@ -136,13 +142,17 @@ const SpaceDetail = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-4">
         <nav className="text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-primary">{t('spaceDetail.home')}</Link>
+          <Link to="/" className="hover:text-primary">
+            {t('spaceDetail.home')}
+          </Link>
           <span className="mx-2">›</span>
-          <Link to="/explore" className="hover:text-primary">{t('spaceDetail.explore')}</Link>
+          <Link to="/explore" className="hover:text-primary">
+            {t('spaceDetail.explore')}
+          </Link>
           <span className="mx-2">›</span>
           <span className="text-foreground">{space.title}</span>
         </nav>
@@ -150,7 +160,6 @@ const SpaceDetail = () => {
 
       <div className="container mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Image Gallery */}
@@ -162,10 +171,12 @@ const SpaceDetail = () => {
                   className="w-full h-96 object-cover rounded-xl"
                 />
                 <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                  {getCurrencySymbol()}{space.price_per_hour}{t('common.perHour')}
+                  {getCurrencySymbol()}
+                  {space.price_per_hour}
+                  {t('common.perHour')}
                 </div>
               </div>
-              
+
               {space.images && space.images.length > 1 && (
                 <div className="grid grid-cols-4 gap-2">
                   {space.images.map((image, index) => (
@@ -191,9 +202,7 @@ const SpaceDetail = () => {
             <div className="mb-8">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">
-                    {space.title}
-                  </h1>
+                  <h1 className="text-3xl font-bold text-foreground mb-2">{space.title}</h1>
                   <p className="text-muted-foreground text-lg">
                     <i className="fas fa-map-marker-alt mr-2"></i>
                     {space.address}, {space.city}
@@ -209,7 +218,9 @@ const SpaceDetail = () => {
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="text-center p-4 bg-secondary rounded-lg">
                   <i className="fas fa-users text-2xl text-primary mb-2"></i>
-                  <p className="font-medium">{t('spaceDetail.upToPeople', { count: space.capacity })}</p>
+                  <p className="font-medium">
+                    {t('spaceDetail.upToPeople', { count: space.capacity })}
+                  </p>
                 </div>
                 <div className="text-center p-4 bg-secondary rounded-lg">
                   <i className="fas fa-ruler-combined text-2xl text-primary mb-2"></i>
@@ -221,9 +232,7 @@ const SpaceDetail = () => {
                 </div>
               </div>
 
-              <p className="text-foreground text-lg leading-relaxed">
-                {space.description}
-              </p>
+              <p className="text-foreground text-lg leading-relaxed">{space.description}</p>
             </div>
 
             {/* Tabs Content */}
@@ -234,7 +243,7 @@ const SpaceDetail = () => {
                 <TabsTrigger value="policies">{t('spaceDetail.policies')}</TabsTrigger>
                 <TabsTrigger value="reviews">{t('spaceDetail.reviews')}</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="amenities" className="space-y-6">
                 <Card>
                   <CardHeader>
@@ -301,7 +310,9 @@ const SpaceDetail = () => {
             {/* Owner Info */}
             <Card>
               <CardHeader>
-                <CardTitle>{t('spaceDetail.hostedBy', { name: space.profiles?.full_name || 'Host' })}</CardTitle>
+                <CardTitle>
+                  {t('spaceDetail.hostedBy', { name: space.profiles?.full_name || 'Host' })}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-4">
@@ -309,7 +320,9 @@ const SpaceDetail = () => {
                     {(space.profiles?.full_name || 'H')[0]}
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">{space.profiles?.full_name || 'Host'}</p>
+                    <p className="font-medium text-foreground">
+                      {space.profiles?.full_name || 'Host'}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {t('spaceDetail.workspaceOwner')}
                     </p>
@@ -324,14 +337,17 @@ const SpaceDetail = () => {
             <Card className="sticky top-24">
               <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                  <span>{getCurrencySymbol()}{space.price_per_hour} {t('common.perHour')}</span>
+                  <span>
+                    {getCurrencySymbol()}
+                    {space.price_per_hour} {t('common.perHour')}
+                  </span>
                   <div className="flex items-center space-x-1 text-yellow-500 text-sm">
                     <i className="fas fa-star"></i>
                     <span>{space.rating}</span>
                   </div>
                 </CardTitle>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 <div>
                   <Label className="text-sm font-medium mb-2">{t('spaceDetail.selectDate')}</Label>
@@ -366,7 +382,9 @@ const SpaceDetail = () => {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium mb-1">{t('spaceDetail.numberOfGuests')}</Label>
+                  <Label className="text-sm font-medium mb-1">
+                    {t('spaceDetail.numberOfGuests')}
+                  </Label>
                   <Input
                     type="number"
                     min="1"
@@ -379,54 +397,87 @@ const SpaceDetail = () => {
                 {selectedDate && (
                   <div className="border-t pt-4">
                     <div className="flex justify-between mb-2">
-                      <span>{getCurrencySymbol()}{space.price_per_hour} x {((new Date(`2000-01-01T${endTime}`).getTime() - new Date(`2000-01-01T${startTime}`).getTime()) / (1000 * 60 * 60))} {t('common.hours')}</span>
-                      <span>{getCurrencySymbol()}{((new Date(`2000-01-01T${endTime}`).getTime() - new Date(`2000-01-01T${startTime}`).getTime()) / (1000 * 60 * 60)) * space.price_per_hour}</span>
+                      <span>
+                        {getCurrencySymbol()}
+                        {space.price_per_hour} x{' '}
+                        {(new Date(`2000-01-01T${endTime}`).getTime() -
+                          new Date(`2000-01-01T${startTime}`).getTime()) /
+                          (1000 * 60 * 60)}{' '}
+                        {t('common.hours')}
+                      </span>
+                      <span>
+                        {getCurrencySymbol()}
+                        {((new Date(`2000-01-01T${endTime}`).getTime() -
+                          new Date(`2000-01-01T${startTime}`).getTime()) /
+                          (1000 * 60 * 60)) *
+                          space.price_per_hour}
+                      </span>
                     </div>
                     <div className="flex justify-between mb-2">
                       <span>{t('spaceDetail.serviceFee')}</span>
-                      <span>{getCurrencySymbol()}{Math.round(((new Date(`2000-01-01T${endTime}`).getTime() - new Date(`2000-01-01T${startTime}`).getTime()) / (1000 * 60 * 60)) * space.price_per_hour * 0.15)}</span>
+                      <span>
+                        {getCurrencySymbol()}
+                        {Math.round(
+                          ((new Date(`2000-01-01T${endTime}`).getTime() -
+                            new Date(`2000-01-01T${startTime}`).getTime()) /
+                            (1000 * 60 * 60)) *
+                            space.price_per_hour *
+                            0.15
+                        )}
+                      </span>
                     </div>
                     <div className="flex justify-between font-bold text-lg border-t pt-2">
                       <span>{t('spaceDetail.total')}</span>
-                      <span>{getCurrencySymbol()}{((new Date(`2000-01-01T${endTime}`).getTime() - new Date(`2000-01-01T${startTime}`).getTime()) / (1000 * 60 * 60)) * space.price_per_hour + Math.round(((new Date(`2000-01-01T${endTime}`).getTime() - new Date(`2000-01-01T${startTime}`).getTime()) / (1000 * 60 * 60)) * space.price_per_hour * 0.15)}</span>
+                      <span>
+                        {getCurrencySymbol()}
+                        {((new Date(`2000-01-01T${endTime}`).getTime() -
+                          new Date(`2000-01-01T${startTime}`).getTime()) /
+                          (1000 * 60 * 60)) *
+                          space.price_per_hour +
+                          Math.round(
+                            ((new Date(`2000-01-01T${endTime}`).getTime() -
+                              new Date(`2000-01-01T${startTime}`).getTime()) /
+                              (1000 * 60 * 60)) *
+                              space.price_per_hour *
+                              0.15
+                          )}
+                      </span>
                     </div>
                   </div>
                 )}
 
-                <Button 
-                  className="w-full btn-primary" 
+                <Button
+                  className="w-full btn-primary"
                   size="lg"
                   onClick={handleBooking}
                   disabled={!selectedDate || createBooking.isPending || isCreatingPayment}
                 >
-                  {createBooking.isPending ? t('spaceDetail.creatingBooking') : 
-                   isCreatingPayment ? t('spaceDetail.redirectingPayment') : 
-                   t('spaceDetail.reservePayNow')}
+                  {createBooking.isPending
+                    ? t('spaceDetail.creatingBooking')
+                    : isCreatingPayment
+                      ? t('spaceDetail.redirectingPayment')
+                      : t('spaceDetail.reservePayNow')}
                 </Button>
-                
+
                 <p className="text-center text-sm text-muted-foreground">
                   {t('spaceDetail.securePayment')}
                 </p>
 
                 <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleToggleFavorite}
-                  >
-                    <Heart 
+                  <Button variant="outline" className="w-full" onClick={handleToggleFavorite}>
+                    <Heart
                       className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
                     />
                     {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                   </Button>
-                  
+
                   <ContactOwnerButton
                     spaceId={space.id}
                     ownerId={space.owner_id}
                     className="w-full"
                   />
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={handleToggleFavorite}
                     disabled={toggleFavorite.isPending}

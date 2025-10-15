@@ -1,9 +1,9 @@
-import Header from '../components/Header';
-import Hero from '../components/Hero';
 import Categories from '../components/Categories';
 import FeaturedSpaces from '../components/FeaturedSpaces';
+import Hero from '../components/Hero';
 import HowItWorks from '../components/HowItWorks';
-import Footer from '../components/Footer';
+import { Footer } from '../components/layout/Footer';
+import { Header } from '../components/layout/Header';
 import ScrollAnimations from '../components/ScrollAnimations';
 
 const Index = () => {

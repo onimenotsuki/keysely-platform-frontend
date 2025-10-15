@@ -3,7 +3,7 @@ import { MapPin, List, Grid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import SpaceCard from './SpaceCard';
+import { SpaceCard } from './features/spaces/SpaceCard';
 import type { Space } from '@/hooks/useSpaces';
 
 interface MapViewProps {
@@ -71,30 +71,28 @@ export const MapView = ({ spaces, isLoading }: MapViewProps) => {
           <div className="h-96 bg-muted rounded-lg flex items-center justify-center">
             <div className="text-center">
               <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-              <p className="text-muted-foreground">
-                Integración de mapa próximamente
-              </p>
+              <p className="text-muted-foreground">Integración de mapa próximamente</p>
               <p className="text-sm text-muted-foreground">
                 Función disponible en la siguiente actualización
               </p>
             </div>
           </div>
-          
+
           {/* Selected Space Card */}
           {selectedSpace && (
             <Card className="absolute bottom-4 left-4 right-4 max-w-sm">
               <CardContent className="p-4">
                 <div className="flex items-start space-x-3">
                   <img
-                    src={selectedSpace.images[0] || '/placeholder.svg?height=60&width=80&text=Space'}
+                    src={
+                      selectedSpace.images[0] || '/placeholder.svg?height=60&width=80&text=Space'
+                    }
                     alt={selectedSpace.title}
                     className="w-20 h-15 object-cover rounded"
                   />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-sm truncate">{selectedSpace.title}</h4>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {selectedSpace.city}
-                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{selectedSpace.city}</p>
                     <div className="flex items-center justify-between mt-1">
                       <Badge variant="secondary" className="text-xs">
                         ${selectedSpace.price_per_hour}/hr

@@ -1,15 +1,15 @@
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { useBookings } from '@/hooks/useBookings';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useBookings } from '@/hooks/useBookings';
-import { useAuth } from '@/contexts/AuthContext';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Footer } from '../components/layout/Footer';
+import { Header } from '../components/layout/Header';
 
 const Bookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,16 +31,18 @@ const Bookings = () => {
     }
   };
 
-  const filteredBookings = bookings?.filter(booking =>
-    booking.spaces?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.spaces?.city.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredBookings =
+    bookings?.filter(
+      (booking) =>
+        booking.spaces?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.spaces?.city.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
-  const upcomingBookings = filteredBookings.filter(b => 
-    b.status === 'confirmed' || b.status === 'pending'
+  const upcomingBookings = filteredBookings.filter(
+    (b) => b.status === 'confirmed' || b.status === 'pending'
   );
-  const pastBookings = filteredBookings.filter(b => 
-    b.status === 'completed' || b.status === 'cancelled'
+  const pastBookings = filteredBookings.filter(
+    (b) => b.status === 'completed' || b.status === 'cancelled'
   );
 
   if (!user) {
@@ -66,24 +68,28 @@ const Bookings = () => {
             <Skeleton className="w-64 h-8 mb-4 mx-auto" />
             <Skeleton className="w-96 h-4 mb-8 mx-auto" />
             <div className="space-y-4">
-              {Array(3).fill(0).map((_, i) => (
-                <Card key={i}>
-                  <CardContent className="p-6">
-                    <div className="flex space-x-4">
-                      <Skeleton className="w-48 h-24" />
-                      <div className="flex-1">
-                        <Skeleton className="w-64 h-6 mb-2" />
-                        <Skeleton className="w-32 h-4 mb-4" />
-                        <div className="grid grid-cols-4 gap-4">
-                          {Array(4).fill(0).map((_, j) => (
-                            <Skeleton key={j} className="w-20 h-4" />
-                          ))}
+              {Array(3)
+                .fill(0)
+                .map((_, i) => (
+                  <Card key={i}>
+                    <CardContent className="p-6">
+                      <div className="flex space-x-4">
+                        <Skeleton className="w-48 h-24" />
+                        <div className="flex-1">
+                          <Skeleton className="w-64 h-6 mb-2" />
+                          <Skeleton className="w-32 h-4 mb-4" />
+                          <div className="grid grid-cols-4 gap-4">
+                            {Array(4)
+                              .fill(0)
+                              .map((_, j) => (
+                                <Skeleton key={j} className="w-20 h-4" />
+                              ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
             </div>
           </div>
         </div>
@@ -94,18 +100,13 @@ const Bookings = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
-          
           {/* Page Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-4">
-              My Bookings
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Manage your workspace reservations
-            </p>
+            <h1 className="text-4xl font-bold text-foreground mb-4">My Bookings</h1>
+            <p className="text-xl text-muted-foreground">Manage your workspace reservations</p>
           </div>
 
           {/* Search Bar */}
@@ -132,12 +133,8 @@ const Bookings = () => {
           {/* Bookings Tabs */}
           <Tabs defaultValue="upcoming" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="upcoming">
-                Upcoming ({upcomingBookings.length})
-              </TabsTrigger>
-              <TabsTrigger value="past">
-                Past ({pastBookings.length})
-              </TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming ({upcomingBookings.length})</TabsTrigger>
+              <TabsTrigger value="past">Past ({pastBookings.length})</TabsTrigger>
             </TabsList>
 
             {/* Upcoming Bookings */}
@@ -146,11 +143,13 @@ const Bookings = () => {
                 <Card>
                   <CardContent className="text-center py-12">
                     <i className="fas fa-calendar-alt text-4xl text-muted-foreground mb-4"></i>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">No upcoming bookings</h3>
-                    <p className="text-muted-foreground mb-4">Start exploring workspaces to make your first booking</p>
-                    <Button className="btn-primary">
-                      Explore Workspaces
-                    </Button>
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                      No upcoming bookings
+                    </h3>
+                    <p className="text-muted-foreground mb-4">
+                      Start exploring workspaces to make your first booking
+                    </p>
+                    <Button className="btn-primary">Explore Workspaces</Button>
                   </CardContent>
                 </Card>
               ) : (
@@ -158,7 +157,6 @@ const Bookings = () => {
                   <Card key={booking.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
-                        
                         {/* Space Image */}
                         <div className="lg:w-48 flex-shrink-0">
                           <img
@@ -192,15 +190,21 @@ const Bookings = () => {
                             </div>
                             <div>
                               <p className="text-muted-foreground">Time</p>
-                              <p className="font-medium text-foreground">{booking.start_time} - {booking.end_time}</p>
+                              <p className="font-medium text-foreground">
+                                {booking.start_time} - {booking.end_time}
+                              </p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Guests</p>
-                              <p className="font-medium text-foreground">{booking.guests_count} people</p>
+                              <p className="font-medium text-foreground">
+                                {booking.guests_count} people
+                              </p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Total</p>
-                              <p className="font-semibold text-foreground">€{booking.total_amount}</p>
+                              <p className="font-semibold text-foreground">
+                                €{booking.total_amount}
+                              </p>
                             </div>
                           </div>
 
@@ -258,7 +262,6 @@ const Bookings = () => {
                   <Card key={booking.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
-                        
                         {/* Space Image */}
                         <div className="lg:w-48 flex-shrink-0">
                           <img
@@ -292,15 +295,21 @@ const Bookings = () => {
                             </div>
                             <div>
                               <p className="text-muted-foreground">Time</p>
-                              <p className="font-medium text-foreground">{booking.start_time} - {booking.end_time}</p>
+                              <p className="font-medium text-foreground">
+                                {booking.start_time} - {booking.end_time}
+                              </p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Guests</p>
-                              <p className="font-medium text-foreground">{booking.guests_count} people</p>
+                              <p className="font-medium text-foreground">
+                                {booking.guests_count} people
+                              </p>
                             </div>
                             <div>
                               <p className="text-muted-foreground">Total</p>
-                              <p className="font-semibold text-foreground">€{booking.total_amount}</p>
+                              <p className="font-semibold text-foreground">
+                                €{booking.total_amount}
+                              </p>
                             </div>
                           </div>
 
@@ -363,7 +372,9 @@ const Bookings = () => {
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-3xl font-bold text-foreground">
-                  €{bookings?.reduce((total, booking) => total + Number(booking.total_amount), 0) || 0}
+                  €
+                  {bookings?.reduce((total, booking) => total + Number(booking.total_amount), 0) ||
+                    0}
                 </p>
               </CardContent>
             </Card>
