@@ -1,6 +1,6 @@
 import { useLanguageContext } from '../contexts/LanguageContext';
-import esTranslations from '../locales/es.json';
 import enTranslations from '../locales/en.json';
+import esTranslations from '../locales/es.json';
 
 const translations = {
   es: esTranslations,
@@ -10,12 +10,16 @@ const translations = {
 export const useTranslation = () => {
   const { language } = useLanguageContext();
 
-  const t = (key: string, params?: Record<string, any>): string => {
+  const t = (key: string, params?: Record<string, string | number>): string => {
     const keys = key.split('.');
-    let value: any = translations[language];
+    let value: unknown = translations[language];
 
     for (const k of keys) {
-      value = value?.[k];
+      if (value && typeof value === 'object' && k in value) {
+        value = (value as Record<string, unknown>)[k];
+      } else {
+        value = undefined;
+      }
     }
 
     if (!value) {
@@ -25,12 +29,15 @@ export const useTranslation = () => {
 
     // Handle interpolation
     if (params && typeof value === 'string') {
-      return value.replace(/\{\{(\w+)\}\}/g, (match, paramKey) => {
-        return params[paramKey]?.toString() || match;
-      });
+      let result = value;
+      for (const [paramKey, paramValue] of Object.entries(params)) {
+        const placeholder = `{{${paramKey}}}`;
+        result = result.split(placeholder).join(paramValue.toString());
+      }
+      return result;
     }
 
-    return value;
+    return typeof value === 'string' ? value : key;
   };
 
   return { t, language };

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 
 export type Language = 'es' | 'en';
 
@@ -22,32 +23,35 @@ interface LanguageProviderProps {
 }
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>('es');
+  const [language, setLanguageState] = useState<Language>(() => {
+    // Initialize from URL first if available
+    const pathLang = globalThis.location?.pathname.split('/')[1];
+    if (pathLang && ['es', 'en'].includes(pathLang)) {
+      return pathLang as Language;
+    }
 
-  useEffect(() => {
-    // Get saved language from localStorage or detect browser language
+    // Otherwise check localStorage
     const savedLanguage = localStorage.getItem('language') as Language;
     if (savedLanguage && ['es', 'en'].includes(savedLanguage)) {
-      setLanguageState(savedLanguage);
-    } else {
-      // Detect browser language - default to Spanish for Spanish-speaking countries
-      const browserLang = navigator.language.toLowerCase();
-      if (browserLang.startsWith('en')) {
-        setLanguageState('en');
-      } else {
-        setLanguageState('es'); // Default to Spanish
-      }
+      return savedLanguage;
     }
-  }, []);
+
+    // Finally, detect browser language
+    const browserLang = navigator.language.toLowerCase();
+    return browserLang.startsWith('en') ? 'en' : 'es';
+  });
+
+  useEffect(() => {
+    // Save to localStorage whenever language changes
+    localStorage.setItem('language', language);
+  }, [language]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('language', lang);
   };
 
-  return (
-    <LanguageContext.Provider value={{ language, setLanguage }}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  const value = useMemo(() => ({ language, setLanguage }), [language]);
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 };

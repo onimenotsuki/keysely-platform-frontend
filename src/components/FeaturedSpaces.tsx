@@ -1,11 +1,11 @@
+import { Link } from 'react-router-dom';
 import { useSpaces } from '../hooks/useSpaces';
 import { useTranslation } from '../hooks/useTranslation';
-import { Link } from 'react-router-dom';
 
 const FeaturedSpaces = () => {
   const { t, language } = useTranslation();
   const { data: spaces, isLoading } = useSpaces();
-  
+
   const getCurrencySymbol = () => {
     return language === 'es' ? '$' : 'USD ';
   };
@@ -44,7 +44,10 @@ const FeaturedSpaces = () => {
           <h2 className="text-4xl font-bold text-foreground mb-4 fade-in-up animate">
             {t('featured.title')}
           </h2>
-          <p className="text-xl text-muted-foreground fade-in-up animate" style={{ animationDelay: '0.2s' }}>
+          <p
+            className="text-xl text-muted-foreground fade-in-up animate"
+            style={{ animationDelay: '0.2s' }}
+          >
             {t('featured.subtitle')}
           </p>
         </div>
@@ -63,11 +66,14 @@ const FeaturedSpaces = () => {
                   className="space-image"
                 />
                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1">
-                  <span className="text-primary font-bold text-lg">{getCurrencySymbol()}{space.price_per_hour}</span>
+                  <span className="text-primary font-bold text-lg">
+                    {getCurrencySymbol()}
+                    {space.price_per_hour}
+                  </span>
                   <span className="text-muted-foreground text-sm">{t('common.perHour')}</span>
                 </div>
               </div>
-              
+
               <div className="p-6">
                 <h3 className="text-xl font-semibold text-foreground mb-2">{space.title}</h3>
                 <div className="flex items-center text-muted-foreground mb-2">
@@ -76,9 +82,11 @@ const FeaturedSpaces = () => {
                 </div>
                 <div className="flex items-center text-muted-foreground mb-4">
                   <i className="fas fa-users mr-2"></i>
-                  <span>{t('featured.upTo')} {space.capacity} {t('featured.people')}</span>
+                  <span>
+                    {t('featured.upTo')} {space.capacity} {t('featured.people')}
+                  </span>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2 mb-6">
                   {space.features?.slice(0, 3).map((feature, idx) => (
                     <span
@@ -89,8 +97,8 @@ const FeaturedSpaces = () => {
                     </span>
                   ))}
                 </div>
-                
-                <Link to={`/space/${space.id}`}>
+
+                <Link to={`/${language}/space/${space.id}`}>
                   <button className="btn-primary w-full">
                     <i className="fas fa-calendar-alt mr-2"></i>
                     {t('featured.bookNow')}
@@ -104,7 +112,7 @@ const FeaturedSpaces = () => {
         {featuredSpaces.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">{t('featured.noSpaces')}</p>
-            <Link to="/list-space" className="btn-primary">
+            <Link to={`/${language}/list-space`} className="btn-primary">
               {t('featured.addFirstSpace')}
             </Link>
           </div>

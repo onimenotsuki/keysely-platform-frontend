@@ -1,19 +1,21 @@
 import { Link } from 'react-router-dom';
+import { useLanguageContext } from '../../../contexts/LanguageContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 
 export const DesktopNav = () => {
   const { t } = useTranslation();
+  const { language } = useLanguageContext();
 
   return (
     <nav className="hidden md:flex items-center space-x-8">
       <Link
-        to="/"
+        to={`/${language}`}
         className="text-foreground hover:text-primary transition-colors duration-300 font-medium"
       >
         {t('header.home')}
       </Link>
       <Link
-        to="/explore"
+        to={`/${language}/explore`}
         className="text-foreground hover:text-primary transition-colors duration-300 font-medium"
       >
         {t('header.explore')}
@@ -25,7 +27,7 @@ export const DesktopNav = () => {
         {t('header.howItWorks')}
       </a>
       <Link
-        to="/list-space"
+        to={`/${language}/list-space`}
         className="text-foreground hover:text-primary transition-colors duration-300 font-medium"
       >
         {t('header.listSpace')}

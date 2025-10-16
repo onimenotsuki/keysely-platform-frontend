@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useLanguageContext } from '../../../contexts/LanguageContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import LanguageSelector from '../../LanguageSelector';
 import NotificationBell from '../../NotificationBell';
@@ -11,6 +12,7 @@ interface MobileNavProps {
 export const MobileNav = ({ isOpen }: MobileNavProps) => {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const { language } = useLanguageContext();
 
   const handleSignOut = async () => {
     await signOut();
@@ -20,13 +22,13 @@ export const MobileNav = ({ isOpen }: MobileNavProps) => {
     <div className={`mobile-menu ${isOpen ? 'open' : 'closed'}`}>
       <nav className="py-4 px-4 space-y-4">
         <Link
-          to="/"
+          to={`/${language}`}
           className="block text-foreground hover:text-primary transition-colors duration-300 font-medium"
         >
           {t('header.home')}
         </Link>
         <Link
-          to="/explore"
+          to={`/${language}/explore`}
           className="block text-foreground hover:text-primary transition-colors duration-300 font-medium"
         >
           {t('header.explore')}
@@ -38,7 +40,7 @@ export const MobileNav = ({ isOpen }: MobileNavProps) => {
           {t('header.howItWorks')}
         </a>
         <Link
-          to="/list-space"
+          to={`/${language}/list-space`}
           className="block text-foreground hover:text-primary transition-colors duration-300 font-medium"
         >
           {t('header.listSpace')}
@@ -56,31 +58,31 @@ export const MobileNav = ({ isOpen }: MobileNavProps) => {
 
           {user ? (
             <>
-              <Link to="/owner-dashboard">
+              <Link to={`/${language}/owner-dashboard`}>
                 <button className="btn-outline w-full">
                   <i className="fas fa-chart-line mr-2"></i>
                   {t('header.dashboard')}
                 </button>
               </Link>
-              <Link to="/messages">
+              <Link to={`/${language}/messages`}>
                 <button className="btn-outline w-full">
                   <i className="fas fa-comments mr-2"></i>
                   Mensajes
                 </button>
               </Link>
-              <Link to="/favorites">
+              <Link to={`/${language}/favorites`}>
                 <button className="btn-outline w-full">
                   <i className="fas fa-heart mr-2"></i>
                   Favoritos
                 </button>
               </Link>
-              <Link to="/list-space">
+              <Link to={`/${language}/list-space`}>
                 <button className="btn-outline w-full">
                   <i className="fas fa-plus mr-2"></i>
                   {t('header.listSpace')}
                 </button>
               </Link>
-              <Link to="/profile">
+              <Link to={`/${language}/profile`}>
                 <button className="btn-primary w-full">
                   <i className="fas fa-user mr-2"></i>
                   {t('header.profile')}
@@ -92,7 +94,7 @@ export const MobileNav = ({ isOpen }: MobileNavProps) => {
               </button>
             </>
           ) : (
-            <Link to="/auth">
+            <Link to={`/${language}/auth`}>
               <button className="btn-primary w-full">
                 <i className="fas fa-sign-in-alt mr-2"></i>
                 Iniciar Sesión

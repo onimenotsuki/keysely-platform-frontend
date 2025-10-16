@@ -1,11 +1,22 @@
 import React from 'react';
-import { useLanguageContext, Language } from '../contexts/LanguageContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Language, useLanguageContext } from '../contexts/LanguageContext';
 
 const LanguageSelector = () => {
   const { language, setLanguage } = useLanguageContext();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const toggleLanguage = () => {
-    setLanguage(language === 'es' ? 'en' : 'es');
+    const newLanguage = language === 'es' ? 'en' : 'es';
+    setLanguage(newLanguage);
+
+    // Get the current path without the language prefix
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const currentPath = pathParts.slice(1).join('/'); // Remove language prefix
+
+    // Navigate to the same path with the new language
+    navigate(`/${newLanguage}/${currentPath}${location.search}${location.hash}`);
   };
 
   return (
