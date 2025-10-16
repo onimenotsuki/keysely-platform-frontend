@@ -37,13 +37,13 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section id="how-it-works" className="py-20 bg-accent/60">
+    <section id="how-it-works" className="py-20 bg-accent/20">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4 fade-in-up animate text-primary">
             {t('howItWorks.title')}
           </h2>
-          <p className="text-xl fade-in-up animate text-white" style={{ animationDelay: '0.2s' }}>
+          <p className="text-xl fade-in-up animate text-primary" style={{ animationDelay: '0.2s' }}>
             {t('howItWorks.subtitle')}
           </p>
         </div>
