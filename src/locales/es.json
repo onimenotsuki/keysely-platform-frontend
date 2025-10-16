@@ -11,7 +11,14 @@
     "title": "Encuentra el espacio de trabajo perfecto",
     "subtitle": "Descubre y reserva oficinas, salas de juntas y espacios de coworking en todo el mundo por hora, día o mes",
     "searchPlaceholder": "Buscar por ubicación, tipo de espacio o características...",
-    "searchButton": "Buscar"
+    "searchButton": "Buscar",
+    "search": "Buscar",
+    "whatLabel": "¿Qué estás planeando?",
+    "whereLabel": "¿Dónde?",
+    "whenLabel": "¿Cuándo?",
+    "locationPlaceholder": "Ciudad, colonia o código postal",
+    "datePlaceholder": "Cualquier fecha",
+    "helpText": "Miles de espacios únicos disponibles para tu próximo proyecto"
   },
   "categories": {
     "title": "Buscar por tipo de espacio",
@@ -251,7 +258,7 @@
     "occupancyRate": "Tasa de Ocupación",
     "paymentSetup": "Configuración de Pagos",
     "myListings": "Mis Listados",
-    "recentBookings": "Reservas Recientes",  
+    "recentBookings": "Reservas Recientes",
     "analytics": "Analíticas",
     "calendar": "Calendario",
     "active": "activo",

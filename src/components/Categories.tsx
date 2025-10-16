@@ -26,33 +26,30 @@ const Categories = () => {
   }
 
   return (
-    <section id="explore" className="py-20 bg-secondary/30">
+    <section id="explore" className="py-24 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-foreground mb-4 fade-in-up animate">
+        <div className="mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-[#1A2B42] mb-4">
             {t('categories.title')}
           </h2>
-          <p className="text-xl text-muted-foreground fade-in-up animate" style={{ animationDelay: '0.2s' }}>
-            {t('categories.subtitle')}
-          </p>
+          <p className="text-xl text-gray-600">{t('categories.subtitle')}</p>
         </div>
 
-        <div className="category-grid">
-          {categories?.map((category, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {categories?.map((category) => (
             <div
               key={category.id}
-              className="category-card fade-in-up animate"
-              style={{ animationDelay: `${0.1 * index}s` }}
+              className="group relative overflow-hidden rounded-2xl aspect-[4/5] cursor-pointer"
             >
               <img
-                src={category.image_url || `/placeholder-category-${index + 1}.jpg`}
+                src={category.image_url || `/placeholder-category.jpg`}
                 alt={category.name}
-                className="category-image"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                <h3 className="text-xl font-semibold mb-2">{category.name}</h3>
-                <p className="text-gray-200 text-sm">{category.description}</p>
+                <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
+                <p className="text-white/80 text-sm line-clamp-2">{category.description}</p>
               </div>
             </div>
           ))}
