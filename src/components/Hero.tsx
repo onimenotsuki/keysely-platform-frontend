@@ -22,19 +22,21 @@ const Hero = () => {
   const fields = heroBannerData?.fields as any;
   const contentfulImages = fields?.images || [];
 
-  // Auto-advance slider effect for Contentful images
+  // Auto-advance slider effect for Contentful images with smooth crossfade
   useEffect(() => {
     if (contentfulImages.length <= 1) return; // No slider needed for single image
 
-    const advanceSlide = () => {
+    const interval = setInterval(() => {
       setIsTransitioning(true);
+      // Start fading to next image
       setTimeout(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % contentfulImages.length);
+      }, 100);
+      // End transition state after fade completes
+      setTimeout(() => {
         setIsTransitioning(false);
-      }, 500);
-    };
-
-    const interval = setInterval(advanceSlide, 5000); // Change image every 5 seconds
+      }, 1600);
+    }, 6000); // Change image every 6 seconds
 
     return () => clearInterval(interval);
   }, [contentfulImages.length]);
@@ -55,25 +57,44 @@ const Hero = () => {
       id="home"
       className="relative min-h-[85vh] full-width-breakout flex items-center justify-center overflow-hidden"
     >
-      {/* Background Image Slider - Contentful images with fade transition */}
+      {/* Background Image Slider - Contentful images with smooth crossfade */}
       {contentfulImages.length > 0 ? (
         <>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {contentfulImages.map((image: any, index: number) => {
             const imageUrl = image?.fields?.file?.url ? `https:${image.fields.file.url}` : '';
             const isActive = index === currentImageIndex;
+            const isPrevious =
+              index === (currentImageIndex - 1 + contentfulImages.length) % contentfulImages.length;
+
+            // Calculate opacity for smooth crossfade
+            let opacity = 0;
+            if (isActive) {
+              opacity = 1;
+            } else if (isPrevious && isTransitioning) {
+              opacity = 1;
+            }
+
+            // Calculate z-index for proper layering
+            let zIndex = 0;
+            if (isActive) {
+              zIndex = 2;
+            } else if (isPrevious && isTransitioning) {
+              zIndex = 1;
+            }
 
             return (
               <div
                 key={image?.sys?.id || `bg-image-${index}`}
-                className="absolute inset-0 w-full h-full transition-opacity duration-200 ease-in-out"
+                className="absolute inset-0 w-full h-full transition-opacity duration-[1500ms] ease-in-out"
                 style={{
                   backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
-                  opacity: isActive && !isTransitioning ? 1 : 0,
-                  zIndex: isActive ? 1 : 0,
+                  backgroundColor: '#000000',
+                  opacity,
+                  zIndex,
                 }}
               />
             );
@@ -99,12 +120,12 @@ const Hero = () => {
       <div className="relative z-20 w-full px-4 sm:px-6 lg:px-8 py-20">
         <div className="max-w-7xl mx-auto w-full">
           {/* Hero Title - Peerspace style */}
-          <h1 className="text-white text-4xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
+          <h1 className="text-white text-4xl md:text-6xl lg:text-6xl font-bold mb-8 leading-tight">
             {t('hero.title')}
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-white/90 text-xl md:text-2xl mb-12 max-w-3xl font-light">
+          {/* Subtitle - Hidden on mobile */}
+          <p className="hidden sm:block text-white/90 text-xl md:text-2xl mb-12 max-w-3xl font-light">
             {t('hero.subtitle')}
           </p>
 
