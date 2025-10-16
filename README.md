@@ -64,6 +64,46 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- **Contentful CMS** - Headless CMS for managing dynamic content
+- Supabase - Backend as a Service (Auth, Database, Storage)
+- TanStack Query - Data fetching and caching
+- Stripe - Payment processing
+
+## 🎨 Contentful CMS Integration
+
+This project integrates **Contentful CMS** for managing dynamic content like hero banners, blog posts, and marketing materials.
+
+### Quick Start with Contentful
+
+1. **Create a Contentful account** at [contentful.com](https://www.contentful.com/)
+
+2. **Get your API credentials:**
+   - Go to Settings → API keys
+   - Copy your Space ID and Content Delivery API access token
+
+3. **Add to `.env` file:**
+
+   ```bash
+   VITE_CONTENTFUL_SPACE_ID=your_space_id_here
+   VITE_CONTENTFUL_ACCESS_TOKEN=your_access_token_here
+   ```
+
+4. **Create a Hero Banner** (optional):
+   - See [HEROBANNER_USAGE.md](./HEROBANNER_USAGE.md) for detailed instructions
+   - Or follow [CONTENTFUL_SETUP.md](./CONTENTFUL_SETUP.md) for complete setup guide
+
+### Available Contentful Features
+
+- ✅ **Hero Banner** - Dynamic hero section with images and CTA
+- ✅ **Blog Posts** - Content type ready for blog integration
+- ✅ **FAQs** - Frequently asked questions management
+- ✅ **Marketing Banners** - Promotional content management
+
+### Documentation
+
+- **[CONTENTFUL_SETUP.md](./CONTENTFUL_SETUP.md)** - Complete setup guide (in Spanish)
+- **[HEROBANNER_USAGE.md](./HEROBANNER_USAGE.md)** - Hero Banner component usage
+- **[Technical Docs](./src/integrations/contentful/README.md)** - API integration details
 
 ## How can I deploy this project?
 

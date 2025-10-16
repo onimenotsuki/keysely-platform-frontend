@@ -1,3 +1,4 @@
+import { useHeroBanner } from '@/hooks/useContentful';
 import { Calendar, MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +11,7 @@ const Hero = () => {
   const [date, setDate] = useState('');
   const { t, language } = useTranslation();
   const navigate = useNavigate();
+  const { data: heroBannerData, isLoading: isLoadingHeroData } = useHeroBanner();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
