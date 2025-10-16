@@ -107,5 +107,21 @@ export default {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    function ({ addUtilities }: any) {
+      const newUtilities = {
+        '.full-width-breakout': {
+          width: '100vw',
+          position: 'relative',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
+        },
+      };
+      addUtilities(newUtilities);
+    },
+  ],
 } satisfies Config;

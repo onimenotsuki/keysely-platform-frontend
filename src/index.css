@@ -98,6 +98,12 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family:
@@ -108,10 +114,10 @@
       sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     font-variant-numeric: tabular-nums;
-  }
-
-  html {
-    scroll-behavior: smooth;
+    width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
   }
 
   /* Improved typography for Peerspace-like design */
