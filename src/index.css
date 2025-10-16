@@ -133,9 +133,14 @@
 }
 
 @layer components {
-  /* Navigation Styles - Peerspace inspired */
+  /* Navigation Styles - Transparent header over hero */
   .navbar-sticky {
-    @apply fixed top-0 w-full z-50 bg-white shadow-sm border-b border-gray-100 transition-all duration-300;
+    @apply fixed top-0 w-full z-50 bg-transparent transition-all duration-300;
+  }
+
+  /* Scrolled state - add background when scrolling */
+  .navbar-scrolled {
+    @apply bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100;
   }
 
   /* Hero Section - Cleaner, more modern */

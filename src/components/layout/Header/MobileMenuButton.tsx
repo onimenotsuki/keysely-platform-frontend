@@ -1,12 +1,21 @@
 interface MobileMenuButtonProps {
   isOpen: boolean;
   onClick: () => void;
+  isScrolled?: boolean;
 }
 
-export const MobileMenuButton = ({ isOpen, onClick }: MobileMenuButtonProps) => {
+export const MobileMenuButton = ({
+  isOpen,
+  onClick,
+  isScrolled = false,
+}: MobileMenuButtonProps) => {
+  const iconClass = isScrolled
+    ? 'text-foreground hover:text-primary'
+    : 'text-white hover:text-white/80';
+
   return (
     <button
-      className="md:hidden text-foreground hover:text-primary transition-colors duration-300"
+      className={`md:hidden ${iconClass} transition-colors duration-300`}
       onClick={onClick}
       aria-label="Toggle menu"
     >

@@ -53,7 +53,7 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative min-h-screen full-width-breakout flex items-center justify-center overflow-hidden"
+      className="relative min-h-[85vh] full-width-breakout flex items-center justify-center overflow-hidden"
     >
       {/* Background Image Slider - Contentful images with fade transition */}
       {contentfulImages.length > 0 ? (
