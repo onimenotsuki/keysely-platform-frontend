@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* OfiKai Design System - Professional workspace marketplace */
+/* Keysely Design System - Professional workspace marketplace */
 
 @layer base {
   :root {
-    /* Core OfiKai Brand Colors - Nueva Paleta */
+    /* Core Keysely Brand Colors - Nueva Paleta */
     --primary: 214 44% 18%; /* Navy Blue #1A2B42 - Color principal del logo */
     --primary-dark: 214 44% 14%; /* Navy Blue más oscuro para hover */
     --primary-light: 217 91% 60%; /* Action Blue #3B82F6 - Azul de acento */

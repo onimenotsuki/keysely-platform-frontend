@@ -1,8 +1,50 @@
-# Ofikai Platform Frontend - GitHub Copilot Instructions
+# Keysely Platform Frontend - GitHub Copilot Instructions
+
+## ⚠️ IMPORTANT: Keeping This File Updated
+
+**CRITICAL INSTRUCTION FOR AI ASSISTANTS:**
+
+Whenever you make any of the following changes to the codebase, you MUST update this `copilot-instructions.md` file accordingly:
+
+1. **Infrastructure Changes:**
+   - Adding/removing dependencies (package.json)
+   - Changing build configuration (vite.config.ts, tsconfig.json)
+   - Modifying environment variables (.env structure)
+   - Database schema changes (Supabase migrations)
+   - API integrations (new services, endpoints)
+
+2. **New Features:**
+   - New major components or pages
+   - New routing patterns
+   - New state management patterns
+   - New hooks or utilities
+   - New API integrations (Contentful, Stripe, etc.)
+
+3. **Architectural Changes:**
+   - Directory structure modifications
+   - Design system updates
+   - Coding convention changes
+   - New best practices
+
+4. **Documentation Updates:**
+   - Update the relevant sections (Technology Stack, Build Instructions, Architecture, etc.)
+   - Add new sections if needed
+   - Keep code examples current
+   - Update file paths if they change
+
+**HOW TO UPDATE:**
+
+- Read the entire file first to understand the structure
+- Locate the relevant section
+- Update or add information
+- Keep the format consistent
+- Ensure examples are accurate
+
+---
 
 ## Project Overview
 
-Ofikai is a workspace marketplace platform that allows users to discover, book, and manage office spaces, meeting rooms, and coworking spaces. The frontend is built with modern React/TypeScript stack featuring a responsive, bilingual (English/Spanish) interface with real-time functionality.
+Keysely is a workspace marketplace platform that allows users to discover, book, and manage office spaces, meeting rooms, and coworking spaces. The frontend is built with modern React/TypeScript stack featuring a responsive, bilingual (English/Spanish) interface with real-time functionality.
 
 **Key Features:**
 
@@ -798,6 +840,59 @@ const MyComponent = () => {
    ```
 4. **Use browser DevTools** - Check Network tab for Contentful API calls
 5. **Check React Query DevTools** - Verify cache and query states
+
+---
+
+## 📝 Recent Changes Log
+
+**IMPORTANT:** Update this section whenever making significant changes to the codebase.
+
+### October 16, 2025 - Latest Updates
+
+**Rebranding: Ofikai → Keysely**
+
+- Changed all references from "Ofikai" to "Keysely" across the entire codebase
+- Updated: Design system, components, translations, documentation
+- Files affected: index.css, Logo.tsx, locales (en/es), Auth.tsx, Footer, Contentful integration, all documentation
+
+**Hero Component Enhancements**
+
+- Implemented full-width hero section using `.full-width-breakout` Tailwind utility
+- Added smooth image slider with 1.5s crossfade transitions (6s intervals)
+- Fixed height to 85vh for better viewport management
+- Integrated transparent-to-solid header on scroll
+- Mobile optimizations: hidden subtitle on small screens
+
+**Header Component Improvements**
+
+- Created transparent header that overlays hero image
+- Added scroll detection (changes to solid background after 50px)
+- Removed HeaderActions component for cleaner, minimal design
+- Logo inverts to white when transparent, normal when scrolled
+- Navigation links adapt colors based on scroll state
+- Reorganized layout: Logo left, Navigation right
+
+**CSS & Layout Fixes**
+
+- Fixed `#root` max-width restriction in App.css (was limiting to 1280px)
+- Added `overflow-x: hidden` to html and body to prevent horizontal scroll
+- Created custom `.full-width-breakout` utility in tailwind.config.ts
+- Updated navbar-sticky and navbar-scrolled classes with backdrop blur
+
+**Contentful Integration**
+
+- Complete CMS setup with 7 content models (Hero Banner, Blog Post, FAQ, etc.)
+- Implemented useHeroBanner hook with 10min cache, 2 retries
+- Enhanced image slider using Contentful Asset[] arrays
+- Proper TypeScript types with EntrySkeletonType patterns
+
+### Key Architectural Decisions Made
+
+1. **Full-Width Hero Pattern**: Using CSS calc() technique for breakout sections
+2. **Transparent Header**: Dynamic styling based on scroll position for modern UX
+3. **Image Transitions**: Crossfade technique with proper z-index layering to avoid gray flashes
+4. **Mobile-First**: Progressive enhancement with hidden elements on small screens
+5. **Contentful as Single Source**: Dynamic content managed via CMS instead of hardcoded
 
 ---
 

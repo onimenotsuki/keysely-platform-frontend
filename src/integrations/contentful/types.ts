@@ -73,7 +73,7 @@ export interface CategorySkeleton extends EntrySkeletonType {
 
 export type Category = Entry<CategorySkeleton>;
 
-// Example: Space Highlight Content Type (specific to Ofikai)
+// Example: Space Highlight Content Type (specific to Keysely)
 export interface SpaceHighlightSkeleton extends EntrySkeletonType {
   contentTypeId: 'spaceHighlight';
   fields: {

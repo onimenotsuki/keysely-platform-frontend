@@ -13,8 +13,8 @@ export const Logo = ({ isScrolled = false }: LogoProps) => {
     <Link to={`/${language}`} className="flex items-center">
       <img
         src={logoImage}
-        alt="OfiKai Logo"
-        className={`h-8 w-auto transition-all duration-300 ${isScrolled ? '' : 'brightness-0 invert'}`}
+        alt="Keysely Logo"
+        className={`h-10 w-auto transition-all duration-300 ${isScrolled ? '' : 'brightness-0 invert'}`}
       />
     </Link>
   );

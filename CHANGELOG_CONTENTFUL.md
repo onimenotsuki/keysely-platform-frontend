@@ -271,6 +271,6 @@ bun add contentful  # v11.8.6
 
 ---
 
-**Mantenido por:** Ofikai Platform Team
+**Mantenido por:** Keysely Platform Team
 **Fecha de Release:** Octubre 16, 2025
 **Branch:** `feat/add-contentful`

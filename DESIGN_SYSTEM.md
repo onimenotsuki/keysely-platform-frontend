@@ -1,6 +1,6 @@
-# 🎨 Paleta de Colores Ofikai
+# 🎨 Paleta de Colores Keysely
 
-Esta documentación describe la paleta de colores actualizada para Ofikai, siguiendo la regla de diseño 60-30-10 para una interfaz coherente y profesional.
+Esta documentación describe la paleta de colores actualizada para Keysely, siguiendo la regla de diseño 60-30-10 para una interfaz coherente y profesional.
 
 ## 🎯 Colores Principales (Extraídos del Logo)
 

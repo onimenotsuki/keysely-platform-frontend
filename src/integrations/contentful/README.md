@@ -1,6 +1,6 @@
 # Contentful CMS Integration
 
-This directory contains the integration with Contentful CMS for the Ofikai platform.
+This directory contains the integration with Contentful CMS for the Keysely platform.
 
 ## 📋 Overview
 

@@ -1,4 +1,4 @@
-# 🚀 Guía Rápida: Configurar Contentful CMS para Ofikai
+# 🚀 Guía Rápida: Configurar Contentful CMS para Keysely
 
 ## Paso 1: Crear una Cuenta en Contentful
 
@@ -10,7 +10,7 @@
 ## Paso 2: Crear tu Espacio (Space)
 
 1. Una vez logueado, haz clic en **Create space**
-2. Elige un nombre para tu espacio, por ejemplo: "Ofikai Platform"
+2. Elige un nombre para tu espacio, por ejemplo: "Keysely Platform"
 3. Selecciona **Empty space** (espacio vacío)
 4. Haz clic en **Create space**
 
@@ -19,7 +19,7 @@
 1. En tu espacio, ve a **Settings** (⚙️) en la parte superior
 2. Haz clic en **API keys**
 3. Haz clic en **Add API key**
-4. Dale un nombre, por ejemplo: "Ofikai Frontend"
+4. Dale un nombre, por ejemplo: "Keysely Frontend"
 5. Copia y guarda estos valores:
    - **Space ID** (lo necesitarás para VITE_CONTENTFUL_SPACE_ID)
    - **Content Delivery API - access token** (para VITE_CONTENTFUL_ACCESS_TOKEN)
@@ -193,4 +193,4 @@ Si todo está bien configurado, deberías ver:
 - **Usa validaciones** en los campos para asegurar calidad de contenido
 - **Implementa i18n** en Contentful para contenido multiidioma
 
-¡Listo! Ahora tienes Contentful completamente integrado en tu plataforma Ofikai. 🎉
+¡Listo! Ahora tienes Contentful completamente integrado en tu plataforma Keysely. 🎉
