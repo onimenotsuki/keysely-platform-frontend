@@ -1,5 +1,6 @@
+import { useHeroBanner } from '@/hooks/useContentful';
 import { Calendar, MapPin } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import heroImage from '../assets/hero-office.jpg';
 import { useTranslation } from '../hooks/useTranslation';
@@ -10,6 +11,35 @@ const Hero = () => {
   const [date, setDate] = useState('');
   const { t, language } = useTranslation();
   const navigate = useNavigate();
+  const { data: heroBannerData, isLoading: isLoadingHeroData } = useHeroBanner();
+
+  // Slider state for Contentful images
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Extract Contentful images
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fields = heroBannerData?.fields as any;
+  const contentfulImages = fields?.images || [];
+
+  // Auto-advance slider effect for Contentful images with smooth crossfade
+  useEffect(() => {
+    if (contentfulImages.length <= 1) return; // No slider needed for single image
+
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      // Start fading to next image
+      setTimeout(() => {
+        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % contentfulImages.length);
+      }, 100);
+      // End transition state after fade completes
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 1600);
+    }, 6000); // Change image every 6 seconds
+
+    return () => clearInterval(interval);
+  }, [contentfulImages.length]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,30 +55,85 @@ const Hero = () => {
   return (
     <section
       id="home"
-      className="relative min-h-[85vh] flex items-center justify-center"
-      style={{
-        backgroundImage: `url(${heroImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      className="relative min-h-[85vh] full-width-breakout flex items-center justify-center overflow-hidden"
     >
-      {/* Dark overlay for better text contrast */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70"></div>
+      {/* Background Image Slider - Contentful images with smooth crossfade */}
+      {contentfulImages.length > 0 ? (
+        <>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          {contentfulImages.map((image: any, index: number) => {
+            const imageUrl = image?.fields?.file?.url ? `https:${image.fields.file.url}` : '';
+            const isActive = index === currentImageIndex;
+            const isPrevious =
+              index === (currentImageIndex - 1 + contentfulImages.length) % contentfulImages.length;
 
-      <div className="container mx-auto px-4 relative z-10 py-20">
-        <div className="max-w-5xl mx-auto">
+            // Calculate opacity for smooth crossfade
+            let opacity = 0;
+            if (isActive) {
+              opacity = 1;
+            } else if (isPrevious && isTransitioning) {
+              opacity = 1;
+            }
+
+            // Calculate z-index for proper layering
+            let zIndex = 0;
+            if (isActive) {
+              zIndex = 2;
+            } else if (isPrevious && isTransitioning) {
+              zIndex = 1;
+            }
+
+            return (
+              <div
+                key={image?.sys?.id || `bg-image-${index}`}
+                className="absolute inset-0 w-full h-full transition-opacity duration-[1500ms] ease-in-out"
+                style={{
+                  backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundColor: '#000000',
+                  opacity,
+                  zIndex,
+                }}
+              />
+            );
+          })}
+        </>
+      ) : (
+        // Fallback to static hero image if no Contentful images
+        <div
+          className="absolute inset-0 w-full h-full"
+          style={{
+            backgroundImage: `url(${heroImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      )}
+
+      {/* Dark overlay for better text contrast */}
+      <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black/70 via-black/60 to-black/70 z-10"></div>
+
+      {/* Content wrapper */}
+      <div className="relative z-20 w-full px-4 sm:px-6 lg:px-8 py-20">
+        <div className="max-w-7xl mx-auto w-full">
           {/* Hero Title - Peerspace style */}
-          <h1 className="text-white text-6xl md:text-7xl lg:text-8xl font-bold mb-8 leading-tight">
+          <h1 className="text-white text-4xl md:text-6xl lg:text-6xl font-bold mb-8 leading-tight">
             {t('hero.title')}
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-white/90 text-xl md:text-2xl mb-12 max-w-3xl font-light">
+          {/* Subtitle - Hidden on mobile */}
+          <p className="hidden sm:block text-white/90 text-xl md:text-2xl mb-12 max-w-3xl font-light">
             {t('hero.subtitle')}
           </p>
 
           {/* Search Card - Peerspace style with 3 inputs */}
-          <form onSubmit={handleSearch} className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <form
+            onSubmit={handleSearch}
+            className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-5xl"
+          >
             <div className="grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-gray-200">
               {/* Activity/What field */}
               <div className="md:col-span-4 p-4 md:p-5">
@@ -108,9 +193,6 @@ const Hero = () => {
               </div>
             </div>
           </form>
-
-          {/* Small text below search - optional */}
-          <p className="text-white/60 text-sm mt-6 text-center">{t('hero.helpText')}</p>
         </div>
       </div>
     </section>

@@ -1,4 +1,4 @@
-import logoImage from '../../../assets/logo.png';
+import logoImage from '../../../assets/logo-tr.png';
 import { useTranslation } from '../../../hooks/useTranslation';
 
 export const CompanyInfo = () => {
@@ -7,7 +7,7 @@ export const CompanyInfo = () => {
   return (
     <div>
       <div className="flex items-center mb-6">
-        <img src={logoImage} alt="OfiKai Logo" className="h-10 w-auto brightness-0 invert" />
+        <img src={logoImage} alt="Keysely Logo" className="h-8 w-auto brightness-0 invert" />
       </div>
       <p className="text-gray-300 mb-6 leading-relaxed">{t('footer.description')}</p>
     </div>

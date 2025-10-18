@@ -90,7 +90,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <img src={logoImage} alt="OfiKai Logo" className="h-12 w-auto" />
+            <img src={logoImage} alt="Keysely Logo" className="h-12 w-auto" />
           </div>
           <CardDescription>Accede a tu cuenta o regístrate para empezar</CardDescription>
         </CardHeader>

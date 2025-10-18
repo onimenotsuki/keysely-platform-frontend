@@ -80,7 +80,7 @@
     "help": "Help",
     "contact": "Contact",
     "terms": "Terms",
-    "copyright": "© 2024 OfiKai. All rights reserved."
+    "copyright": "© 2025 Keysely. All rights reserved."
   },
   "explore": {
     "title": "Explore Spaces",
@@ -166,7 +166,7 @@
   "listSpace": {
     "title": "List Your Workspace",
     "subtitle": "Share your space with professionals worldwide and earn extra income",
-    "whyList": "Why List with OfiKai?",
+    "whyList": "Why List with Keysely?",
     "earnIncome": "Earn Extra Income",
     "earnIncomeDesc": "Monetize your unused space and generate passive income",
     "globalReach": "Global Reach",
@@ -200,7 +200,7 @@
     "pricePerDay": "Price per Day ($)",
     "pricePerWeek": "Price per Week ($)",
     "pricePerMonth": "Price per Month ($)",
-    "serviceFee": "* OfiKai charges a 15% service fee on all bookings.",
+    "serviceFee": "* Keysely charges a 15% service fee on all bookings.",
     "amenities": "Amenities & Features",
     "availability": "Availability",
     "availableDays": "Available Days",
@@ -245,7 +245,95 @@
     "thursday": "Thursday",
     "friday": "Friday",
     "saturday": "Saturday",
-    "sunday": "Sunday"
+    "sunday": "Sunday",
+    "marketing": {
+      "hero": {
+        "title": "Turn Your Space Into Income",
+        "subtitle": "Join thousands of hosts earning extra money by sharing their workspace with professionals worldwide",
+        "cta": "Get Started"
+      },
+      "stats": {
+        "spaces": "Active Spaces",
+        "earned": "Total Earned",
+        "cities": "Cities Worldwide"
+      },
+      "howItWorks": {
+        "title": "How Hosting Works",
+        "subtitle": "Start earning in three simple steps - it only takes a few minutes to get started",
+        "step1": {
+          "title": "List Your Space",
+          "description": "Create your listing with photos, description, and pricing. Set your own schedule and house rules."
+        },
+        "step2": {
+          "title": "Accept Bookings",
+          "description": "Review and approve booking requests. Communicate directly with guests through our secure messaging."
+        },
+        "step3": {
+          "title": "Get Paid",
+          "description": "Receive payments securely after each booking. Track your earnings and payouts in your dashboard."
+        }
+      },
+      "spaceTypes": {
+        "title": "Every Space Belongs on Keysely",
+        "subtitle": "From private offices to meeting rooms, list any professional workspace and start earning",
+        "office": {
+          "title": "Private Offices",
+          "description": "Fully equipped private spaces perfect for teams and companies seeking dedicated workspace"
+        },
+        "meeting": {
+          "title": "Meeting Rooms",
+          "description": "Professional rooms with technology for presentations, workshops, and important meetings"
+        },
+        "coworking": {
+          "title": "Coworking Spaces",
+          "description": "Flexible collaborative environments ideal for freelancers and remote workers"
+        },
+        "event": {
+          "title": "Event Spaces",
+          "description": "Unique venues perfect for corporate events, workshops, and professional gatherings"
+        }
+      },
+      "trust": {
+        "title": "Trust & Safety",
+        "subtitle": "We're committed to keeping you, your space, and your guests safe and secure",
+        "insurance": {
+          "title": "Property Protection",
+          "description": "Up to $1M in damage protection for eligible claims during professional workspace bookings."
+        },
+        "support": {
+          "title": "24/7 Host Support",
+          "description": "Dedicated support team available around the clock to assist with any questions or concerns."
+        },
+        "verification": {
+          "title": "Verified Bookings",
+          "description": "All guests must verify their identity and provide professional credentials before booking."
+        }
+      },
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "q1": {
+          "question": "How much does it cost to list my space?",
+          "answer": "Listing your space on Keysely is completely free. We only charge a 15% service fee on successful bookings, so you only pay when you earn."
+        },
+        "q2": {
+          "question": "How do I get paid?",
+          "answer": "Payments are processed automatically 24 hours after each completed booking. Funds are transferred directly to your bank account via Stripe Connect."
+        },
+        "q3": {
+          "question": "What if a guest damages my property?",
+          "answer": "All bookings are covered by our Host Protection Program, providing up to $1M in damage protection. Simply file a claim within 48 hours of discovering damage."
+        },
+        "q4": {
+          "question": "Can I cancel a booking?",
+          "answer": "Yes, but we encourage hosts to honor confirmed bookings. Cancellations may affect your listing's ranking and availability. Review our cancellation policy for details."
+        }
+      },
+      "finalCta": {
+        "title": "Ready to Start Earning?",
+        "subtitle": "Join thousands of successful hosts and turn your unused space into a valuable income source",
+        "cta": "List Your Space Now"
+      }
+    }
   },
   "ownerDashboard": {
     "title": "Owner Dashboard",

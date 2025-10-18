@@ -135,7 +135,7 @@ const FeaturedSpaces = () => {
           <div className="text-center py-16">
             <p className="text-gray-600 text-lg mb-6">{t('featured.noSpaces')}</p>
             <Link
-              to={`/${language}/list-space`}
+              to={`/${language}/host`}
               className="inline-block bg-[#1A2B42] hover:bg-[#3B82F6] text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               {t('featured.addFirstSpace')}

@@ -1,8 +1,50 @@
-# Ofikai Platform Frontend - GitHub Copilot Instructions
+# Keysely Platform Frontend - GitHub Copilot Instructions
+
+## ⚠️ IMPORTANT: Keeping This File Updated
+
+**CRITICAL INSTRUCTION FOR AI ASSISTANTS:**
+
+Whenever you make any of the following changes to the codebase, you MUST update this `copilot-instructions.md` file accordingly:
+
+1. **Infrastructure Changes:**
+   - Adding/removing dependencies (package.json)
+   - Changing build configuration (vite.config.ts, tsconfig.json)
+   - Modifying environment variables (.env structure)
+   - Database schema changes (Supabase migrations)
+   - API integrations (new services, endpoints)
+
+2. **New Features:**
+   - New major components or pages
+   - New routing patterns
+   - New state management patterns
+   - New hooks or utilities
+   - New API integrations (Contentful, Stripe, etc.)
+
+3. **Architectural Changes:**
+   - Directory structure modifications
+   - Design system updates
+   - Coding convention changes
+   - New best practices
+
+4. **Documentation Updates:**
+   - Update the relevant sections (Technology Stack, Build Instructions, Architecture, etc.)
+   - Add new sections if needed
+   - Keep code examples current
+   - Update file paths if they change
+
+**HOW TO UPDATE:**
+
+- Read the entire file first to understand the structure
+- Locate the relevant section
+- Update or add information
+- Keep the format consistent
+- Ensure examples are accurate
+
+---
 
 ## Project Overview
 
-Ofikai is a workspace marketplace platform that allows users to discover, book, and manage office spaces, meeting rooms, and coworking spaces. The frontend is built with modern React/TypeScript stack featuring a responsive, bilingual (English/Spanish) interface with real-time functionality.
+Keysely is a workspace marketplace platform that allows users to discover, book, and manage office spaces, meeting rooms, and coworking spaces. The frontend is built with modern React/TypeScript stack featuring a responsive, bilingual (English/Spanish) interface with real-time functionality.
 
 **Key Features:**
 
@@ -21,6 +63,7 @@ Ofikai is a workspace marketplace platform that allows users to discover, book, 
 - **State Management:** TanStack Query (React Query), React Context
 - **Routing:** React Router DOM v6
 - **Backend Integration:** Supabase (PostgreSQL, Auth, Real-time)
+- **CMS:** Contentful (Headless CMS for dynamic content)
 - **Payment:** Stripe integration
 - **Form Handling:** React Hook Form with Zod validation
 - **Icons:** Lucide React
@@ -95,7 +138,8 @@ Ofikai is a workspace marketplace platform that allows users to discover, book, 
 ├── contexts/            # React contexts (Auth, Language)
 ├── hooks/               # Custom React hooks
 ├── integrations/        # External service integrations
-│   └── supabase/        # Supabase client and types
+│   ├── supabase/        # Supabase client and types
+│   └── contentful/      # Contentful CMS client and types
 ├── lib/                 # Utility functions
 ├── locales/             # Internationalization
 ├── pages/               # Route components
@@ -135,7 +179,14 @@ Ofikai is a workspace marketplace platform that allows users to discover, book, 
 - Always define interfaces for component props
 - Use strict TypeScript configuration
 - Leverage Supabase generated types from `integrations/supabase/types.ts`
+- Leverage Contentful types from `integrations/contentful/types.ts`
 - Prefer type unions over enums for simple values
+- **For Contentful integrations:**
+  - Use `EntrySkeletonType` for content model definitions
+  - Use `Asset` type for media fields (not `Entry<>`)
+  - Use `Entry<YourSkeleton>` for the final type
+  - Always handle optional fields with `?.` and provide fallbacks
+  - Type cast fields safely when needed: `const cta = fields.cta as string;`
 
 ### Styling Guidelines
 
@@ -151,6 +202,11 @@ Ofikai is a workspace marketplace platform that allows users to discover, book, 
 - Use React Context for global client state (Auth, Language)
 - Custom hooks for component-specific logic
 - Local state with useState for component-specific data
+- **For Contentful data:**
+  - Always use TanStack Query hooks (defined in `hooks/useContentful.ts`)
+  - Set appropriate `staleTime` (recommended: 10 minutes for CMS content)
+  - Add `retry` logic for better UX (recommended: 2 retries)
+  - Cache keys should follow pattern: `['contentful', 'contentType']`
 
 ## Key Architectural Patterns
 
@@ -193,6 +249,153 @@ Ofikai is a workspace marketplace platform that allows users to discover, book, 
 - Marketplace payments via Supabase Edge Functions
 - Connect accounts for space owners
 - Webhook handling for payment status
+
+### Contentful CMS Integration
+
+**Purpose:** Headless CMS for managing dynamic content (hero banners, blog posts, FAQs, marketing materials)
+
+**Architecture:**
+
+- Client configured in `integrations/contentful/client.ts`
+- TypeScript types defined in `integrations/contentful/types.ts`
+- Service functions in `integrations/contentful/services.ts`
+- React Query hooks in `hooks/useContentful.ts`
+- Centralized exports in `integrations/contentful/index.ts`
+
+**Configuration:**
+
+```bash
+# Required environment variables
+VITE_CONTENTFUL_SPACE_ID=your_space_id
+VITE_CONTENTFUL_ACCESS_TOKEN=your_cda_token
+VITE_CONTENTFUL_PREVIEW_TOKEN=your_preview_token  # Optional
+VITE_CONTENTFUL_ENVIRONMENT=master                # Optional
+```
+
+**Available Content Models:**
+
+1. **Hero Banner** (`heroBanner`) - Dynamic hero section with CTA and images
+2. **Blog Post** (`blogPost`) - Blog articles with author and categories
+3. **FAQ** (`faq`) - Frequently asked questions
+4. **Author** (`author`) - Content authors/contributors
+5. **Category** (`category`) - Content categorization
+6. **Space Highlight** (`spaceHighlight`) - Featured workspace highlights
+7. **Marketing Banner** (`marketingBanner`) - Promotional content
+
+**Key Components:**
+
+- `HeroBannerContentful.tsx` - Example implementation of Contentful-powered hero
+- `ContentfulExample.tsx` - Demo component showing various content types
+
+**Documentation:**
+
+- `CONTENTFUL_SETUP.md` - Complete setup guide (Spanish)
+- `HEROBANNER_USAGE.md` - Hero Banner implementation guide
+- `src/integrations/contentful/README.md` - Technical API documentation
+
+**Best Practices:**
+
+- Always use TypeScript skeleton types for type safety
+- Use `getEntries()` with `content_type` filter to fetch by content type
+- Use `getEntry()` only when you have a specific entry ID
+- Leverage TanStack Query for caching (10 min stale time recommended)
+- Handle loading/error/empty states in components
+- Images are `Asset[]` type, access via `asset.fields.file.url`
+- Prefix image URLs with `https:` (Contentful returns protocol-relative URLs)
+
+**Common Patterns:**
+
+_Fetching Content:_
+
+```typescript
+// In services file
+export const getHeroBanner = async (): Promise<HeroBanner | null> => {
+  const response = await contentfulClient.getEntries<HeroBannerSkeleton>({
+    content_type: 'heroBanner',
+    limit: 1,
+    order: ['-sys.createdAt'],
+  });
+  return response.items[0] || null;
+};
+```
+
+_Using in Components:_
+
+```typescript
+import { useHeroBanner } from '../hooks/useContentful';
+
+const MyComponent = () => {
+  const { data, isLoading, error } = useHeroBanner();
+
+  if (isLoading) return <LoadingSkeleton />;
+  if (error) return <ErrorState />;
+  if (!data) return <EmptyState />;
+
+  const { cta, images } = data.fields;
+  const imageUrl = images?.[0]?.fields.file?.url
+    ? `https:${images[0].fields.file.url}`
+    : '';
+
+  return <div>{/* render content */}</div>;
+};
+```
+
+**Creating New Content Models:**
+
+1. **Create content type in Contentful UI** with desired fields
+2. **Define TypeScript skeleton** in `types.ts`:
+
+   ```typescript
+   export interface MyContentSkeleton extends EntrySkeletonType {
+     contentTypeId: 'myContent';
+     fields: {
+       title: string;
+       body: string;
+       image?: Asset;
+     };
+   }
+   export type MyContent = Entry<MyContentSkeleton>;
+   ```
+
+3. **Create service function** in `services.ts`:
+
+   ```typescript
+   export const getMyContent = async (): Promise<MyContent[]> => {
+     const response = await contentfulClient.getEntries<MyContentSkeleton>({
+       content_type: 'myContent',
+     });
+     return response.items;
+   };
+   ```
+
+4. **Create React Query hook** in `useContentful.ts`:
+
+   ```typescript
+   export const useMyContent = () => {
+     return useQuery({
+       queryKey: ['contentful', 'myContent'],
+       queryFn: getMyContent,
+       staleTime: 10 * 60 * 1000,
+     });
+   };
+   ```
+
+5. **Export types and hook** in `index.ts`:
+
+   ```typescript
+   export type { MyContent, MyContentSkeleton } from './types';
+   export { getMyContent } from './services';
+   ```
+
+6. **Use in component** as shown in the pattern above
+
+**Important Notes:**
+
+- `Asset` type for media fields (images, files)
+- `Entry<T>` for references to other content types
+- Always handle `null`/`undefined` for optional fields
+- Use `ChainModifiers` generic if needed for advanced querying
+- Preview API available via `previewClient` for unpublished content
 
 ## Common Patterns & Best Practices
 
@@ -316,9 +519,21 @@ chmod +x .husky/*
 
 Required environment variables (see `.env.example`):
 
+**Supabase:**
+
 - `VITE_SUPABASE_URL` - Supabase project URL
 - `VITE_SUPABASE_PUBLISHABLE_KEY` - Supabase anon key
+
+**Stripe:**
+
 - Additional Stripe variables for payment processing
+
+**Contentful CMS:**
+
+- `VITE_CONTENTFUL_SPACE_ID` - Your Contentful Space ID
+- `VITE_CONTENTFUL_ACCESS_TOKEN` - Content Delivery API token
+- `VITE_CONTENTFUL_PREVIEW_TOKEN` - (Optional) Preview API token for unpublished content
+- `VITE_CONTENTFUL_ENVIRONMENT` - (Optional) Environment name (default: 'master')
 
 ## Common Issues & Solutions
 
@@ -333,6 +548,11 @@ Required environment variables (see `.env.example`):
 - **Hot reload not working:** Restart dev server, check file permissions
 - **Environment variables not loading:** Restart dev server after .env changes
 - **Supabase connection issues:** Verify URL and key in .env
+- **Contentful API errors:**
+  - Check Space ID and Access Token are correct
+  - Verify content type `contentTypeId` matches exactly in Contentful
+  - Use `getEntries()` for content type queries, `getEntry()` only for specific IDs
+  - Ensure content is published (or use Preview API for drafts)
 
 ### Deployment
 
@@ -364,5 +584,342 @@ While formal testing is not yet implemented, manual testing should cover:
 8. Build production version to catch issues
 9. Commit with descriptive messages
 10. Create pull request for review
+
+---
+
+## 🎯 Contentful CMS Quick Reference
+
+### Installation & Setup
+
+```bash
+# Install Contentful SDK
+bun add contentful
+
+# Environment variables needed
+VITE_CONTENTFUL_SPACE_ID=your_space_id
+VITE_CONTENTFUL_ACCESS_TOKEN=your_access_token
+```
+
+### File Structure for New Content Models
+
+When creating a new Contentful content model, follow this pattern:
+
+**1. Define Types** (`src/integrations/contentful/types.ts`):
+
+```typescript
+export interface MyContentSkeleton extends EntrySkeletonType {
+  contentTypeId: 'myContent'; // Must match Contentful content type ID
+  fields: {
+    title: string; // Required field
+    description?: string; // Optional field
+    image?: Asset; // Single image/file
+    images?: Asset[]; // Multiple images/files
+    relatedPost?: Entry<BlogPostSkeleton>; // Reference to another content type
+  };
+}
+export type MyContent = Entry<MyContentSkeleton>;
+export type MyContentCollection = EntryCollection<MyContentSkeleton>;
+```
+
+**2. Create Service** (`src/integrations/contentful/services.ts`):
+
+```typescript
+export const getMyContent = async (): Promise<MyContent[]> => {
+  try {
+    const response = await contentfulClient.getEntries<MyContentSkeleton>({
+      content_type: 'myContent',
+      order: ['-sys.createdAt'],
+      limit: 10,
+    });
+    return response.items;
+  } catch (error) {
+    console.error('Error fetching myContent:', error);
+    return [];
+  }
+};
+
+// For single entry by ID
+export const getMyContentById = async (id: string): Promise<MyContent | null> => {
+  try {
+    const response = await contentfulClient.getEntry<MyContentSkeleton>(id);
+    return response;
+  } catch (error) {
+    console.error('Error fetching myContent by ID:', error);
+    return null;
+  }
+};
+```
+
+**3. Create Hook** (`src/hooks/useContentful.ts`):
+
+```typescript
+export const useMyContent = () => {
+  return useQuery({
+    queryKey: ['contentful', 'myContent'],
+    queryFn: getMyContent,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+  });
+};
+
+export const useMyContentById = (id: string) => {
+  return useQuery({
+    queryKey: ['contentful', 'myContent', id],
+    queryFn: () => getMyContentById(id),
+    staleTime: 10 * 60 * 1000,
+    retry: 2,
+    enabled: !!id, // Only fetch if ID is provided
+  });
+};
+```
+
+**4. Export** (`src/integrations/contentful/index.ts`):
+
+```typescript
+// Types
+export type { MyContent, MyContentSkeleton, MyContentCollection } from './types';
+
+// Services
+export { getMyContent, getMyContentById } from './services';
+```
+
+**5. Use in Component**:
+
+```typescript
+import { useMyContent } from '../hooks/useContentful';
+
+const MyComponent = () => {
+  const { data, isLoading, error } = useMyContent();
+
+  if (isLoading) return <LoadingSkeleton />;
+  if (error) return <ErrorMessage error={error} />;
+  if (!data || data.length === 0) return <EmptyState />;
+
+  return (
+    <div>
+      {data.map((item) => {
+        // Safely extract fields with type casting
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const fields = item.fields as any;
+        const title = fields.title as string;
+        const image = fields.image as Asset | undefined;
+        const imageUrl = image?.fields?.file?.url
+          ? `https:${image.fields.file.url}`
+          : '';
+
+        return (
+          <div key={item.sys.id}>
+            <h2>{title}</h2>
+            {imageUrl && <img src={imageUrl} alt={title} />}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+```
+
+### Common Contentful Patterns
+
+**Filtering by field value:**
+
+```typescript
+const response = await contentfulClient.getEntries<MySkeleton>({
+  content_type: 'myContent',
+  'fields.category': 'featured', // Filter by field
+  order: ['-fields.publishDate'],
+});
+```
+
+**Include references:**
+
+```typescript
+const response = await contentfulClient.getEntries<MySkeleton>({
+  content_type: 'myContent',
+  include: 2, // Include 2 levels of linked entries
+});
+```
+
+**Search:**
+
+```typescript
+const response = await contentfulClient.getEntries<MySkeleton>({
+  content_type: 'myContent',
+  query: 'search term', // Full-text search
+});
+```
+
+**Localization:**
+
+```typescript
+const response = await contentfulClient.getEntries<MySkeleton>({
+  content_type: 'myContent',
+  locale: 'es-MX', // Get Spanish content
+});
+```
+
+### Field Type Reference
+
+| Contentful Field Type | TypeScript Type          | Example                                                  |
+| --------------------- | ------------------------ | -------------------------------------------------------- |
+| Short text            | `string`                 | `title: string`                                          |
+| Long text             | `string`                 | `description: string`                                    |
+| Number                | `number`                 | `price: number`                                          |
+| Boolean               | `boolean`                | `featured: boolean`                                      |
+| Date                  | `string`                 | `publishDate: string` (ISO 8601)                         |
+| Media (single)        | `Asset`                  | `image?: Asset`                                          |
+| Media (many)          | `Asset[]`                | `images?: Asset[]`                                       |
+| Reference (single)    | `Entry<TypeSkeleton>`    | `author?: Entry<AuthorSkeleton>`                         |
+| Reference (many)      | `Entry<TypeSkeleton>[]`  | `tags?: Entry<TagSkeleton>[]`                            |
+| JSON Object           | `{ [key: string]: any }` | `metadata?: { [key: string]: any }`                      |
+| Rich Text             | `Document`               | `content: Document` (from '@contentful/rich-text-types') |
+
+### Accessing Asset URLs
+
+**Single image:**
+
+```typescript
+const image = fields.image as Asset | undefined;
+const imageUrl = image?.fields?.file?.url ? `https:${image.fields.file.url}` : '';
+const imageTitle = image?.fields?.title || 'Untitled';
+const imageWidth = image?.fields?.file?.details?.image?.width;
+```
+
+**Multiple images:**
+
+```typescript
+const images = fields.images as Asset[] | undefined;
+const firstImageUrl = images?.[0]?.fields?.file?.url ? `https:${images[0].fields.file.url}` : '';
+```
+
+**Image transformations (Contentful Images API):**
+
+```typescript
+const imageUrl = `https:${image.fields.file.url}?w=800&h=600&fit=fill`;
+// w = width, h = height, fit = fill|pad|scale|crop|thumb
+```
+
+### Error Handling Best Practices
+
+```typescript
+// In service function
+export const getMyContent = async (): Promise<MyContent[]> => {
+  try {
+    const response = await contentfulClient.getEntries<MyContentSkeleton>({
+      content_type: 'myContent',
+    });
+    return response.items;
+  } catch (error) {
+    console.error('Error fetching content:', error);
+    // Return empty array instead of throwing
+    // This allows components to handle gracefully
+    return [];
+  }
+};
+
+// In component
+const MyComponent = () => {
+  const { data, isLoading, error } = useMyContent();
+
+  // Always handle all states
+  if (isLoading) return <LoadingSkeleton />;
+  if (error) return <ErrorBoundary error={error} />;
+  if (!data || data.length === 0) return <EmptyState message="No content available" />;
+
+  return <ContentDisplay data={data} />;
+};
+```
+
+### Testing Contentful Integration
+
+1. **Test in Contentful Web App first** - Create and publish content
+2. **Check environment variables** - Verify Space ID and tokens
+3. **Test with curl** - Verify API access:
+   ```bash
+   curl https://cdn.contentful.com/spaces/SPACE_ID/entries?access_token=TOKEN
+   ```
+4. **Use browser DevTools** - Check Network tab for Contentful API calls
+5. **Check React Query DevTools** - Verify cache and query states
+
+---
+
+## 📝 Recent Changes Log
+
+**IMPORTANT:** Update this section whenever making significant changes to the codebase.
+
+### October 18, 2025 - ListSpace Marketing Page
+
+**New Marketing-Focused Host Page (Peerspace-Inspired)**
+
+- Created new `ListSpaceNew.tsx` - Marketing page at `/:lang/host` route
+- Separated marketing from form: `/host` (public) vs `/list-space` (protected form)
+- Implemented 7 key sections inspired by Peerspace:
+  1. Hero with dual CTAs (Get Started + Calculate Earnings)
+  2. Statistics/Social proof (3 key metrics)
+  3. "Why Host" benefits (3 cards with icons)
+  4. "How It Works" (3-step process)
+  5. "Space Types" showcase (6 categories)
+  6. Trust & Safety features (4 cards)
+  7. FAQ section (5 common questions)
+  8. Final CTA
+- Updated navigation: Header "List Space" → `/host` (marketing page)
+- Kept authenticated users' "List Space" → `/list-space` (direct to form)
+- Added complete bilingual translations (en/es) for all marketing content
+- Used Keysely brand colors: Navy Blue (#1A2B42), Action Blue (#3B82F6)
+- Responsive design with mobile-first approach
+
+**Routing Changes:**
+
+- `/:lang/host` - New public marketing page (ListSpaceNew)
+- `/:lang/list-space` - Protected route for actual listing form (ListSpace)
+
+### October 16, 2025 - Latest Updates
+
+**Rebranding: Ofikai → Keysely**
+
+- Changed all references from "Ofikai" to "Keysely" across the entire codebase
+- Updated: Design system, components, translations, documentation
+- Files affected: index.css, Logo.tsx, locales (en/es), Auth.tsx, Footer, Contentful integration, all documentation
+
+**Hero Component Enhancements**
+
+- Implemented full-width hero section using `.full-width-breakout` Tailwind utility
+- Added smooth image slider with 1.5s crossfade transitions (6s intervals)
+- Fixed height to 85vh for better viewport management
+- Integrated transparent-to-solid header on scroll
+- Mobile optimizations: hidden subtitle on small screens
+
+**Header Component Improvements**
+
+- Created transparent header that overlays hero image
+- Added scroll detection (changes to solid background after 50px)
+- Removed HeaderActions component for cleaner, minimal design
+- Logo inverts to white when transparent, normal when scrolled
+- Navigation links adapt colors based on scroll state
+- Reorganized layout: Logo left, Navigation right
+
+**CSS & Layout Fixes**
+
+- Fixed `#root` max-width restriction in App.css (was limiting to 1280px)
+- Added `overflow-x: hidden` to html and body to prevent horizontal scroll
+- Created custom `.full-width-breakout` utility in tailwind.config.ts
+- Updated navbar-sticky and navbar-scrolled classes with backdrop blur
+
+**Contentful Integration**
+
+- Complete CMS setup with 7 content models (Hero Banner, Blog Post, FAQ, etc.)
+- Implemented useHeroBanner hook with 10min cache, 2 retries
+- Enhanced image slider using Contentful Asset[] arrays
+- Proper TypeScript types with EntrySkeletonType patterns
+
+### Key Architectural Decisions Made
+
+1. **Full-Width Hero Pattern**: Using CSS calc() technique for breakout sections
+2. **Transparent Header**: Dynamic styling based on scroll position for modern UX
+3. **Image Transitions**: Crossfade technique with proper z-index layering to avoid gray flashes
+4. **Mobile-First**: Progressive enhancement with hidden elements on small screens
+5. **Contentful as Single Source**: Dynamic content managed via CMS instead of hardcoded
+
+---
 
 **Always trust these instructions first and only explore the codebase if information is incomplete or incorrect.**

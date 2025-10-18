@@ -2,11 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* OfiKai Design System - Professional workspace marketplace */
+/* Keysely Design System - Professional workspace marketplace */
 
 @layer base {
   :root {
-    /* Core OfiKai Brand Colors - Nueva Paleta */
+    /* Core Keysely Brand Colors - Nueva Paleta */
     --primary: 214 44% 18%; /* Navy Blue #1A2B42 - Color principal del logo */
     --primary-dark: 214 44% 14%; /* Navy Blue más oscuro para hover */
     --primary-light: 217 91% 60%; /* Action Blue #3B82F6 - Azul de acento */
@@ -98,6 +98,12 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family:
@@ -108,10 +114,10 @@
       sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     font-variant-numeric: tabular-nums;
-  }
-
-  html {
-    scroll-behavior: smooth;
+    width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
   }
 
   /* Improved typography for Peerspace-like design */
@@ -127,9 +133,14 @@
 }
 
 @layer components {
-  /* Navigation Styles - Peerspace inspired */
+  /* Navigation Styles - Transparent header over hero */
   .navbar-sticky {
-    @apply fixed top-0 w-full z-50 bg-white shadow-sm border-b border-gray-100 transition-all duration-300;
+    @apply fixed top-0 w-full z-50 bg-transparent transition-all duration-300;
+  }
+
+  /* Scrolled state - add background when scrolling */
+  .navbar-scrolled {
+    @apply bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100;
   }
 
   /* Hero Section - Cleaner, more modern */

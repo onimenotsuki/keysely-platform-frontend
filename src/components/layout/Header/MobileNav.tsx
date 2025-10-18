@@ -7,9 +7,10 @@ import NotificationBell from '../../NotificationBell';
 
 interface MobileNavProps {
   isOpen: boolean;
+  isScrolled?: boolean;
 }
 
-export const MobileNav = ({ isOpen }: MobileNavProps) => {
+export const MobileNav = ({ isOpen, isScrolled = false }: MobileNavProps) => {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { language } = useLanguageContext();
@@ -40,7 +41,7 @@ export const MobileNav = ({ isOpen }: MobileNavProps) => {
           {t('header.howItWorks')}
         </a>
         <Link
-          to={`/${language}/list-space`}
+          to={`/${language}/host`}
           className="block text-foreground hover:text-primary transition-colors duration-300 font-medium"
         >
           {t('header.listSpace')}
@@ -48,7 +49,7 @@ export const MobileNav = ({ isOpen }: MobileNavProps) => {
 
         <div className="pt-4 space-y-3">
           <div className="mb-3">
-            <LanguageSelector />
+            <LanguageSelector isScrolled={isScrolled} />
           </div>
           {user && (
             <div className="mb-3">

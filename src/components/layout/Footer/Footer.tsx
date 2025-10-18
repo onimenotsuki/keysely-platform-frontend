@@ -7,7 +7,7 @@ import { SupportLinks } from './SupportLinks';
 
 export const Footer = () => {
   return (
-    <footer className="footer-section">
+    <footer className="footer-section bg-primary">
       <div className="container mx-auto px-4">
         <div className="footer-grid">
           <div>
