@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLanguageContext } from '../../../contexts/LanguageContext';
 import { useTranslation } from '../../../hooks/useTranslation';
+import LanguageSelector from '../../LanguageSelector';
 
 interface DesktopNavProps {
   isScrolled?: boolean;
@@ -16,6 +17,7 @@ export const DesktopNav = ({ isScrolled = false }: DesktopNavProps) => {
 
   return (
     <nav className="hidden md:flex items-center space-x-8">
+      <LanguageSelector isScrolled={isScrolled} />
       <Link to={`/${language}`} className={linkClass}>
         {t('header.home')}
       </Link>

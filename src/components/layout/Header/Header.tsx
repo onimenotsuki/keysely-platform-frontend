@@ -32,7 +32,7 @@ export const Header = () => {
             <MobileMenuButton isOpen={isMenuOpen} onClick={toggleMenu} isScrolled={isScrolled} />
           </div>
         </div>
-        <MobileNav isOpen={isMenuOpen} />
+        <MobileNav isOpen={isMenuOpen} isScrolled={isScrolled} />
       </div>
     </header>
   );
