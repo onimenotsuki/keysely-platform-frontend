@@ -246,7 +246,95 @@
     "thursday": "Jueves",
     "friday": "Viernes",
     "saturday": "Sábado",
-    "sunday": "Domingo"
+    "sunday": "Domingo",
+    "marketing": {
+      "hero": {
+        "title": "Convierte Tu Espacio en Ingresos",
+        "subtitle": "Únete a miles de anfitriones que ganan dinero extra compartiendo su espacio de trabajo con profesionales de todo el mundo",
+        "cta": "Comenzar"
+      },
+      "stats": {
+        "spaces": "Espacios Activos",
+        "earned": "Total Ganado",
+        "cities": "Ciudades en el Mundo"
+      },
+      "howItWorks": {
+        "title": "Cómo Funciona el Hospedaje",
+        "subtitle": "Comienza a ganar en tres simples pasos - solo toma unos minutos comenzar",
+        "step1": {
+          "title": "Lista Tu Espacio",
+          "description": "Crea tu anuncio con fotos, descripción y precios. Establece tu propio horario y reglas de la casa."
+        },
+        "step2": {
+          "title": "Acepta Reservas",
+          "description": "Revisa y aprueba solicitudes de reserva. Comunícate directamente con los huéspedes a través de nuestra mensajería segura."
+        },
+        "step3": {
+          "title": "Recibe Pagos",
+          "description": "Recibe pagos de forma segura después de cada reserva. Rastrea tus ganancias y pagos en tu panel de control."
+        }
+      },
+      "spaceTypes": {
+        "title": "Cada Espacio Pertenece a Keysely",
+        "subtitle": "Desde oficinas privadas hasta salas de reuniones, lista cualquier espacio profesional y comienza a ganar",
+        "office": {
+          "title": "Oficinas Privadas",
+          "description": "Espacios privados completamente equipados, perfectos para equipos y empresas que buscan un lugar de trabajo dedicado"
+        },
+        "meeting": {
+          "title": "Salas de Reuniones",
+          "description": "Salas profesionales con tecnología para presentaciones, talleres y reuniones importantes"
+        },
+        "coworking": {
+          "title": "Espacios de Coworking",
+          "description": "Entornos colaborativos flexibles ideales para freelancers y trabajadores remotos"
+        },
+        "event": {
+          "title": "Espacios para Eventos",
+          "description": "Lugares únicos perfectos para eventos corporativos, talleres y reuniones profesionales"
+        }
+      },
+      "trust": {
+        "title": "Confianza y Seguridad",
+        "subtitle": "Estamos comprometidos a mantenerte a ti, tu espacio y tus huéspedes seguros y protegidos",
+        "insurance": {
+          "title": "Protección de Propiedad",
+          "description": "Hasta $1M en protección por daños para reclamos elegibles durante reservas de espacios de trabajo profesionales."
+        },
+        "support": {
+          "title": "Soporte al Anfitrión 24/7",
+          "description": "Equipo de soporte dedicado disponible las 24 horas para ayudarte con cualquier pregunta o inquietud."
+        },
+        "verification": {
+          "title": "Reservas Verificadas",
+          "description": "Todos los huéspedes deben verificar su identidad y proporcionar credenciales profesionales antes de reservar."
+        }
+      },
+      "faq": {
+        "title": "Preguntas Frecuentes",
+        "q1": {
+          "question": "¿Cuánto cuesta listar mi espacio?",
+          "answer": "Listar tu espacio en Keysely es completamente gratis. Solo cobramos una tarifa de servicio del 15% en reservas exitosas, así que solo pagas cuando ganas."
+        },
+        "q2": {
+          "question": "¿Cómo recibo el pago?",
+          "answer": "Los pagos se procesan automáticamente 24 horas después de cada reserva completada. Los fondos se transfieren directamente a tu cuenta bancaria a través de Stripe Connect."
+        },
+        "q3": {
+          "question": "¿Qué pasa si un huésped daña mi propiedad?",
+          "answer": "Todas las reservas están cubiertas por nuestro Programa de Protección al Anfitrión, proporcionando hasta $1M en protección por daños. Simplemente presenta un reclamo dentro de las 48 horas de descubrir el daño."
+        },
+        "q4": {
+          "question": "¿Puedo cancelar una reserva?",
+          "answer": "Sí, pero alentamos a los anfitriones a honrar las reservas confirmadas. Las cancelaciones pueden afectar el ranking de tu anuncio y disponibilidad. Revisa nuestra política de cancelación para más detalles."
+        }
+      },
+      "finalCta": {
+        "title": "¿Listo Para Comenzar a Ganar?",
+        "subtitle": "Únete a miles de anfitriones exitosos y convierte tu espacio sin usar en una valiosa fuente de ingresos",
+        "cta": "Lista Tu Espacio Ahora"
+      }
+    }
   },
   "ownerDashboard": {
     "title": "Panel de Propietario",

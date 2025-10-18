@@ -25,7 +25,7 @@ export const DesktopNav = ({ isScrolled = false }: DesktopNavProps) => {
       <a href="#how-it-works" className={linkClass}>
         {t('header.howItWorks')}
       </a>
-      <Link to={`/${language}/list-space`} className={linkClass}>
+      <Link to={`/${language}/host`} className={linkClass}>
         {t('header.listSpace')}
       </Link>
     </nav>

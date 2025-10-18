@@ -14,6 +14,7 @@ import Explore from './pages/Explore';
 import Favorites from './pages/Favorites';
 import Index from './pages/Index';
 import ListSpace from './pages/ListSpace';
+import ListSpaceNew from './pages/ListSpaceNew';
 import Messages from './pages/Messages';
 import MyReviews from './pages/MyReviews';
 import NotFound from './pages/NotFound';
@@ -67,6 +68,14 @@ const App = () => (
                 element={
                   <LanguageWrapper>
                     <Auth />
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/host"
+                element={
+                  <LanguageWrapper>
+                    <ListSpaceNew />
                   </LanguageWrapper>
                 }
               />

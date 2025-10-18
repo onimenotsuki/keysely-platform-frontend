@@ -847,6 +847,32 @@ const MyComponent = () => {
 
 **IMPORTANT:** Update this section whenever making significant changes to the codebase.
 
+### October 18, 2025 - ListSpace Marketing Page
+
+**New Marketing-Focused Host Page (Peerspace-Inspired)**
+
+- Created new `ListSpaceNew.tsx` - Marketing page at `/:lang/host` route
+- Separated marketing from form: `/host` (public) vs `/list-space` (protected form)
+- Implemented 7 key sections inspired by Peerspace:
+  1. Hero with dual CTAs (Get Started + Calculate Earnings)
+  2. Statistics/Social proof (3 key metrics)
+  3. "Why Host" benefits (3 cards with icons)
+  4. "How It Works" (3-step process)
+  5. "Space Types" showcase (6 categories)
+  6. Trust & Safety features (4 cards)
+  7. FAQ section (5 common questions)
+  8. Final CTA
+- Updated navigation: Header "List Space" → `/host` (marketing page)
+- Kept authenticated users' "List Space" → `/list-space` (direct to form)
+- Added complete bilingual translations (en/es) for all marketing content
+- Used Keysely brand colors: Navy Blue (#1A2B42), Action Blue (#3B82F6)
+- Responsive design with mobile-first approach
+
+**Routing Changes:**
+
+- `/:lang/host` - New public marketing page (ListSpaceNew)
+- `/:lang/list-space` - Protected route for actual listing form (ListSpace)
+
 ### October 16, 2025 - Latest Updates
 
 **Rebranding: Ofikai → Keysely**

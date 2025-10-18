@@ -40,7 +40,7 @@ export const MobileNav = ({ isOpen }: MobileNavProps) => {
           {t('header.howItWorks')}
         </a>
         <Link
-          to={`/${language}/list-space`}
+          to={`/${language}/host`}
           className="block text-foreground hover:text-primary transition-colors duration-300 font-medium"
         >
           {t('header.listSpace')}
