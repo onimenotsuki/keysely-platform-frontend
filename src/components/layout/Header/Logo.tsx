@@ -14,7 +14,7 @@ export const Logo = ({ isScrolled = false }: LogoProps) => {
       <img
         src={logoImage}
         alt="Keysely Logo"
-        className={`h-10 w-auto transition-all duration-300 ${isScrolled ? '' : 'brightness-0 invert'}`}
+        className={`h-8 w-auto transition-all duration-300 ${isScrolled ? '' : 'brightness-0 invert'}`}
       />
     </Link>
   );
