@@ -1,200 +1,516 @@
-# 🚀 Quick Guide: Setting Up Contentful CMS for Keysely# 🚀 Guía Rápida: Configurar Contentful CMS para Keysely
+# 🚀 Quick Guide: Setting Up Contentful CMS for Keysely# 🚀 Quick Guide: Setting Up Contentful CMS for Keysely# 🚀 Quick Guide: Setting Up Contentful CMS for Keysely# 🚀 Guía Rápida: Configurar Contentful CMS para Keysely
 
-## Step 1: Create a Contentful Account## Paso 1: Crear una Cuenta en Contentful
+## Step 1: Create a Contentful Account
 
-1. Go to [https://www.contentful.com/](https://www.contentful.com/)1. Ve a [https://www.contentful.com/](https://www.contentful.com/)
+1. Go to [https://www.contentful.com/](https://www.contentful.com/)## Step 1: Create a Contentful Account## Step 1: Create a Contentful Account## Paso 1: Crear una Cuenta en Contentful
 
-2. Click on **Sign up** or **Get started free**2. Haz clic en **Sign up** o **Get started free**
+2. Click on **Sign up** or **Get started free**
 
-3. Create your account (you can use GitHub, Google, or email)3. Crea tu cuenta (puedes usar GitHub, Google o email)
+3. Create your account (you can use GitHub, Google, or email)
 
-4. Contentful offers a free plan to get started4. Contentful ofrece un plan gratuito para empezar
+4. Contentful offers a free plan to get started
 
-## Step 2: Create Your Space## Paso 2: Crear tu Espacio (Space)
+5. Go to [https://www.contentful.com/](https://www.contentful.com/)1. Go to [https://www.contentful.com/](https://www.contentful.com/)1. Ve a [https://www.contentful.com/](https://www.contentful.com/)
 
-1. Once logged in, click on **Create space**1. Una vez logueado, haz clic en **Create space**
+## Step 2: Create Your Space
 
-2. Choose a name for your space, for example: "Keysely Platform"2. Elige un nombre para tu espacio, por ejemplo: "Keysely Platform"
+2. Click on **Sign up** or **Get started free**
 
-3. Select **Empty space**3. Selecciona **Empty space** (espacio vacío)
+1. Once logged in, click on **Create space**
 
-4. Click **Create space**4. Haz clic en **Create space**
+1. Choose a name for your space, for example: "Keysely Platform"3. Create your account (you can use GitHub, Google, or email)2. Click on **Sign up** or **Get started free**2. Haz clic en **Sign up** o **Get started free**
 
-## Step 3: Get Your API Credentials## Paso 3: Obtener tus Credenciales API
+1. Select **Empty space**
 
-1. In your space, go to **Settings** (⚙️) at the top1. En tu espacio, ve a **Settings** (⚙️) en la parte superior
+1. Click **Create space**4. Contentful offers a free plan to get started
 
-2. Click on **API keys**2. Haz clic en **API keys**
+## Step 3: Get Your API Credentials3. Create your account (you can use GitHub, Google, or email)
 
-3. Click on **Add API key**3. Haz clic en **Add API key**
+1. In your space, go to **Settings** (⚙️) at the top## Step 2: Create Your Space
 
-4. Give it a name, for example: "Keysely Frontend"4. Dale un nombre, por ejemplo: "Keysely Frontend"
+2. Click on **API keys**
 
-5. Copy and save these values:5. Copia y guarda estos valores:
-   - **Space ID** (you'll need it for VITE_CONTENTFUL_SPACE_ID) - **Space ID** (lo necesitarás para VITE_CONTENTFUL_SPACE_ID)
+3. Click on **Add API key**4. Contentful offers a free plan to get started4. Contentful ofrece un plan gratuito para empezar
 
-   - **Content Delivery API - access token** (for VITE_CONTENTFUL_ACCESS_TOKEN) - **Content Delivery API - access token** (para VITE_CONTENTFUL_ACCESS_TOKEN)
+4. Give it a name, for example: "Keysely Frontend"
 
-   - **Content Preview API - access token** (optional, for VITE_CONTENTFUL_PREVIEW_TOKEN) - **Content Preview API - access token** (opcional, para VITE_CONTENTFUL_PREVIEW_TOKEN)
+5. Copy and save these values:1. Once logged in, click on **Create space**
+   - **Space ID** (you'll need it for VITE_CONTENTFUL_SPACE_ID)
 
-## Step 4: Configure Environment Variables## Paso 4: Configurar Variables de Entorno
+   - **Content Delivery API - access token** (for VITE_CONTENTFUL_ACCESS_TOKEN)2. Choose a name for your space, for example: "Keysely Platform"## Step 2: Create Your Space## Paso 2: Crear tu Espacio (Space)
 
-1. Copy the `.env.example` file to `.env`:1. Copia el archivo `.env.example` a `.env`:
+   - **Content Preview API - access token** (optional, for VITE_CONTENTFUL_PREVIEW_TOKEN)
 
-   `bash   `bash
+6. Select **Empty space**
 
-   cp .env.example .env cp .env.example .env
+## Step 4: Configure Environment Variables
 
-   `   `
+4. Click **Create space**1. Once logged in, click on **Create space**
 
-2. Open `.env` and add your credentials:2. Abre `.env` y añade tus credenciales:
+1. Copy the `.env.example` file to `.env`:
+
+   ```bash
+
+   cp .env.example .env## Step 3: Get Your API Credentials2. Choose a name for your space, for example: "Keysely Platform"Platform"
+
+   ```
+
+1. Open `.env` and add your credentials:
+
+1. In your space, go to **Settings** (⚙️) at the top3. Select **Empty space**
 
    ````env
 
-   ```env   VITE_CONTENTFUL_SPACE_ID=tu_space_id_aqui
+   VITE_CONTENTFUL_SPACE_ID=your_space_id_here2. Click on **API keys**
 
-   VITE_CONTENTFUL_SPACE_ID=your_space_id_here   VITE_CONTENTFUL_ACCESS_TOKEN=tu_access_token_aqui
+   VITE_CONTENTFUL_ACCESS_TOKEN=your_access_token_here
 
-   VITE_CONTENTFUL_ACCESS_TOKEN=your_access_token_here   VITE_CONTENTFUL_PREVIEW_TOKEN=tu_preview_token_aqui
+   VITE_CONTENTFUL_PREVIEW_TOKEN=your_preview_token_here3. Click on **Add API key**4. Click **Create space**
 
-   VITE_CONTENTFUL_PREVIEW_TOKEN=your_preview_token_here   VITE_CONTENTFUL_ENVIRONMENT=master
+   VITE_CONTENTFUL_ENVIRONMENT=master
 
-   VITE_CONTENTFUL_ENVIRONMENT=master   ```
-
+   ```4. Give it a name, for example: "Keysely Frontend"
    ````
 
-## Paso 5: Crear tu Primer Content Model
+## Step 5: Create Your First Content Model5. Copy and save these values:## Step 3: Get Your API Credentials##
 
-## Step 5: Create Your First Content Model
+### Example: Space Highlight - **Space ID** (you'll need it for VITE_CONTENTFUL_SPACE_ID)
 
-### Ejemplo: Space Highlight (Espacio Destacado)
+1. In Contentful, go to **Content model** - **Content Delivery API - access token** (for VITE_CONTENTFUL_ACCESS_TOKEN)1. In your space, go to **Settings** (⚙️) at the top1.
 
-### Example: Space Highlight
+2. Click on **Add content type**
 
-1. En Contentful, ve a **Content model**
+3. Configure: - **Content Preview API - access token** (optional, for VITE_CONTENTFUL_PREVIEW_TOKEN)
+   - **Name**: Space Highlight
 
-1. In Contentful, go to **Content model**2. Haz clic en **Add content type**
+   - **API Identifier**: `spaceHighlight`2. Click on **API keys**
 
-1. Click on **Add content type**3. Configura:
+4. Click **Create**
 
-1. Configure: - **Name**: Space Highlight
-   - **Name**: Space Highlight - **API Identifier**: `spaceHighlight`
+## Step 4: Configure Environment Variables
 
-   - **API Identifier**: `spaceHighlight`4. Haz clic en **Create**
+5. Now add fields (Add field):
 
-1. Click **Create**
+6. Click on **Add API key**
 
-1. Ahora añade campos (Add field):
+   **Field 1: Title**
+   - Type: **Short text**1. Copy the `.env.example` file to `.env`:
 
-1. Now add fields (Add field):
+   - Name: `Title`
 
-   **Campo 1: Title**
-
-   **Field 1: Title** - Type: **Short text**
-   - Type: **Short text** - Name: `Title`
-
-   - Name: `Title` - Field ID: `title`
-
-   - Field ID: `title` - ✓ Required
-
-   - ✓ Required - ✓ Unique
-
-   - ✓ Unique
-
-   **Campo 2: Description**
-
-   **Field 2: Description** - Type: **Long text**
-   - Type: **Long text** - Name: `Description`
-
-   - Name: `Description` - Field ID: `description`
-
-   - Field ID: `description` - ✓ Required
+   - Field ID: `title`4. Give it a name, for example: "Keysely Frontend"
 
    - ✓ Required
 
-   **Campo 3: Images**
+   - ✓ Unique ```bash
 
-   **Field 3: Images** - Type: **Media**
-   - Type: **Media** - Name: `Images`
+   **Field 2: Description** cp .env.example .env5. Copy and save these values:5. Copia y guarda estos valores:
+   - Type: **Long text**
 
-   - Name: `Images` - Field ID: `images`
+   - Name: `Description` ``` - **Space ID** (you'll need it for VITE_CONTENTFUL_SPACE_ID) - **Space ID**
 
-   - Field ID: `images` - ✓ Many files
+   - Field ID: `description`
 
-   - ✓ Many files
+   - ✓ Required
 
-   **Campo 4: Featured**
+   **Field 3: Images**2. Open `.env` and add your credentials: - **Content Delivery API - access token** (for VITE_CONTENTFUL_ACCESS_TOKEN) - **Content Delivery API - access token** (para VITE_CONTENTFUL_ACCESS_TOKEN)
+   - Type: **Media**
 
-   **Field 4: Featured** - Type: **Boolean**
-   - Type: **Boolean** - Name: `Featured`
+   - Name: `Images`
 
-   - Name: `Featured` - Field ID: `featured`
+   - Field ID: `images`
 
-   - Field ID: `featured` - Default: `false`
+   - ✓ Many files ```env - **Content Preview API - access token** (optional, for VITE_CONTENTFUL_PREVIEW_TOKEN) - **Content Preview API - access token** (opcional, para VITE_CONTENTFUL_PREVIEW_TOKEN)
 
-   - Default: `false`
+   **Field 4: Featured** VITE_CONTENTFUL_SPACE_ID=your_space_id_here
+   - Type: **Boolean**
 
-   **Campo 5: Display Order**
+   - Name: `Featured` VITE_CONTENTFUL_ACCESS_TOKEN=your_access_token_here## Step 4: Configure Environment Variables## Paso 4: Configurar Variables de Entorno
 
-   **Field 5: Display Order** - Type: **Integer**
-   - Type: **Integer** - Name: `Display Order`
+   - Field ID: `featured`
 
-   - Name: `Display Order` - Field ID: `displayOrder`
+   - Default: `false` VITE_CONTENTFUL_PREVIEW_TOKEN=your_preview_token_here
 
-   - Field ID: `displayOrder` - Default: `0`
+   **Field 5: Display Order** VITE_CONTENTFUL_ENVIRONMENT=master1. Copy the `.env.example` file to `.env`:1. Copia el archivo `.env.example` a `.env`:
+   - Type: **Integer**
 
-   - Default: `0`
+   - Name: `Display Order` ```
 
-   **Campo 6: Space (JSON Object)**
+   - Field ID: `displayOrder`
 
-   **Field 6: Space (JSON Object)** - Type: **JSON object**
-   - Type: **JSON object** - Name: `Space`
+   - Default: `0` `bash   `bash
 
-   - Name: `Space` - Field ID: `space`
+   **Field 6: Space (JSON Object)**## Step 5: Create Your First Content Model
+   - Type: **JSON object**
+
+   - Name: `Space` cp .env.example .env cp .env.example .env
 
    - Field ID: `space`
 
-1. Haz clic en **Save** para guardar el content type
+### Example: Space Highlight
 
-1. Click **Save** to save the content type
+6. Click **Save** to save the content type
 
-## Paso 6: Crear tu Primera Entrada de Contenido
+   `   `
 
 ## Step 6: Create Your First Content Entry
 
-1. Ve a **Content** en la navegación superior
+1. In Contentful, go to **Content model**
 
-1. Go to **Content** in the top navigation2. Haz clic en **Add entry**
+1. Go to **Content** in the top navigation
+
+1. Click on **Add entry**2. Click on **Add content type**2. Open `.env` and add your credentials:2. Abre `.env` y añade tus credenciales:
+
+1. Select **Space Highlight**
+
+1. Fill in the fields:3. Configure:
+   - **Title**: "Modern Office in Querétaro"
+
+   - **Description**: "Bright and modern space perfect for creative sessions" - **Name**: Space Highlight ````env
+
+   - **Images**: Upload one or more images
+
+   - **Featured**: Check ✓ (checked) - **API Identifier**: `spaceHighlight`
+
+   - **Display Order**: 1
+
+   - **Space** (JSON):4. Click **Create** ```env VITE_CONTENTFUL_SPACE_ID=tu_space_id_aqui
+
+     ```json
+
+     {
+
+       "spaceId": "123",
+
+       "spaceName": "Creative Studio QRO"5. Now add fields (Add field):   VITE_CONTENTFUL_SPACE_ID=your_space_id_here   VITE_CONTENTFUL_ACCESS_TOKEN=tu_access_token_aqui
+
+     }
+
+     ```
+
+1. Click **Publish** (not just Save)
+
+   **Field 1: Title** VITE_CONTENTFUL_ACCESS_TOKEN=your_access_token_here VITE_CONTENTFUL_PREVIEW_TOKEN=tu_preview_token_aqui
+
+## Step 7: Test the Integration
+
+- Type: **Short text**
+
+1. Restart your development server:
+   - Name: `Title` VITE_CONTENTFUL_PREVIEW_TOKEN=your_preview_token_here VITE_CONTENTFUL_ENVIRONMENT=master
+
+   ```bash
+
+   bun run dev   - Field ID: `title`
+
+   ```
+
+   - ✓ Required VITE_CONTENTFUL_ENVIRONMENT=master ```
+
+2. Add the example component to your page:
+   - ✓ Unique
+
+   `````typescript
+
+   // In src/pages/Index.tsx   ````
+
+   import ContentfulExample from '../components/ContentfulExample';
+
+   **Field 2: Description**
+
+   const Index = () => {
+
+     return (   - Type: **Long text**## Paso 5: Crear tu Primer Content Model
+
+       <div className="min-h-screen">
+
+         <Header />   - Name: `Description`
+
+         <Hero />
+
+         <ContentfulExample /> {/* 👈 Add this component */}   - Field ID: `description`## Step 5: Create Your First Content Model
+
+         <Categories />
+
+         <FeaturedSpaces />   - ✓ Required
+
+         <Footer />
+
+       </div>### Ejemplo: Space Highlight (Espacio Destacado)
+
+     );
+
+   };   **Field 3: Images**
+
+   `````
+
+   - Type: **Media**### Example: Space Highlight
+
+3. Open your browser at http://localhost:8080
+
+4. You should see your Contentful content rendered! - Name: `Images`
+
+## ✅ Verification - Field ID: `images`1. En Contentful, ve a **Content model**
+
+If everything is configured correctly, you should see: - ✓ Many files
+
+- ✅ The `ContentfulExample` component rendering without errors1. In Contentful, go to **Content model**2. Haz clic en **Add content type**
+
+- ✅ The title and description of your entry
+
+- ✅ The images you uploaded **Field 4: Featured**
+
+- ✅ A blue message at the end: "Contentful Integration Active: Displaying X featured items"
+  - Type: **Boolean**1. Click on **Add content type**3. Configura:
+
+## 🐛 Troubleshooting
+
+- Name: `Featured`
+
+### I don't see my content
+
+- Field ID: `featured`1. Configure: - **Name**: Space Highlight
+
+1. **Verify that the content is PUBLISHED** (Publish, not just Save)
+
+2. Check the browser console for errors - Default: `false` - **Name**: Space Highlight - **API Identifier**: `spaceHighlight`
+
+3. Verify that the environment variables are correct
+
+4. Make sure you restarted the server after changing `.env`
+
+### Error 401 or 403 **Field 5: Display Order** - **API Identifier**: `spaceHighlight`4. Haz clic en **Create**
+
+- Your access token is incorrect - Type: **Integer**
+
+- Go to Settings > API keys in Contentful and copy the token again
+  - Name: `Display Order`1. Click **Create**
+
+### Error "Cannot find VITE_CONTENTFUL_SPACE_ID"
+
+- Field ID: `displayOrder`
+
+- You didn't copy `.env.example` to `.env`
+
+- Or you didn't restart the server after creating `.env` - Default: `0`1. Ahora añade campos (Add field):
+
+## 🎯 Next Steps
+
+1. **Create more content types** following the same process **Field 6: Space (JSON Object)**1. Now add fields (Add field):
+
+2. **Update TypeScript types** in `src/integrations/contentful/types.ts`
+
+3. **Create services** for your new content types in `services.ts` - Type: **JSON object**
+
+4. **Create hooks** in `useContentful.ts` to use in your components
+
+5. **Use the content** in your pages and components - Name: `Space` **Campo 1: Title**
+
+## 📚 Useful Resources - Field ID: `space`
+
+- [Contentful Documentation](https://www.contentful.com/developers/docs/) **Field 1: Title** - Type: **Short text**
+
+- [Content Delivery API](https://www.contentful.com/developers/docs/references/content-delivery-api/)
+
+- [Content Modeling Guide](https://www.contentful.com/help/content-modelling-basics/)6. Click **Save** to save the content type - Type: **Short text** - Name: `Title`
+
+## 💡 Tips
+
+- **Use the Content Preview API** to see draft content before publishing## Step 6: Create Your First Content Entry - Name: `Title` - Field ID: `title`
+
+- **Organize your content** with categories and tags
+
+- **Leverage references** between content types (like Author → Blog Post)
+
+- **Use validations** on fields to ensure content quality
+
+- **Implement i18n** in Contentful for multilingual content1. Go to **Content** in the top navigation - Field ID: `title` - ✓ Required
+
+Done! Now you have Contentful fully integrated in your Keysely platform. 🎉2. Click on **Add entry**
+
+3. Select **Space Highlight** - ✓ Required - ✓ Unique
+
+4. Fill in the fields:
+   - **Title**: "Modern Office in Querétaro" - ✓ Unique
+
+   - **Description**: "Bright and modern space perfect for creative sessions"
+
+   - **Images**: Upload one or more images **Campo 2: Description**
+
+   - **Featured**: Check ✓ (checked)
+
+   - **Display Order**: 1 **Field 2: Description** - Type: **Long text**
+
+   - **Space** (JSON): - Type: **Long text** - Name: `Description`
+
+     ````json
+
+     {   - Name: `Description` - Field ID: `description`
+
+       "spaceId": "123",
+
+       "spaceName": "Creative Studio QRO"   - Field ID: `description` - ✓ Required
+
+     }
+
+     ```   - ✓ Required
+     ````
+
+5. Click **Publish** (not just Save)
+
+   **Campo 3: Images**
+
+## Step 7: Test the Integration
+
+**Field 3: Images** - Type: **Media**
+
+1. Restart your development server: - Type: **Media** - Name: `Images`
+
+   ```bash   - Name: `Images`- Field ID:`images`
+
+   bun run dev
+
+   ```  - Field ID:`images` - ✓ Many files
+
+2. Add the example component to your page: - ✓ Many files
+
+   ````typescript **Campo 4: Featured**
+
+   // In src/pages/Index.tsx
+
+   import ContentfulExample from '../components/ContentfulExample';   **Field 4: Featured** - Type: **Boolean**
+
+   - Type: **Boolean** - Name: `Featured`
+
+   const Index = () => {
+
+     return (   - Name: `Featured` - Field ID: `featured`
+
+       <div className="min-h-screen">
+
+         <Header />   - Field ID: `featured` - Default: `false`
+
+         <Hero />
+
+         <ContentfulExample /> {/* 👈 Add this component */}   - Default: `false`
+
+         <Categories />
+
+         <FeaturedSpaces />   **Campo 5: Display Order**
+
+         <Footer />
+
+       </div>   **Field 5: Display Order** - Type: **Integer**
+
+     );   - Type: **Integer** - Name: `Display Order`
+
+   };
+
+   ```   - Name: `Display Order` - Field ID: `displayOrder`
+
+   ````
+
+3. Open your browser at http://localhost:8080 - Field ID: `displayOrder` - Default: `0`
+
+4. You should see your Contentful content rendered!
+   - Default: `0`
+
+## ✅ Verification
+
+**Campo 6: Space (JSON Object)**
+
+If everything is configured correctly, you should see:
+
+**Field 6: Space (JSON Object)** - Type: **JSON object**
+
+- ✅ The `ContentfulExample` component rendering without errors - Type: **JSON object** - Name: `Space`
+
+- ✅ The title and description of your entry
+
+- ✅ The images you uploaded - Name: `Space` - Field ID: `space`
+
+- ✅ A blue message at the end: "Contentful Integration Active: Displaying X featured items"
+  - Field ID: `space`
+
+## 🐛 Troubleshooting
+
+1. Haz clic en **Save** para guardar el content type
+
+### I don't see my content
+
+1. Click **Save** to save the content type
+
+1. **Verify that the content is PUBLISHED** (Publish, not just Save)
+
+1. Check the browser console for errors## Paso 6: Crear tu Primera Entrada de Contenido
+
+1. Verify that the environment variables are correct
+
+1. Make sure you restarted the server after changing `.env`## Step 6: Create Your First Content Entry
+
+### Error 401 or 4031. Ve a **Content** en la navegación superior
+
+- Your access token is incorrect1. Go to **Content** in the top navigation2. Haz clic en **Add entry**
+
+- Go to Settings > API keys in Contentful and copy the token again
 
 1. Click on **Add entry**3. Selecciona **Space Highlight**
 
+### Error "Cannot find VITE_CONTENTFUL_SPACE_ID"
+
 1. Select **Space Highlight**4. Llena los campos:
 
-1. Fill in the fields: - **Title**: "Oficina Moderna en Querétaro"
-   - **Title**: "Modern Office in Querétaro" - **Description**: "Espacio luminoso y moderno perfecto para sesiones creativas"
+- You didn't copy `.env.example` to `.env`
 
-   - **Description**: "Bright and modern space perfect for creative sessions" - **Images**: Sube una o varias imágenes
+- Or you didn't restart the server after creating `.env`1. Fill in the fields: - **Title**: "Oficina Moderna en Querétaro"
+  - **Title**: "Modern Office in Querétaro" - **Description**: "Espacio luminoso y moderno perfecto para sesiones creativas"
 
-   - **Images**: Upload one or more images - **Featured**: Marca como ✓ (checked)
+## 🎯 Next Steps
 
-   - **Featured**: Check ✓ (checked) - **Display Order**: 1
+- **Description**: "Bright and modern space perfect for creative sessions" - **Images**: Sube una o varias imágenes
 
+1. **Create more content types** following the same process
+
+2. **Update TypeScript types** in `src/integrations/contentful/types.ts` - **Images**: Upload one or more images - **Featured**: Marca como ✓ (checked)
+
+3. **Create services** for your new content types in `services.ts`
+
+4. **Create hooks** in `useContentful.ts` to use in your components - **Featured**: Check ✓ (checked) - **Display Order**: 1
+
+5. **Use the content** in your pages and components
    - **Display Order**: 1 - **Space** (JSON):
 
-   - **Space** (JSON): ```json
+## 📚 Useful Resources
 
-     ````json {
+- **Space** (JSON): ```json
 
-     {       "spaceId": "123",
+- [Contentful Documentation](https://www.contentful.com/developers/docs/)
+
+- [Content Delivery API](https://www.contentful.com/developers/docs/references/content-delivery-api/) ````json {
+
+- [Content Modeling Guide](https://www.contentful.com/help/content-modelling-basics/)
+
+  { "spaceId": "123",
+
+## 💡 Tips
 
        "spaceId": "123",       "spaceName": "Creative Studio QRO"
 
-       "spaceName": "Creative Studio QRO"     }
+- **Use the Content Preview API** to see draft content before publishing
 
-     }     ```
+- **Organize your content** with categories and tags "spaceName": "Creative Studio QRO" }
 
-     ```5. Haz clic en **Publish** (no solo Save)
-     ````
+- **Leverage references** between content types (like Author → Blog Post)
+
+- **Use validations** on fields to ensure content quality } ```
+
+- **Implement i18n** in Contentful for multilingual content
+
+  ```5. Haz clic en **Publish** (no solo Save)
+
+  ```
+
+Done! Now you have Contentful fully integrated in your Keysely platform. 🎉 ````
 
 1. Click **Publish** (not just Save)
 
