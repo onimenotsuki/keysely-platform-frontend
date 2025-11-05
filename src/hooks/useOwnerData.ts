@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 export interface OwnerStats {
   total_earnings: number;
@@ -47,7 +47,7 @@ export interface OwnerBooking {
 
 export const useOwnerSpaces = () => {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['owner-spaces', user?.id],
     queryFn: async () => {
@@ -59,9 +59,9 @@ export const useOwnerSpaces = () => {
         .select('*')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       // For each space, get booking stats
       const spacesWithStats = await Promise.all(
         spaces.map(async (space) => {
@@ -69,16 +69,23 @@ export const useOwnerSpaces = () => {
             .from('bookings')
             .select('total_amount, created_at')
             .eq('space_id', space.id);
-          
+
           const currentMonth = new Date().getMonth();
           const currentYear = new Date().getFullYear();
-          
-          const monthlyBookings = bookings?.filter((booking: any) => {
-            const bookingDate = new Date(booking.created_at);
-            return bookingDate.getMonth() === currentMonth && 
-                   bookingDate.getFullYear() === currentYear;
-          }) || [];
-          
+
+          interface BookingData {
+            total_amount: number;
+            created_at: string;
+          }
+
+          const monthlyBookings =
+            bookings?.filter((booking: BookingData) => {
+              const bookingDate = new Date(booking.created_at);
+              return (
+                bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear
+              );
+            }) || [];
+
           return {
             id: space.id,
             title: space.title,
@@ -89,22 +96,23 @@ export const useOwnerSpaces = () => {
             total_reviews: space.total_reviews || 0,
             images: space.images || [],
             bookings_this_month: monthlyBookings.length,
-            earnings_this_month: monthlyBookings.reduce((sum: number, booking: any) => 
-              sum + Number(booking.total_amount), 0
-            )
+            earnings_this_month: monthlyBookings.reduce(
+              (sum: number, booking: BookingData) => sum + Number(booking.total_amount),
+              0
+            ),
           } as OwnerSpace;
         })
       );
-      
+
       return spacesWithStats;
     },
-    enabled: !!user
+    enabled: !!user,
   });
 };
 
 export const useOwnerBookings = () => {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['owner-bookings', user?.id],
     queryFn: async () => {
@@ -112,25 +120,27 @@ export const useOwnerBookings = () => {
 
       const { data, error } = await supabase
         .from('bookings')
-        .select(`
+        .select(
+          `
           *,
           spaces!inner(title, owner_id),
           profiles(full_name, avatar_url)
-        `)
+        `
+        )
         .eq('spaces.owner_id', user.id)
         .order('created_at', { ascending: false })
         .limit(10);
-      
+
       if (error) throw error;
       return data as OwnerBooking[];
     },
-    enabled: !!user
+    enabled: !!user,
   });
 };
 
 export const useOwnerStats = () => {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['owner-stats', user?.id],
     queryFn: async () => {
@@ -139,14 +149,16 @@ export const useOwnerStats = () => {
       // Get all bookings for owner's spaces
       const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
-        .select(`
+        .select(
+          `
           total_amount,
           created_at,
           status,
           spaces!inner(owner_id)
-        `)
+        `
+        )
         .eq('spaces.owner_id', user.id);
-      
+
       if (bookingsError) throw bookingsError;
 
       // Get owner's spaces count
@@ -154,31 +166,42 @@ export const useOwnerStats = () => {
         .from('spaces')
         .select('id, is_active, rating, total_reviews')
         .eq('owner_id', user.id);
-      
+
       if (spacesError) throw spacesError;
+
+      interface BookingWithAmountAndDate {
+        total_amount: number;
+        created_at: string;
+      }
 
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
-      
-      const thisMonthBookings = bookings?.filter((booking: any) => {
-        const bookingDate = new Date(booking.created_at);
-        return bookingDate.getMonth() === currentMonth && 
-               bookingDate.getFullYear() === currentYear;
-      }) || [];
 
-      const totalEarnings = bookings?.reduce((sum: number, booking: any) => 
-        sum + Number(booking.total_amount), 0
-      ) || 0;
+      const thisMonthBookings =
+        bookings?.filter((booking: BookingWithAmountAndDate) => {
+          const bookingDate = new Date(booking.created_at);
+          return (
+            bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear
+          );
+        }) || [];
 
-      const thisMonthEarnings = thisMonthBookings.reduce((sum: number, booking: any) => 
-        sum + Number(booking.total_amount), 0
+      const totalEarnings =
+        bookings?.reduce(
+          (sum: number, booking: BookingWithAmountAndDate) => sum + Number(booking.total_amount),
+          0
+        ) || 0;
+
+      const thisMonthEarnings = thisMonthBookings.reduce(
+        (sum: number, booking: BookingWithAmountAndDate) => sum + Number(booking.total_amount),
+        0
       );
 
-      const activeSpaces = spaces?.filter(space => space.is_active).length || 0;
-      
-      const avgRating = spaces?.length > 0 
-        ? spaces.reduce((sum, space) => sum + (space.rating || 0), 0) / spaces.length
-        : 0;
+      const activeSpaces = spaces?.filter((space) => space.is_active).length || 0;
+
+      const avgRating =
+        spaces?.length > 0
+          ? spaces.reduce((sum, space) => sum + (space.rating || 0), 0) / spaces.length
+          : 0;
 
       // Calculate occupancy rate (simplified calculation)
       const occupancyRate = activeSpaces > 0 ? Math.min(100, (bookings?.length || 0) * 5) : 0;
@@ -189,9 +212,9 @@ export const useOwnerStats = () => {
         total_bookings: bookings?.length || 0,
         active_listings: activeSpaces,
         avg_rating: Math.round(avgRating * 10) / 10,
-        occupancy_rate: Math.round(occupancyRate)
+        occupancy_rate: Math.round(occupancyRate),
       } as OwnerStats;
     },
-    enabled: !!user
+    enabled: !!user,
   });
 };

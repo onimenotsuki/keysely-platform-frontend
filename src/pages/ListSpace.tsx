@@ -31,6 +31,8 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
+import { GoogleMapProvider, isGoogleMapsConfigured } from '../components/map/GoogleMapView';
+import { LocationPicker } from '../components/map/LocationPicker';
 
 const listSpaceSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
@@ -43,6 +45,8 @@ const listSpaceSchema = z.object({
   area_sqm: z.number().optional(),
   address: z.string().min(1, 'Address is required'),
   city: z.string().min(1, 'City is required'),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   rental_period: z.enum(['hourly', 'daily', 'weekly', 'monthly']).default('hourly'),
   price_per_hour: z.number().min(1, 'Price per hour is required'),
   amenities: z.array(z.string()).default([]),
@@ -77,6 +81,8 @@ const ListSpace = () => {
       area_sqm: undefined,
       address: '',
       city: '',
+      latitude: undefined,
+      longitude: undefined,
       rental_period: 'hourly',
       price_per_hour: 0,
       amenities: [],
@@ -99,6 +105,8 @@ const ListSpace = () => {
         description: data.description || '',
         address: data.address,
         city: data.city,
+        latitude: data.latitude,
+        longitude: data.longitude,
         price_per_hour: data.price_per_hour,
         capacity: data.capacity,
         area_sqm: data.area_sqm,
@@ -392,6 +400,24 @@ const ListSpace = () => {
                       </FormItem>
                     )}
                   />
+
+                  {/* Location Picker */}
+                  {isGoogleMapsConfigured() && (
+                    <div className="space-y-2">
+                      <Label>Ubicación en el mapa</Label>
+                      <GoogleMapProvider>
+                        <LocationPicker
+                          address={`${form.watch('address')}, ${form.watch('city')}`}
+                          latitude={form.watch('latitude')}
+                          longitude={form.watch('longitude')}
+                          onLocationChange={(lat, lng) => {
+                            form.setValue('latitude', lat);
+                            form.setValue('longitude', lng);
+                          }}
+                        />
+                      </GoogleMapProvider>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

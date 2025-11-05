@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { Button } from '../../../ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../../../ui/sheet';
 import { ActiveFilters } from './ActiveFilters';
+import { AmenitiesFilter } from './AmenitiesFilter';
 import { CapacityFilter } from './CapacityFilter';
 import { CategoryFilter } from './CategoryFilter';
 import { DatePicker } from './DatePicker';
+import { EnhancedAvailabilityCalendar } from './EnhancedAvailabilityCalendar';
 import { LocationInput } from './LocationInput';
 import { PriceRangeFilter } from './PriceRangeFilter';
 import { SearchInput } from './SearchInput';
@@ -28,7 +30,10 @@ export const SearchFilters = ({ filters, onFiltersChange, onReset }: SearchFilte
       filters.maxPrice < 1000 ||
       filters.minCapacity > 1 ||
       filters.checkInDate ||
-      filters.checkOutDate
+      filters.checkOutDate ||
+      (filters.amenities && filters.amenities.length > 0) ||
+      filters.availableFrom ||
+      filters.availableTo
     );
   };
 
@@ -92,7 +97,7 @@ export const SearchFilters = ({ filters, onFiltersChange, onReset }: SearchFilte
               </SheetTitle>
             </SheetHeader>
 
-            <div className="mt-6 space-y-6">
+            <div className="mt-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
               <CategoryFilter
                 value={filters.categoryId}
                 onFiltersChange={onFiltersChange}
@@ -112,7 +117,20 @@ export const SearchFilters = ({ filters, onFiltersChange, onReset }: SearchFilte
                 filters={filters}
               />
 
-              <div className="pt-4">
+              <AmenitiesFilter
+                selectedAmenities={filters.amenities || []}
+                onFiltersChange={onFiltersChange}
+                filters={filters}
+              />
+
+              <EnhancedAvailabilityCalendar
+                availableFrom={filters.availableFrom}
+                availableTo={filters.availableTo}
+                onFiltersChange={onFiltersChange}
+                filters={filters}
+              />
+
+              <div className="pt-4 sticky bottom-0 bg-background">
                 <Button className="w-full" onClick={() => setIsOpen(false)}>
                   Aplicar Filtros
                 </Button>
