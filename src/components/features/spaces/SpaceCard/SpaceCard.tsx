@@ -6,6 +6,7 @@ import { Space } from '../../../../hooks/useSpaces';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { Card, CardContent } from '../../../ui/card';
 import { SpaceActions } from './SpaceActions';
+import { SpaceAmenities } from './SpaceAmenities';
 import { SpaceDetails } from './SpaceDetails';
 import { SpaceFeatures } from './SpaceFeatures';
 import { SpaceImage } from './SpaceImage';
@@ -66,10 +67,11 @@ export const SpaceCard = ({ space, variant = 'default' }: SpaceCardProps) => {
 
   return (
     <Card
-      className={`group hover:shadow-lg transition-all duration-300 overflow-hidden ${
+      className={`group hover:shadow-lg transition-all duration-300 overflow-hidden focus-visible:outline-none focus-visible:ring-0 ${
         variant === 'compact' ? 'cursor-pointer' : ''
       }`}
       onClick={handleCardClick}
+      tabIndex={variant === 'compact' ? 0 : -1}
     >
       <SpaceImage
         imageUrl={space.images?.[0] || ''}
@@ -89,6 +91,11 @@ export const SpaceCard = ({ space, variant = 'default' }: SpaceCardProps) => {
         />
 
         <SpaceFeatures features={space.features || []} />
+
+        <SpaceAmenities
+          amenities={space.amenities || []}
+          maxDisplay={variant === 'compact' ? 3 : 4}
+        />
 
         {variant === 'default' && <SpaceActions spaceId={space.id} />}
       </CardContent>

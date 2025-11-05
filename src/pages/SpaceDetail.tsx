@@ -1,3 +1,4 @@
+import { AmenityBadge } from '@/components/features/spaces/AmenityBadge';
 import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import ContactOwnerButton from '@/components/ContactOwnerButton';
 import ReviewsSection from '@/components/ReviewsSection';
@@ -264,11 +265,9 @@ const SpaceDetail = () => {
                     <CardTitle className="text-lg">{t('spaceDetail.amenities')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
                       {space.amenities.map((amenity) => (
-                        <Badge key={amenity} variant="secondary">
-                          {amenity}
-                        </Badge>
+                        <AmenityBadge key={amenity} amenity={amenity} variant="icon-only" />
                       ))}
                     </div>
                   </CardContent>

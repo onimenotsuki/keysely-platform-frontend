@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { amenitiesConfig } from '@/config/amenitiesConfig';
 import { useToast } from '@/hooks/use-toast';
 import { useCategories } from '@/hooks/useCategories';
 import { useCreateSpace } from '@/hooks/useSpaces';
@@ -143,28 +144,8 @@ const ListSpace = () => {
     }
   };
 
-  const amenitiesList = [
-    { key: 'highSpeedWifi', value: 'High-speed WiFi' },
-    { key: 'printerScanner', value: 'Printer/Scanner' },
-    { key: 'coffeeAndTea', value: 'Coffee & Tea' },
-    { key: 'kitchenAccess', value: 'Kitchen Access' },
-    { key: 'airConditioning', value: 'Air Conditioning' },
-    { key: 'naturalLight', value: 'Natural Light' },
-    { key: 'ergonomicFurniture', value: 'Ergonomic Furniture' },
-    { key: 'whiteboard', value: 'Whiteboard' },
-    { key: 'projectorScreen', value: 'Projector/Screen' },
-    { key: 'videoConferencing', value: 'Video Conferencing' },
-    { key: 'securitySystem', value: 'Security System' },
-    { key: 'access24x7', value: '24/7 Access' },
-    { key: 'receptionServices', value: 'Reception Services' },
-    { key: 'cleaningService', value: 'Cleaning Service' },
-    { key: 'parking', value: 'Parking' },
-    { key: 'publicTransport', value: 'Public Transport' },
-    { key: 'bikeStorage', value: 'Bike Storage' },
-    { key: 'showerFacilities', value: 'Shower Facilities' },
-    { key: 'phoneBooth', value: 'Phone Booth' },
-    { key: 'lockers', value: 'Lockers' },
-  ];
+  // Use amenitiesConfig from central configuration
+  const amenitiesList = amenitiesConfig;
 
   const availabilityOptions = [
     { key: 'monday', label: t('listSpace.monday') },
@@ -487,20 +468,33 @@ const ListSpace = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {amenitiesList.map((amenity) => (
-                      <div key={amenity.key} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={amenity.key}
-                          checked={form.watch('amenities').includes(amenity.value)}
-                          onCheckedChange={(checked) =>
-                            handleAmenityChange(amenity.value, checked as boolean)
-                          }
-                        />
-                        <Label htmlFor={amenity.key} className="text-sm">
-                          {t(`listSpace.amenitiesList.${amenity.key}`)}
-                        </Label>
-                      </div>
-                    ))}
+                    {amenitiesList.map((amenity) => {
+                      const Icon = amenity.icon;
+                      return (
+                        <div
+                          key={amenity.key}
+                          className="flex items-center space-x-3 p-2 transition-colors"
+                        >
+                          <Checkbox
+                            id={amenity.key}
+                            checked={form.watch('amenities').includes(amenity.value)}
+                            onCheckedChange={(checked) =>
+                              handleAmenityChange(amenity.value, checked as boolean)
+                            }
+                          />
+                          <Icon
+                            className="h-5 w-5 text-primary stroke-[1.5] flex-shrink-0"
+                            strokeWidth={1.5}
+                          />
+                          <Label
+                            htmlFor={amenity.key}
+                            className="text-sm font-medium cursor-pointer flex-1"
+                          >
+                            {t(`listSpace.amenitiesList.${amenity.key}`)}
+                          </Label>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
