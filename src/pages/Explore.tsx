@@ -154,18 +154,18 @@ const Explore = () => {
         </div>
       </section>
 
-      {/* Results */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          {isLoading && (
-            <MapView spaces={[]} isLoading={true} onMapBoundsChange={handleMapBoundsChange} />
-          )}
+      {/* Results - Full Width */}
+      <section className="w-full">
+        {isLoading && (
+          <MapView spaces={[]} isLoading={true} onMapBoundsChange={handleMapBoundsChange} />
+        )}
 
-          {!isLoading && spaces && spaces.length > 0 && (
-            <MapView spaces={spaces} isLoading={false} onMapBoundsChange={handleMapBoundsChange} />
-          )}
+        {!isLoading && spaces && spaces.length > 0 && (
+          <MapView spaces={spaces} isLoading={false} onMapBoundsChange={handleMapBoundsChange} />
+        )}
 
-          {!isLoading && (!spaces || spaces.length === 0) && (
+        {!isLoading && (!spaces || spaces.length === 0) && (
+          <div className="container mx-auto px-4">
             <div className="text-center py-16">
               <div className="max-w-md mx-auto">
                 <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
@@ -178,8 +178,8 @@ const Explore = () => {
                 </Button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </section>
 
       <Footer />

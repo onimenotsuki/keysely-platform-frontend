@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useToast } from '../../../../hooks/use-toast';
 import { useIsFavorite, useToggleFavorite } from '../../../../hooks/useFavorites';
@@ -12,17 +13,26 @@ import { SpaceTitle } from './SpaceTitle';
 
 interface SpaceCardProps {
   space: Space;
+  variant?: 'default' | 'compact';
 }
 
-export const SpaceCard = ({ space }: SpaceCardProps) => {
+export const SpaceCard = ({ space, variant = 'default' }: SpaceCardProps) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
   const { data: isFavorite } = useIsFavorite(space.id);
   const toggleFavorite = useToggleFavorite();
 
+  const handleCardClick = () => {
+    if (variant === 'compact') {
+      navigate(`/space/${space.id}`);
+    }
+  };
+
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
 
     if (!user) {
       toast({
@@ -55,7 +65,12 @@ export const SpaceCard = ({ space }: SpaceCardProps) => {
   };
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+    <Card
+      className={`group hover:shadow-lg transition-all duration-300 overflow-hidden ${
+        variant === 'compact' ? 'cursor-pointer' : ''
+      }`}
+      onClick={handleCardClick}
+    >
       <SpaceImage
         imageUrl={space.images?.[0] || ''}
         title={space.title}
@@ -67,11 +82,15 @@ export const SpaceCard = ({ space }: SpaceCardProps) => {
       <CardContent className="p-4">
         <SpaceTitle title={space.title} rating={space.rating} totalReviews={space.total_reviews} />
 
-        <SpaceDetails city={space.city} capacity={space.capacity} />
+        <SpaceDetails
+          city={space.city}
+          capacity={space.capacity}
+          showCapacity={variant === 'default'}
+        />
 
         <SpaceFeatures features={space.features || []} />
 
-        <SpaceActions spaceId={space.id} />
+        {variant === 'default' && <SpaceActions spaceId={space.id} />}
       </CardContent>
     </Card>
   );
