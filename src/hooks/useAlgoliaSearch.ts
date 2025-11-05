@@ -127,8 +127,8 @@ export const shouldUseAlgolia = (filters: SearchFilters): boolean => {
   // - There are amenities filters
   // - There are map bounds (geo search)
   return !!(
-    filters.searchTerm ||
-    (filters.amenities && filters.amenities.length > 0) ||
-    filters.mapBounds
+    (filters.searchTerm || (filters.amenities && filters.amenities.length > 0))
+    // Temporarily disabled map bounds to prevent using Algolia for geo-search
+    // || filters.mapBounds
   );
 };

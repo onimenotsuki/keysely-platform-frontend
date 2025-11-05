@@ -9,8 +9,10 @@ import { initializeSeedData } from './utils/seedData.ts';
 import './utils/runSync.ts';
 
 // Import debug and fix tools
+import './utils/checkAlgolia.ts';
 import './utils/debugSpaces.ts';
 import './utils/fixSpaces.ts';
+import './utils/fullDiagnostic.ts';
 
 // Suppress Google Maps Marker deprecation warning
 // The @react-google-maps/api library still uses the old Marker internally
