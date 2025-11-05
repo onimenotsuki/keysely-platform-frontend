@@ -30,14 +30,15 @@ const randomInRange = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-// Mexican cities with coordinates
+// Mexican cities with coordinates - popular business districts
 const cities = [
-  { name: 'Ciudad de México', lat: 19.4326, lng: -99.1332, count: 20 },
-  { name: 'Monterrey', lat: 25.6866, lng: -100.3161, count: 10 },
-  { name: 'Guadalajara', lat: 20.6597, lng: -103.3496, count: 10 },
-  { name: 'Puebla', lat: 19.0414, lng: -98.2063, count: 5 },
-  { name: 'Querétaro', lat: 20.5888, lng: -100.3899, count: 5 },
-  { name: 'Mérida', lat: 20.9674, lng: -89.5926, count: 5 },
+  { name: 'Ciudad de México', lat: 19.4326, lng: -99.1332, count: 25 },
+  { name: 'Guadalajara', lat: 20.6597, lng: -103.3496, count: 30 },
+  { name: 'Monterrey', lat: 25.6866, lng: -100.3161, count: 15 },
+  { name: 'Puebla', lat: 19.0414, lng: -98.2063, count: 10 },
+  { name: 'Querétaro', lat: 20.5888, lng: -100.3899, count: 8 },
+  { name: 'Mérida', lat: 20.9674, lng: -89.5926, count: 7 },
+  { name: 'Tijuana', lat: 32.5149, lng: -117.0382, count: 5 },
 ];
 
 // Space name templates by category
@@ -142,9 +143,19 @@ export const generateSeedSpaces = async (userId: string) => {
           spaceTemplates['Oficina Privada'];
         const template = templates[Math.floor(Math.random() * templates.length)];
 
-        // Add slight variation to coordinates for different spaces in same city
-        const latVariation = (Math.random() - 0.5) * 0.05; // ~5km variation
-        const lngVariation = (Math.random() - 0.5) * 0.05;
+        // Add variations to distribute spaces across popular business districts
+        // Larger cities get wider distribution to cover multiple popular zones
+        let variationRange = 0.03; // Default ~3km variation
+        if (city.name === 'Ciudad de México') {
+          variationRange = 0.08; // ~8km to cover Polanco, Santa Fe, Reforma, Condesa, Roma
+        } else if (city.name === 'Guadalajara') {
+          variationRange = 0.06; // ~6km to cover Providencia, Chapalita, Zapopan
+        } else if (city.name === 'Monterrey') {
+          variationRange = 0.05; // ~5km to cover San Pedro, Valle, Centro
+        }
+
+        const latVariation = (Math.random() - 0.5) * variationRange;
+        const lngVariation = (Math.random() - 0.5) * variationRange;
 
         // Generate availability hours
         const startHour = randomInRange(7, 9);

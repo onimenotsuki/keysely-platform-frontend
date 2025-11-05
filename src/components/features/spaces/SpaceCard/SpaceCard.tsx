@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useToast } from '../../../../hooks/use-toast';
 import { useIsFavorite, useToggleFavorite } from '../../../../hooks/useFavorites';
+import { useLanguageRouting } from '../../../../hooks/useLanguageRouting';
 import { Space } from '../../../../hooks/useSpaces';
 import { useTranslation } from '../../../../hooks/useTranslation';
 import { Card, CardContent } from '../../../ui/card';
@@ -18,7 +18,7 @@ interface SpaceCardProps {
 }
 
 export const SpaceCard = ({ space, variant = 'default' }: SpaceCardProps) => {
-  const navigate = useNavigate();
+  const { navigateWithLang } = useLanguageRouting();
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -27,7 +27,7 @@ export const SpaceCard = ({ space, variant = 'default' }: SpaceCardProps) => {
 
   const handleCardClick = () => {
     if (variant === 'compact') {
-      navigate(`/space/${space.id}`);
+      navigateWithLang(`space/${space.id}`);
     }
   };
 
