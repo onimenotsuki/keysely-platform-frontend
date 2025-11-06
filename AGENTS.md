@@ -117,6 +117,15 @@ If linting fails, the commit is blocked. Fix errors before committing.
 - Use **React Query** for data fetching, not `useEffect`
 - Use **Context** sparingly (auth, language, theme only)
 
+### Internationalization (i18n)
+
+- **Always update translations** when adding new text to the UI
+- Translation files are located in `src/locales/` (en.json, es.json)
+- Use the `useTranslation` hook to access translations
+- Never hardcode user-facing text directly in components
+- Add translation keys in both English and Spanish simultaneously
+- Follow the existing key structure and naming conventions
+
 ### Naming Conventions
 
 - Components: `PascalCase` (e.g., `SpaceCard.tsx`)

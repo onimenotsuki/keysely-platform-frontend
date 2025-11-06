@@ -95,6 +95,23 @@
     "viewDetails": "View details",
     "bookNow": "Book now",
     "loadMore": "Load more spaces",
+    "searchBar": {
+      "whatLookingFor": "What are you looking for?",
+      "searchSpaces": "Search spaces...",
+      "location": "Location",
+      "whereToGo": "Where to?",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "addDate": "Add date",
+      "advancedFilters": "Advanced Filters",
+      "clear": "Clear",
+      "applyFilters": "Apply Filters",
+      "filters": "Filters",
+      "noSpacesFound": "No spaces found",
+      "adjustFilters": "Try adjusting your search filters or explore different criteria.",
+      "clearFilters": "Clear filters",
+      "removeFilter": "Remove filter"
+    },
     "features": {
       "wifi": "WiFi",
       "coffee": "Coffee",

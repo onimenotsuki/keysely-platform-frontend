@@ -23,38 +23,46 @@ export const ActiveFilters = ({
   };
 
   return (
-    <div className="mt-4 flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 items-center">
       {filters.categoryId && (
-        <div className="flex items-center bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-          {categories?.find((c) => c.id === filters.categoryId)?.name}
+        <div className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-colors">
+          <span className="font-medium">
+            {categories?.find((c) => c.id === filters.categoryId)?.name}
+          </span>
           <button
             onClick={() => updateFilter('categoryId', '')}
-            className="ml-2 hover:text-primary/80"
+            className="hover:bg-gray-300 rounded-full p-0.5 transition-colors"
+            aria-label="Remover filtro de categoría"
           >
-            <X className="w-3 h-3" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {filters.city && (
-        <div className="flex items-center bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-          <MapPin className="w-3 h-3 mr-1" />
-          {filters.city}
-          <button onClick={() => updateFilter('city', '')} className="ml-2 hover:text-primary/80">
-            <X className="w-3 h-3" />
+        <div className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-colors">
+          <MapPin className="w-3.5 h-3.5" />
+          <span className="font-medium">{filters.city}</span>
+          <button
+            onClick={() => updateFilter('city', '')}
+            className="hover:bg-gray-300 rounded-full p-0.5 transition-colors"
+            aria-label="Remover filtro de ubicación"
+          >
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {filters.checkInDate && (
-        <div className="flex items-center bg-primary/10 text-primary px-3 py-1 rounded-full text-sm">
-          <Calendar className="w-3 h-3 mr-1" />
-          {format(filters.checkInDate, 'dd/MM')}
+        <div className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full text-sm transition-colors">
+          <Calendar className="w-3.5 h-3.5" />
+          <span className="font-medium">{format(filters.checkInDate, 'dd/MM')}</span>
           <button
             onClick={() => updateFilter('checkInDate', undefined)}
-            className="ml-2 hover:text-primary/80"
+            className="hover:bg-gray-300 rounded-full p-0.5 transition-colors"
+            aria-label="Remover filtro de fecha"
           >
-            <X className="w-3 h-3" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
