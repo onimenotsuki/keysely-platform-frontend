@@ -25,6 +25,113 @@ const mapOptions: google.maps.MapOptions = {
   mapTypeControl: false,
   fullscreenControl: true,
   // mapId: 'keysely-map', // Commented out - causes issues with @react-google-maps/api v2.20.7
+  styles: [
+    {
+      elementType: 'geometry',
+      stylers: [{ color: '#F8F9FA' }],
+    },
+    {
+      elementType: 'labels.icon',
+      stylers: [{ visibility: 'off' }],
+    },
+    {
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#343A40' }],
+    },
+    {
+      elementType: 'labels.text.stroke',
+      stylers: [{ color: '#F8F9FA' }],
+    },
+    {
+      featureType: 'administrative',
+      elementType: 'geometry',
+      stylers: [{ color: '#6C757D' }],
+    },
+    {
+      featureType: 'administrative.country',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#1A2B42' }],
+    },
+    {
+      featureType: 'administrative.land_parcel',
+      stylers: [{ visibility: 'off' }],
+    },
+    {
+      featureType: 'administrative.locality',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#1A2B42' }],
+    },
+    {
+      featureType: 'poi',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#6C757D' }],
+    },
+    {
+      featureType: 'poi.park',
+      elementType: 'geometry',
+      stylers: [{ color: '#E8F5E9' }],
+    },
+    {
+      featureType: 'poi.park',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#6C757D' }],
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry',
+      stylers: [{ color: '#FFFFFF' }],
+    },
+    {
+      featureType: 'road',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#343A40' }],
+    },
+    {
+      featureType: 'road.arterial',
+      elementType: 'geometry',
+      stylers: [{ color: '#FFFFFF' }],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry',
+      stylers: [{ color: '#E3F2FD' }],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry.stroke',
+      stylers: [{ color: '#3B82F6' }, { weight: 0.5 }],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#1A2B42' }],
+    },
+    {
+      featureType: 'road.local',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#6C757D' }],
+    },
+    {
+      featureType: 'transit',
+      elementType: 'geometry',
+      stylers: [{ color: '#E3F2FD' }],
+    },
+    {
+      featureType: 'transit.station',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#1A2B42' }],
+    },
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [{ color: '#BBDEFB' }],
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#3B82F6' }],
+    },
+  ],
 };
 
 interface InteractiveMapProps {
@@ -146,10 +253,10 @@ export const InteractiveMap = ({
     const price = Math.round(space.price_per_hour);
     const priceText = `$${price}`;
 
-    // Keysely brand colors - invertidos
-    const primaryColor = '#1A2B42'; // Navy Blue
-    const accentColor = '#3B82F6'; // Action Blue
-    const whiteColor = '#FFFFFF';
+    // Keysely brand colors from design system
+    const primaryColor = '#1A2B42'; // Navy Blue - Primary brand color
+    const accentColor = '#3B82F6'; // Action Blue - Interactive state color
+    const whiteColor = '#FFFFFF'; // White for badge background
 
     const bgColor = whiteColor;
     const textColor = isSelected ? accentColor : primaryColor;
@@ -236,20 +343,24 @@ export const InteractiveMap = ({
                   />
                 </div>
               )}
-              <h3 className="font-semibold text-base mb-1">{selectedSpace.title}</h3>
-              <p className="text-sm text-gray-600 mb-2 flex items-center">
+              <h3 className="font-semibold text-base mb-1 text-foreground">
+                {selectedSpace.title}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-2 flex items-center">
                 <MapPin className="w-3 h-3 mr-1" />
                 {selectedSpace.city}
               </p>
               <div className="flex items-center justify-between mb-2">
-                <Badge variant="secondary" className="text-sm">
+                <Badge variant="secondary" className="text-sm bg-primary text-primary-foreground">
                   ${selectedSpace.price_per_hour}/hr
                 </Badge>
-                <span className="text-sm text-gray-600">★ {selectedSpace.rating.toFixed(1)}</span>
+                <span className="text-sm text-muted-foreground">
+                  ★ {selectedSpace.rating.toFixed(1)}
+                </span>
               </div>
               <Button
                 size="sm"
-                className="w-full"
+                className="w-full bg-primary hover:bg-primary-light"
                 onClick={() => handleViewDetails(selectedSpace.id)}
               >
                 Ver detalles
@@ -262,7 +373,10 @@ export const InteractiveMap = ({
       {/* Search this area button */}
       {showSearchButton && showSearchThisArea && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-          <Button onClick={handleSearchThisArea} variant="default" className="shadow-lg">
+          <Button
+            onClick={handleSearchThisArea}
+            className="bg-primary hover:bg-primary-light text-primary-foreground shadow-lg"
+          >
             <MapPin className="w-4 h-4 mr-2" />
             Buscar en esta área
           </Button>
