@@ -46,8 +46,8 @@ export const createSeedData = async () => {
         capacity: 6,
         area_sqm: 40,
         images: [
-          '/placeholder.svg?height=400&width=600&text=Oficina+Principal',
-          '/placeholder.svg?height=400&width=600&text=Vista+Interior',
+          'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop',
         ],
         features: [
           'Vista panorámica',
@@ -89,8 +89,8 @@ export const createSeedData = async () => {
         capacity: 10,
         area_sqm: 25,
         images: [
-          '/placeholder.svg?height=400&width=600&text=Sala+Reuniones',
-          '/placeholder.svg?height=400&width=600&text=Sala+Equipada',
+          'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=800&h=600&fit=crop',
         ],
         features: [
           'Mesa ejecutiva',
@@ -134,8 +134,8 @@ export const createSeedData = async () => {
         capacity: 20,
         area_sqm: 120,
         images: [
-          '/placeholder.svg?height=400&width=600&text=Coworking+Space',
-          '/placeholder.svg?height=400&width=600&text=Area+Colaborativa',
+          'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800&h=600&fit=crop',
         ],
         features: [
           'Internet de alta velocidad',
