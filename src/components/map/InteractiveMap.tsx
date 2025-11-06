@@ -143,25 +143,51 @@ export const InteractiveMap = ({
   // Get marker icon based on whether the space is selected
   const getMarkerIcon = (space: Space): google.maps.Icon | undefined => {
     const isSelected = selectedSpaceId === space.id || selectedSpace?.id === space.id;
+    const price = Math.round(space.price_per_hour);
+    const priceText = `$${price}`;
+
+    // Keysely brand colors - invertidos
+    const primaryColor = '#1A2B42'; // Navy Blue
+    const accentColor = '#3B82F6'; // Action Blue
+    const whiteColor = '#FFFFFF';
+
+    const bgColor = whiteColor;
+    const textColor = isSelected ? accentColor : primaryColor;
+
+    // Calculate text width based on price length (approximation)
+    const textLength = priceText.length;
+    const baseWidth = 50;
+    const charWidth = 9;
+    const badgeWidth = Math.max(baseWidth, textLength * charWidth + 20);
+    const badgeHeight = 36;
 
     return {
-      url: isSelected
-        ? 'data:image/svg+xml;charset=UTF-8,' +
-          encodeURIComponent(`
-          <svg width="40" height="50" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 0C11.2 0 4 7.2 4 16c0 13 16 34 16 34s16-21 16-34c0-8.8-7.2-16-16-16z" fill="#2563eb"/>
-            <circle cx="20" cy="16" r="8" fill="white"/>
-          </svg>
-        `)
-        : 'data:image/svg+xml;charset=UTF-8,' +
-          encodeURIComponent(`
-          <svg width="32" height="40" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16 0C9.8 0 4.8 5 4.8 11.2c0 9.1 11.2 23.8 11.2 23.8s11.2-14.7 11.2-23.8C27.2 5 22.2 0 16 0z" fill="#6366f1"/>
-            <circle cx="16" cy="11" r="6" fill="white"/>
+      url:
+        'data:image/svg+xml;charset=UTF-8,' +
+        encodeURIComponent(`
+          <svg width="${badgeWidth}" height="${badgeHeight + 8}" xmlns="http://www.w3.org/2000/svg">
+            <!-- Badge background with rounded corners -->
+            <rect x="0" y="0" width="${badgeWidth}" height="${badgeHeight}" rx="18" ry="18" 
+                  fill="${bgColor}"/>
+            
+            <!-- Price text -->
+            <text x="${badgeWidth / 2}" y="${badgeHeight / 2 + 1}" 
+                  font-family="Inter, system-ui, -apple-system, sans-serif" 
+                  font-size="16" 
+                  font-weight="700" 
+                  fill="${textColor}" 
+                  text-anchor="middle" 
+                  dominant-baseline="central">
+              ${priceText}
+            </text>
+            
+            <!-- Small triangle pointer at bottom -->
+            <polygon points="${badgeWidth / 2 - 6},${badgeHeight} ${badgeWidth / 2},${badgeHeight + 6} ${badgeWidth / 2 + 6},${badgeHeight}" 
+                     fill="${bgColor}"/>
           </svg>
         `),
-      scaledSize: isSelected ? new google.maps.Size(40, 50) : new google.maps.Size(32, 40),
-      anchor: isSelected ? new google.maps.Point(20, 50) : new google.maps.Point(16, 40),
+      scaledSize: new google.maps.Size(badgeWidth, badgeHeight + 8),
+      anchor: new google.maps.Point(badgeWidth / 2, badgeHeight + 8),
     };
   };
 
