@@ -198,15 +198,22 @@ const OwnerDashboard = () => {
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                   {ownerSpaces.map((space) => (
-                    <Card key={space.id} className="hover:shadow-md transition-shadow">
-                      <div className="relative">
+                    <Card
+                      key={space.id}
+                      className="hover:shadow-md transition-shadow overflow-hidden"
+                    >
+                      <div className="relative w-full h-48 overflow-hidden">
                         <img
-                          src={space.images[0] || '/src/assets/private-office.jpg'}
+                          src={space.images[0] || '/placeholder.svg'}
                           alt={space.title}
-                          className="w-full h-48 object-cover rounded-t-lg"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder.svg';
+                          }}
                         />
                         <Badge
-                          className={`absolute top-2 right-2 ${getStatusColor(space.is_active ? 'active' : 'inactive')}`}
+                          className={`absolute top-2 right-2 z-10 ${getStatusColor(space.is_active ? 'active' : 'inactive')}`}
                         >
                           {getStatusText(space.is_active ? 'active' : 'inactive')}
                         </Badge>

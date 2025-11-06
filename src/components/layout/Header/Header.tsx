@@ -4,9 +4,13 @@ import { Logo } from './Logo';
 import { MobileMenuButton } from './MobileMenuButton';
 import { MobileNav } from './MobileNav';
 
-export const Header = () => {
+interface HeaderProps {
+  forceScrolled?: boolean;
+}
+
+export const Header = ({ forceScrolled = false }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(forceScrolled);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -14,13 +18,18 @@ export const Header = () => {
 
   // Add scroll listener to change header background
   useEffect(() => {
+    if (forceScrolled) {
+      setIsScrolled(true);
+      return;
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > window.innerHeight * 0.85);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [forceScrolled]);
 
   return (
     <header className={`navbar-sticky ${isScrolled ? 'navbar-scrolled' : ''}`}>

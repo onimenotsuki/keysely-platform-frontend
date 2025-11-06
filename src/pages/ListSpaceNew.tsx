@@ -7,6 +7,7 @@ import {
   Shield,
   Users,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
@@ -14,6 +15,7 @@ import { useTranslation } from '../hooks/useTranslation';
 
 const ListSpaceNew = () => {
   const { t, language } = useTranslation();
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const stats = [
     { value: '10,000+', label: t('listSpace.marketing.stats.spaces') },
@@ -99,9 +101,19 @@ const ListSpaceNew = () => {
     },
   ];
 
+  // Add scroll listener to change header background
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > window.innerHeight * 0.7);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isScrolled]);
+
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header forceScrolled={isScrolled} />
 
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">

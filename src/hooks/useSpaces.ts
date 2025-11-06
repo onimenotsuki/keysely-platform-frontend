@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface Space {
   id: string;
@@ -14,7 +14,7 @@ export interface Space {
   images: string[];
   features: string[];
   amenities: string[];
-  availability_hours: any;
+  availability_hours: Record<string, unknown>;
   policies?: string;
   is_active: boolean;
   rating: number;
@@ -23,6 +23,8 @@ export interface Space {
   updated_at: string;
   owner_id: string;
   category_id?: string;
+  latitude?: number;
+  longitude?: number;
   categories?: { name: string };
   profiles?: { full_name: string };
 }
@@ -40,15 +42,19 @@ export const useSpaces = (filters?: {
     queryFn: async () => {
       let query = supabase
         .from('spaces')
-        .select(`
+        .select(
+          `
           *,
           categories(name),
           profiles(full_name)
-        `)
+        `
+        )
         .eq('is_active', true);
 
       if (filters?.searchTerm) {
-        query = query.or(`title.ilike.%${filters.searchTerm}%,description.ilike.%${filters.searchTerm}%,city.ilike.%${filters.searchTerm}%`);
+        query = query.or(
+          `title.ilike.%${filters.searchTerm}%,description.ilike.%${filters.searchTerm}%,city.ilike.%${filters.searchTerm}%`
+        );
       }
 
       if (filters?.categoryId) {
@@ -72,10 +78,10 @@ export const useSpaces = (filters?: {
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as Space[];
-    }
+    },
   });
 };
 
@@ -85,18 +91,20 @@ export const useSpace = (id: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('spaces')
-        .select(`
+        .select(
+          `
           *,
           categories(name),
           profiles(full_name, avatar_url, bio)
-        `)
+        `
+        )
         .eq('id', id)
         .single();
-      
+
       if (error) throw error;
       return data as Space;
     },
-    enabled: !!id
+    enabled: !!id,
   });
 };
 
@@ -105,14 +113,19 @@ export const useCreateSpace = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (spaceData: Omit<Space, 'id' | 'created_at' | 'updated_at' | 'owner_id' | 'rating' | 'total_reviews'>) => {
+    mutationFn: async (
+      spaceData: Omit<
+        Space,
+        'id' | 'created_at' | 'updated_at' | 'owner_id' | 'rating' | 'total_reviews'
+      >
+    ) => {
       if (!user) throw new Error('User not authenticated');
 
       const { data, error } = await supabase
         .from('spaces')
         .insert({
           ...spaceData,
-          owner_id: user.id
+          owner_id: user.id,
         })
         .select()
         .single();
@@ -122,7 +135,7 @@ export const useCreateSpace = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spaces'] });
-    }
+    },
   });
 };
 
@@ -144,6 +157,6 @@ export const useUpdateSpace = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['spaces'] });
       queryClient.invalidateQueries({ queryKey: ['space', data.id] });
-    }
+    },
   });
 };

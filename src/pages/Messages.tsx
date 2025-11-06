@@ -1,24 +1,31 @@
-import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import ConversationsList from '@/components/chat/ConversationsList';
 import ChatWindow from '@/components/chat/ChatWindow';
-import { useConversations } from '@/hooks/useConversations';
+import ConversationsList from '@/components/chat/ConversationsList';
+import { Card } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { useConversations } from '@/hooks/useConversations';
 import { MessageCircle } from 'lucide-react';
+import React, { useState } from 'react';
 
 const Messages = () => {
   const { user } = useAuth();
   const [selectedConversationId, setSelectedConversationId] = useState<string>();
   const { data: conversations } = useConversations();
 
-  const selectedConversation = conversations?.find(c => c.id === selectedConversationId);
-  
-  const getRecipientInfo = (conversation: any) => {
+  const selectedConversation = conversations?.find((c) => c.id === selectedConversationId);
+
+  interface ConversationType {
+    owner_id: string;
+    user_profile?: { full_name?: string };
+    owner_profile?: { full_name?: string };
+    space?: { title?: string };
+  }
+
+  const getRecipientInfo = (conversation: ConversationType) => {
     const isOwner = user?.id === conversation.owner_id;
     const otherProfile = isOwner ? conversation.user_profile : conversation.owner_profile;
     return {
       name: otherProfile?.full_name || 'Usuario',
-      spaceName: conversation.space?.title || 'Espacio'
+      spaceName: conversation.space?.title || 'Espacio',
     };
   };
 

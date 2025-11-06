@@ -249,11 +249,17 @@ const Profile = () => {
                           className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                         >
                           <Link to={`/space/${favorite.spaces?.id}`}>
-                            <img
-                              src={favorite.spaces?.images?.[0] || '/src/assets/private-office.jpg'}
-                              alt={favorite.spaces?.title}
-                              className="w-full h-40 object-cover hover:opacity-90 transition-opacity"
-                            />
+                            <div className="w-full h-40 overflow-hidden">
+                              <img
+                                src={favorite.spaces?.images?.[0] || '/placeholder.svg'}
+                                alt={favorite.spaces?.title}
+                                className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = '/placeholder.svg';
+                                }}
+                              />
+                            </div>
                           </Link>
                           <div className="p-4">
                             <Link to={`/space/${favorite.spaces?.id}`}>

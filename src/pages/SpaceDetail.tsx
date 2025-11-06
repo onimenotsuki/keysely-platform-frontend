@@ -1,3 +1,4 @@
+import { AmenityBadge } from '@/components/features/spaces/AmenityBadge';
 import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import ContactOwnerButton from '@/components/ContactOwnerButton';
 import ReviewsSection from '@/components/ReviewsSection';
@@ -164,13 +165,17 @@ const SpaceDetail = () => {
           <div className="lg:col-span-2">
             {/* Image Gallery */}
             <div className="mb-8">
-              <div className="relative mb-4">
+              <div className="relative mb-4 w-full h-96 overflow-hidden rounded-xl">
                 <img
-                  src={space.images[selectedImage] || '/src/assets/private-office.jpg'}
+                  src={space.images[selectedImage] || '/placeholder.svg'}
                   alt={space.title}
-                  className="w-full h-96 object-cover rounded-xl"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
                 />
-                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
+                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium z-10">
                   {getCurrencySymbol()}
                   {space.price_per_hour}
                   {t('common.perHour')}
@@ -191,6 +196,10 @@ const SpaceDetail = () => {
                         src={image}
                         alt={`View ${index + 1}`}
                         className="w-full h-20 object-cover hover:opacity-80 transition-opacity"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
                       />
                     </button>
                   ))}
@@ -264,11 +273,9 @@ const SpaceDetail = () => {
                     <CardTitle className="text-lg">{t('spaceDetail.amenities')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
                       {space.amenities.map((amenity) => (
-                        <Badge key={amenity} variant="secondary">
-                          {amenity}
-                        </Badge>
+                        <AmenityBadge key={amenity} amenity={amenity} variant="icon-only" />
                       ))}
                     </div>
                   </CardContent>

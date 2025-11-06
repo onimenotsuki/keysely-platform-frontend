@@ -53,9 +53,13 @@ const FeaturedSpaces = () => {
               <div className="overflow-hidden rounded-2xl shadow-sm hover:shadow-2xl transition-all duration-300">
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img
-                    src={space.images?.[0] || '/placeholder-office.jpg'}
+                    src={space.images?.[0] || '/placeholder.svg'}
                     alt={space.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder.svg';
+                    }}
                   />
                   <div className="absolute top-4 right-4 bg-white rounded-lg px-3 py-2 shadow-lg">
                     <span className="text-[#1A2B42] font-bold text-lg">

@@ -134,21 +134,54 @@ Keysely is a workspace marketplace platform that allows users to discover, book,
 ├── components/           # Reusable UI components
 │   ├── ui/              # shadcn/ui base components
 │   ├── chat/            # Chat-related components
-│   └── *.tsx            # Feature-specific components
+│   ├── layout/          # Layout components
+│   ├── features/        # Feature-specific components
+│   └── *.tsx            # Other feature components
 ├── contexts/            # React contexts (Auth, Language)
 ├── hooks/               # Custom React hooks
 ├── integrations/        # External service integrations
 │   ├── supabase/        # Supabase client and types
 │   └── contentful/      # Contentful CMS client and types
 ├── lib/                 # Utility functions
-├── locales/             # Internationalization
+├── locales/             # Internationalization (en.json, es.json)
 ├── pages/               # Route components
-└── utils/               # Helper utilities
+├── utils/               # Helper utilities
+└── docs/                # 📖 Technical documentation
+    ├── DATABASE_DIAGRAMS.md      # Complete DB schema with UML
+    ├── DESIGN_SYSTEM.md          # Design system guide
+    ├── CODE_QUALITY_GUIDE.md     # Code standards
+    ├── CONTENTFUL_SETUP.md       # CMS setup guide
+    └── HEROBANNER_USAGE.md       # Hero component usage
 
 /.github/                # GitHub workflows and templates
 /public/                 # Static assets
 /supabase/              # Supabase configuration and migrations
 ```
+
+### Documentation Organization
+
+All technical documentation is now centralized in `src/docs/`:
+
+- **DATABASE_DIAGRAMS.md** - Complete database schema with:
+  - Mermaid UML diagram showing all table relationships
+  - Detailed field descriptions for each table
+  - RLS policies and security rules
+  - Indexes and performance optimizations
+  - Storage buckets configuration
+  - Triggers and functions
+  - Migration history
+
+- **DESIGN_SYSTEM.md** - Brand guidelines and UI patterns
+- **CODE_QUALITY_GUIDE.md** - Development standards and best practices
+- **CONTENTFUL_SETUP.md** - Step-by-step CMS configuration guide
+- **HEROBANNER_USAGE.md** - Hero Banner component implementation guide
+
+**Quick Access:**
+
+- For database questions → Check `src/docs/DATABASE_DIAGRAMS.md`
+- For styling questions → Check `src/docs/DESIGN_SYSTEM.md`
+- For code standards → Check `src/docs/CODE_QUALITY_GUIDE.md`
+- For CMS integration → Check `src/docs/CONTENTFUL_SETUP.md`
 
 ### Key Configuration Files
 
@@ -240,9 +273,36 @@ Keysely is a workspace marketplace platform that allows users to discover, book,
 ### Supabase Integration
 
 - Client configured in `integrations/supabase/client.ts`
-- Row Level Security (RLS) policies implemented
+- Row Level Security (RLS) policies implemented on all tables
 - Real-time subscriptions for messages and notifications
-- File upload for space images
+- File upload for space images via Storage buckets
+- **Database Schema:** See complete documentation in [`src/docs/DATABASE_DIAGRAMS.md`](../src/docs/DATABASE_DIAGRAMS.md)
+  - Full UML diagram with all table relationships
+  - Detailed field descriptions and constraints
+  - RLS policies, triggers, and indexes
+  - Migration history and storage configuration
+
+**Key Database Tables:**
+
+- `profiles` - User profiles (auto-created via trigger)
+- `spaces` - Workspace listings with pricing and availability
+- `bookings` - Reservations with Stripe payment tracking
+- `reviews` - Rating and review system
+- `conversations` + `messages` - Real-time chat system
+- `favorites` - User favorites
+- `stripe_connect_accounts` - Payment accounts for space owners
+- `notifications` - System notifications
+- `categories` - Space categorization
+
+**Data Flow:**
+
+1. User registers → `auth.users` → trigger creates `profiles` entry
+2. Owner lists space → `spaces` table with RLS protection
+3. User books space → `bookings` + Stripe payment processing
+4. Chat initiated → `conversations` + `messages` with realtime sync
+5. Review submitted → `reviews` table updates space rating
+
+For detailed schema, relationships, and policies, always refer to `src/docs/DATABASE_DIAGRAMS.md`.
 
 ### Stripe Integration
 
@@ -289,7 +349,7 @@ VITE_CONTENTFUL_ENVIRONMENT=master                # Optional
 
 **Documentation:**
 
-- `CONTENTFUL_SETUP.md` - Complete setup guide (Spanish)
+- `CONTENTFUL_SETUP.md` - Complete setup guide
 - `HEROBANNER_USAGE.md` - Hero Banner implementation guide
 - `src/integrations/contentful/README.md` - Technical API documentation
 
@@ -847,6 +907,56 @@ const MyComponent = () => {
 
 **IMPORTANT:** Update this section whenever making significant changes to the codebase.
 
+### October 27, 2025 - Documentation Restructuring
+
+**Database Documentation Centralization**
+
+- Created comprehensive `src/docs/DATABASE_DIAGRAMS.md` with:
+  - Complete Mermaid UML diagram showing all table relationships
+  - Detailed field descriptions for all 10 tables
+  - RLS policies, triggers, and indexes documentation
+  - Storage buckets and realtime configuration
+  - Migration history from 8 migration files
+  - Data flow diagrams and security notes
+- Analyzed all Supabase migrations (2025-09-26) to ensure accuracy
+
+**Documentation Reorganization**
+
+- Moved all technical documentation to `src/docs/`:
+  - `DATABASE_DIAGRAMS.md` (NEW) - Complete database schema
+  - `DESIGN_SYSTEM.md` - Brand guidelines and UI patterns
+  - `CODE_QUALITY_GUIDE.md` - Development standards
+  - `CONTENTFUL_SETUP.md` - CMS setup guide (Spanish)
+  - `HEROBANNER_USAGE.md` - Hero Banner usage
+- Removed temporary refactoring documentation:
+  - Deleted: CHANGELOG_CONTENTFUL.md, COLOR_UPDATE_SUMMARY.md, ESLINT_FIXES.md
+  - Deleted: HEADER*REFACTORING_COMPLETE.md, REFACTORING*\*.md files
+  - Deleted: RESTRUCTURING_PLAN.md, THEME_UI_MIGRATION_ANALYSIS.md
+
+**README.md Overhaul**
+
+- Complete rewrite with professional structure:
+  - Added comprehensive table of contents
+  - Detailed project description and features
+  - Full technology stack breakdown
+  - Quick start guide with Bun/npm instructions
+  - Environment variables documentation
+  - Architecture section with file structure
+  - Database overview with reference to DATABASE_DIAGRAMS.md
+  - Deployment options (Lovable, Vercel/Netlify, Docker)
+  - Contributing guidelines and code standards
+- Improved navigation with clear sections
+- Added badges for tech stack
+- Updated all documentation links to new `src/docs/` structure
+
+**Copilot Instructions Update**
+
+- Updated directory structure to reflect `src/docs/` folder
+- Added "Documentation Organization" section with quick access guide
+- Enhanced Supabase Integration section with database details
+- Added reference to DATABASE_DIAGRAMS.md for schema questions
+- Improved documentation discoverability
+
 ### October 18, 2025 - ListSpace Marketing Page
 
 **New Marketing-Focused Host Page (Peerspace-Inspired)**
@@ -919,6 +1029,7 @@ const MyComponent = () => {
 3. **Image Transitions**: Crossfade technique with proper z-index layering to avoid gray flashes
 4. **Mobile-First**: Progressive enhancement with hidden elements on small screens
 5. **Contentful as Single Source**: Dynamic content managed via CMS instead of hardcoded
+6. **Centralized Documentation**: All technical docs in `src/docs/` for easy maintenance
 
 ---
 

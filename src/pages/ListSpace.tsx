@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { amenitiesConfig } from '@/config/amenitiesConfig';
 import { useToast } from '@/hooks/use-toast';
 import { useCategories } from '@/hooks/useCategories';
 import { useCreateSpace } from '@/hooks/useSpaces';
@@ -31,6 +32,8 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
+import { GoogleMapProvider, isGoogleMapsConfigured } from '../components/map/GoogleMapView';
+import { LocationPicker } from '../components/map/LocationPicker';
 
 const listSpaceSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
@@ -43,6 +46,8 @@ const listSpaceSchema = z.object({
   area_sqm: z.number().optional(),
   address: z.string().min(1, 'Address is required'),
   city: z.string().min(1, 'City is required'),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   rental_period: z.enum(['hourly', 'daily', 'weekly', 'monthly']).default('hourly'),
   price_per_hour: z.number().min(1, 'Price per hour is required'),
   amenities: z.array(z.string()).default([]),
@@ -77,6 +82,8 @@ const ListSpace = () => {
       area_sqm: undefined,
       address: '',
       city: '',
+      latitude: undefined,
+      longitude: undefined,
       rental_period: 'hourly',
       price_per_hour: 0,
       amenities: [],
@@ -99,6 +106,8 @@ const ListSpace = () => {
         description: data.description || '',
         address: data.address,
         city: data.city,
+        latitude: data.latitude,
+        longitude: data.longitude,
         price_per_hour: data.price_per_hour,
         capacity: data.capacity,
         area_sqm: data.area_sqm,
@@ -135,28 +144,8 @@ const ListSpace = () => {
     }
   };
 
-  const amenitiesList = [
-    { key: 'highSpeedWifi', value: 'High-speed WiFi' },
-    { key: 'printerScanner', value: 'Printer/Scanner' },
-    { key: 'coffeeAndTea', value: 'Coffee & Tea' },
-    { key: 'kitchenAccess', value: 'Kitchen Access' },
-    { key: 'airConditioning', value: 'Air Conditioning' },
-    { key: 'naturalLight', value: 'Natural Light' },
-    { key: 'ergonomicFurniture', value: 'Ergonomic Furniture' },
-    { key: 'whiteboard', value: 'Whiteboard' },
-    { key: 'projectorScreen', value: 'Projector/Screen' },
-    { key: 'videoConferencing', value: 'Video Conferencing' },
-    { key: 'securitySystem', value: 'Security System' },
-    { key: 'access24x7', value: '24/7 Access' },
-    { key: 'receptionServices', value: 'Reception Services' },
-    { key: 'cleaningService', value: 'Cleaning Service' },
-    { key: 'parking', value: 'Parking' },
-    { key: 'publicTransport', value: 'Public Transport' },
-    { key: 'bikeStorage', value: 'Bike Storage' },
-    { key: 'showerFacilities', value: 'Shower Facilities' },
-    { key: 'phoneBooth', value: 'Phone Booth' },
-    { key: 'lockers', value: 'Lockers' },
-  ];
+  // Use amenitiesConfig from central configuration
+  const amenitiesList = amenitiesConfig;
 
   const availabilityOptions = [
     { key: 'monday', label: t('listSpace.monday') },
@@ -392,6 +381,24 @@ const ListSpace = () => {
                       </FormItem>
                     )}
                   />
+
+                  {/* Location Picker */}
+                  {isGoogleMapsConfigured() && (
+                    <div className="space-y-2">
+                      <Label>Ubicación en el mapa</Label>
+                      <GoogleMapProvider>
+                        <LocationPicker
+                          address={`${form.watch('address')}, ${form.watch('city')}`}
+                          latitude={form.watch('latitude')}
+                          longitude={form.watch('longitude')}
+                          onLocationChange={(lat, lng) => {
+                            form.setValue('latitude', lat);
+                            form.setValue('longitude', lng);
+                          }}
+                        />
+                      </GoogleMapProvider>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -461,20 +468,33 @@ const ListSpace = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {amenitiesList.map((amenity) => (
-                      <div key={amenity.key} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={amenity.key}
-                          checked={form.watch('amenities').includes(amenity.value)}
-                          onCheckedChange={(checked) =>
-                            handleAmenityChange(amenity.value, checked as boolean)
-                          }
-                        />
-                        <Label htmlFor={amenity.key} className="text-sm">
-                          {t(`listSpace.amenitiesList.${amenity.key}`)}
-                        </Label>
-                      </div>
-                    ))}
+                    {amenitiesList.map((amenity) => {
+                      const Icon = amenity.icon;
+                      return (
+                        <div
+                          key={amenity.key}
+                          className="flex items-center space-x-3 p-2 transition-colors"
+                        >
+                          <Checkbox
+                            id={amenity.key}
+                            checked={form.watch('amenities').includes(amenity.value)}
+                            onCheckedChange={(checked) =>
+                              handleAmenityChange(amenity.value, checked as boolean)
+                            }
+                          />
+                          <Icon
+                            className="h-5 w-5 text-primary stroke-[1.5] flex-shrink-0"
+                            strokeWidth={1.5}
+                          />
+                          <Label
+                            htmlFor={amenity.key}
+                            className="text-sm font-medium cursor-pointer flex-1"
+                          >
+                            {t(`listSpace.amenitiesList.${amenity.key}`)}
+                          </Label>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
