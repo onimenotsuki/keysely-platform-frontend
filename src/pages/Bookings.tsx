@@ -159,11 +159,17 @@ const Bookings = () => {
                       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
                         {/* Space Image */}
                         <div className="lg:w-48 flex-shrink-0">
-                          <img
-                            src={booking.spaces?.images?.[0] || '/src/assets/private-office.jpg'}
-                            alt={booking.spaces?.title}
-                            className="w-full h-32 lg:h-24 object-cover rounded-lg"
-                          />
+                          <div className="w-full h-32 lg:h-24 overflow-hidden rounded-lg">
+                            <img
+                              src={booking.spaces?.images?.[0] || '/placeholder.svg'}
+                              alt={booking.spaces?.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/placeholder.svg';
+                              }}
+                            />
+                          </div>
                         </div>
 
                         {/* Booking Details */}
@@ -264,11 +270,17 @@ const Bookings = () => {
                       <div className="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:space-x-6">
                         {/* Space Image */}
                         <div className="lg:w-48 flex-shrink-0">
-                          <img
-                            src={booking.spaces?.images?.[0] || '/src/assets/private-office.jpg'}
-                            alt={booking.spaces?.title}
-                            className="w-full h-32 lg:h-24 object-cover rounded-lg opacity-75"
-                          />
+                          <div className="w-full h-32 lg:h-24 overflow-hidden rounded-lg">
+                            <img
+                              src={booking.spaces?.images?.[0] || '/placeholder.svg'}
+                              alt={booking.spaces?.title}
+                              className="w-full h-full object-cover opacity-75"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/placeholder.svg';
+                              }}
+                            />
+                          </div>
                         </div>
 
                         {/* Booking Details */}

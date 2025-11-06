@@ -224,11 +224,17 @@ export const InteractiveMap = ({
           >
             <div className="p-2 max-w-xs">
               {selectedSpace.images && selectedSpace.images.length > 0 && (
-                <img
-                  src={selectedSpace.images[0]}
-                  alt={selectedSpace.title}
-                  className="w-full h-32 object-cover rounded-lg mb-2"
-                />
+                <div className="w-full h-32 overflow-hidden rounded-lg mb-2">
+                  <img
+                    src={selectedSpace.images[0]}
+                    alt={selectedSpace.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder.svg';
+                    }}
+                  />
+                </div>
               )}
               <h3 className="font-semibold text-base mb-1">{selectedSpace.title}</h3>
               <p className="text-sm text-gray-600 mb-2 flex items-center">

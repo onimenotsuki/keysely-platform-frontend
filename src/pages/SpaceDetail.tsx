@@ -165,13 +165,17 @@ const SpaceDetail = () => {
           <div className="lg:col-span-2">
             {/* Image Gallery */}
             <div className="mb-8">
-              <div className="relative mb-4">
+              <div className="relative mb-4 w-full h-96 overflow-hidden rounded-xl">
                 <img
-                  src={space.images[selectedImage] || '/src/assets/private-office.jpg'}
+                  src={space.images[selectedImage] || '/placeholder.svg'}
                   alt={space.title}
-                  className="w-full h-96 object-cover rounded-xl"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder.svg';
+                  }}
                 />
-                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
+                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium z-10">
                   {getCurrencySymbol()}
                   {space.price_per_hour}
                   {t('common.perHour')}
@@ -192,6 +196,10 @@ const SpaceDetail = () => {
                         src={image}
                         alt={`View ${index + 1}`}
                         className="w-full h-20 object-cover hover:opacity-80 transition-opacity"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
                       />
                     </button>
                   ))}

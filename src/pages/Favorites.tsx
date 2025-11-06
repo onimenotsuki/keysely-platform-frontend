@@ -78,12 +78,16 @@ const Favorites = () => {
                   key={favorite.id}
                   className="group hover:shadow-lg transition-all duration-300 overflow-hidden"
                 >
-                  <div className="relative">
+                  <div className="relative w-full h-48 overflow-hidden">
                     <Link to={`/space/${favorite.spaces?.id}`}>
                       <img
-                        src={favorite.spaces?.images?.[0] || '/placeholder-office.jpg'}
+                        src={favorite.spaces?.images?.[0] || '/placeholder.svg'}
                         alt={favorite.spaces?.title}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.svg';
+                        }}
                       />
                     </Link>
                     <Button
