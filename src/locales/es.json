@@ -179,7 +179,11 @@
     "contactOwner": "Contactar Propietario",
     "pleaseSignIn": "Por favor inicia sesión para hacer una reserva",
     "signInFavorites": "Por favor inicia sesión para guardar favoritos",
-    "failedBooking": "Error al crear la reserva"
+    "failedBooking": "Error al crear la reserva",
+    "share": "Compartir",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "showAllPhotos": "Ver todas las {{count}} fotos"
   },
   "listSpace": {
     "title": "Lista tu espacio de trabajo",

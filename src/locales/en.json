@@ -178,7 +178,11 @@
     "contactOwner": "Contact Owner",
     "pleaseSignIn": "Please sign in to make a booking",
     "signInFavorites": "Please sign in to save favorites",
-    "failedBooking": "Failed to create booking"
+    "failedBooking": "Failed to create booking",
+    "share": "Share",
+    "save": "Save",
+    "saved": "Saved",
+    "showAllPhotos": "Show all {{count}} photos"
   },
   "listSpace": {
     "title": "List Your Workspace",
