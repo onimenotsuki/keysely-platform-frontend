@@ -247,19 +247,17 @@ export const InteractiveMap = ({
     navigate(`/space/${spaceId}`);
   };
 
-  // Get marker icon based on whether the space is selected
+  // Get marker icon for price display
   const getMarkerIcon = (space: Space): google.maps.Icon | undefined => {
-    const isSelected = selectedSpaceId === space.id || selectedSpace?.id === space.id;
     const price = Math.round(space.price_per_hour);
     const priceText = `$${price}`;
 
     // Keysely brand colors from design system
     const primaryColor = '#1A2B42'; // Navy Blue - Primary brand color
-    const accentColor = '#3B82F6'; // Action Blue - Interactive state color
-    const whiteColor = '#FFFFFF'; // White for badge background
+    const whiteColor = '#FFFFFF'; // White for text
 
-    const bgColor = whiteColor;
-    const textColor = isSelected ? accentColor : primaryColor;
+    const bgColor = primaryColor;
+    const textColor = whiteColor;
 
     // Calculate text width based on price length (approximation)
     const textLength = priceText.length;
@@ -312,6 +310,10 @@ export const InteractiveMap = ({
         {/* Render markers for each space */}
         {spaces.map((space) => {
           if (!space.latitude || !space.longitude) return null;
+
+          // Hide marker if this space is selected (InfoWindow will be shown instead)
+          const isSelected = selectedSpace?.id === space.id;
+          if (isSelected) return null;
 
           return (
             <MarkerF
