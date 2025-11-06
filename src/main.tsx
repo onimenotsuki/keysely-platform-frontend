@@ -8,6 +8,9 @@ import { initializeSeedData } from './utils/seedData.ts';
 // Import Algolia sync tools for console access
 import './utils/runSync.ts';
 
+// Import seed utilities for console access
+import './utils/runSeed.ts';
+
 // Import debug and fix tools
 import './utils/checkAlgolia.ts';
 import './utils/debugSpaces.ts';
