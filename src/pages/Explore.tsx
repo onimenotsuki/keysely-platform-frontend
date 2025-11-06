@@ -128,23 +128,10 @@ const Explore = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-primary/80 text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Descubre Espacios Increíbles</h1>
-            <p className="text-xl opacity-90 max-w-2xl mx-auto">
-              Encuentra el espacio de trabajo perfecto para tu equipo. Oficinas, salas de reuniones
-              y más.
-            </p>
-          </div>
-        </div>
-      </section>
+      <Header forceScrolled={true} />
 
       {/* Enhanced Search and Filters */}
-      <section className="py-8">
+      <section className="py-10 mt-10">
         <div className="container mx-auto px-4">
           <SearchFilters
             filters={filters}
