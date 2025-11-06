@@ -15,9 +15,16 @@ import { SpaceTitle } from './SpaceTitle';
 interface SpaceCardProps {
   space: Space;
   variant?: 'default' | 'compact';
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
-export const SpaceCard = ({ space, variant = 'default' }: SpaceCardProps) => {
+export const SpaceCard = ({
+  space,
+  variant = 'default',
+  onMouseEnter,
+  onMouseLeave,
+}: SpaceCardProps) => {
   const { navigateWithLang } = useLanguageRouting();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -71,6 +78,8 @@ export const SpaceCard = ({ space, variant = 'default' }: SpaceCardProps) => {
         variant === 'compact' ? 'cursor-pointer' : ''
       }`}
       onClick={handleCardClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       tabIndex={variant === 'compact' ? 0 : -1}
     >
       <SpaceImage

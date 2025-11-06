@@ -34,9 +34,12 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
         {/* Results Loading Skeleton - 60vw */}
         <div className="w-[60vw] h-full overflow-hidden p-6 bg-background">
           <div className="h-8 w-48 bg-muted animate-pulse rounded mb-6"></div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="columns-3 gap-4 space-y-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-80 bg-muted animate-pulse rounded-lg"></div>
+              <div
+                key={i}
+                className="h-80 bg-muted animate-pulse rounded-lg break-inside-avoid mb-4"
+              ></div>
             ))}
           </div>
         </div>
@@ -78,25 +81,21 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
             </h3>
           </div>
 
-          {/* Results Grid - 3 Columns */}
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          {/* Results Grid - Masonry Layout with 3 Columns */}
+          <div className="columns-3 gap-4 mb-6 space-y-4">
             {paginatedItems.map((space) => (
               <div
                 key={space.id}
-                className={`transition-all ${
+                className={`break-inside-avoid mb-4 transition-all ${
                   selectedSpaceId === space.id ? 'ring-2 ring-primary rounded-lg' : ''
                 }`}
-                onMouseEnter={() => setSelectedSpaceId(space.id)}
-                onMouseLeave={() => setSelectedSpaceId(null)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    setSelectedSpaceId(space.id);
-                  }
-                }}
               >
-                <SpaceCard space={space} variant="compact" />
+                <SpaceCard
+                  space={space}
+                  variant="compact"
+                  onMouseEnter={() => setSelectedSpaceId(space.id)}
+                  onMouseLeave={() => setSelectedSpaceId(null)}
+                />
               </div>
             ))}
           </div>
