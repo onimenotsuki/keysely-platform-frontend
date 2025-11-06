@@ -16,6 +16,21 @@ export const Header = ({ forceScrolled = false }: HeaderProps) => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Add scroll listener to change header background
+  useEffect(() => {
+    if (forceScrolled) {
+      setIsScrolled(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > window.innerHeight * 0.85);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [forceScrolled]);
+
   return (
     <header className={`navbar-sticky ${isScrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container mx-auto px-4">
