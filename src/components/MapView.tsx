@@ -27,7 +27,7 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-300px)] min-h-[600px]">
+      <div className="flex h-[calc(100vh-150px)] w-full">
         {/* Map Loading Skeleton - 40vw */}
         <div className="w-[40vw] h-full bg-muted animate-pulse"></div>
 
@@ -48,7 +48,7 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
   }
 
   return (
-    <div className="flex h-[calc(100vh-300px)] min-h-[600px]">
+    <div className="flex h-[calc(100vh-150px)] w-full">
       {/* Map Section - Fixed 40vw */}
       <div className="w-[40vw] h-full sticky top-0">
         {mapsConfigured ? (

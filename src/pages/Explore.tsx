@@ -129,7 +129,7 @@ const Explore = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header forceScrolled={true} />
 
       {/* Modern Search Bar - Full Width */}
@@ -143,7 +143,7 @@ const Explore = () => {
         </div>
       </section>
 
-      {/* Results - Full Width */}
+      {/* Results - Full Width - Fixed height for map view */}
       <section className="w-full">
         {isLoading && (
           <MapView spaces={[]} isLoading={true} onMapBoundsChange={handleMapBoundsChange} />
@@ -154,8 +154,8 @@ const Explore = () => {
         )}
 
         {!isLoading && (!spaces || spaces.length === 0) && (
-          <div className="container mx-auto px-4">
-            <div className="text-center py-16">
+          <div className="container mx-auto px-4 h-[calc(100vh-200px)] flex items-center justify-center">
+            <div className="text-center">
               <div className="max-w-md mx-auto">
                 <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">
