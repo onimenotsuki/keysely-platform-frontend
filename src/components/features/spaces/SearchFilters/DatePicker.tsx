@@ -37,14 +37,17 @@ export const DatePicker = ({
             </div>
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent
+          className="w-auto p-0 bg-white shadow-xl border border-gray-200"
+          align="start"
+        >
           <CalendarComponent
             mode="single"
             selected={date}
             onSelect={(selectedDate) => onFiltersChange({ ...filters, [type]: selectedDate })}
             disabled={(dateToCheck) => dateToCheck < (minDate || new Date())}
             initialFocus
-            className={cn('p-3 pointer-events-auto')}
+            className={cn('pointer-events-auto rounded-lg')}
           />
         </PopoverContent>
       </Popover>

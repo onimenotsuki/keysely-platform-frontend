@@ -21,6 +21,8 @@
     /* UI Elements */
     --card: 0 0% 100%; /* Blanco puro para tarjetas */
     --card-foreground: 210 9% 18%;
+    --popover: 0 0% 100%; /* Blanco puro para popovers */
+    --popover-foreground: 210 9% 18%; /* Texto oscuro para popovers */
     --border: 210 14% 89%; /* Border sutil */
     --input: 210 17% 95%; /* Inputs con fondo muy claro */
     --ring: 217 91% 60%; /* Action Blue para focus ring */
