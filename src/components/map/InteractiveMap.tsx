@@ -1,11 +1,13 @@
 import type { MapBounds } from '@/components/features/spaces/SearchFilters/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import type { Space } from '@/hooks/useSpaces';
+import { useTranslation } from '@/hooks/useTranslation';
 import { GoogleMap, InfoWindow, MarkerF } from '@react-google-maps/api';
 import { MapPin } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const mapContainerStyle = {
   width: '100%',
@@ -149,7 +151,8 @@ export const InteractiveMap = ({
   onSpaceSelect,
   showSearchButton = true,
 }: InteractiveMapProps) => {
-  const navigate = useNavigate();
+  const { navigateWithLang } = useLanguageRouting();
+  const { t } = useTranslation();
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const [showSearchThisArea, setShowSearchThisArea] = useState(false);
@@ -244,13 +247,13 @@ export const InteractiveMap = ({
   };
 
   const handleViewDetails = (spaceId: string) => {
-    navigate(`/space/${spaceId}`);
+    navigateWithLang(`/space/${spaceId}`);
   };
 
   // Get marker icon for price display
-  const getMarkerIcon = (space: Space): google.maps.Icon | undefined => {
+  const getMarkerIcon = (space: Space, currencySymbol: string): google.maps.Icon | undefined => {
     const price = Math.round(space.price_per_hour);
-    const priceText = `$${price}`;
+    const priceText = `${currencySymbol}${price}`;
 
     // Keysely brand colors from design system
     const primaryColor = '#1A2B42'; // Navy Blue - Primary brand color
@@ -320,7 +323,7 @@ export const InteractiveMap = ({
               key={space.id}
               position={{ lat: space.latitude, lng: space.longitude }}
               onClick={() => handleMarkerClick(space)}
-              icon={getMarkerIcon(space)}
+              icon={getMarkerIcon(space, t('common.currency'))}
             />
           );
         })}
@@ -354,7 +357,9 @@ export const InteractiveMap = ({
               </p>
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-sm bg-primary text-primary-foreground">
-                  ${selectedSpace.price_per_hour}/hr
+                  {t('common.currency')}
+                  {selectedSpace.price_per_hour}
+                  {t('common.perHourShort')}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   ★ {selectedSpace.rating.toFixed(1)}
@@ -365,7 +370,7 @@ export const InteractiveMap = ({
                 className="w-full bg-primary hover:bg-primary-light"
                 onClick={() => handleViewDetails(selectedSpace.id)}
               >
-                Ver detalles
+                {t('map.viewDetails')}
               </Button>
             </div>
           </InfoWindow>
@@ -380,7 +385,7 @@ export const InteractiveMap = ({
             className="bg-primary hover:bg-primary-light text-primary-foreground shadow-lg"
           >
             <MapPin className="w-4 h-4 mr-2" />
-            Buscar en esta área
+            {t('map.searchThisArea')}
           </Button>
         </div>
       )}

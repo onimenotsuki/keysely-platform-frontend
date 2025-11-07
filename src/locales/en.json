@@ -125,6 +125,7 @@
   },
   "common": {
     "perHour": "/hour",
+    "perHourShort": "/hr",
     "perDay": "/day",
     "perMonth": "/month",
     "rating": "Rating",
@@ -182,7 +183,18 @@
     "share": "Share",
     "save": "Save",
     "saved": "Saved",
-    "showAllPhotos": "Show all {{count}} photos"
+    "showAllPhotos": "Show all {{count}} photos",
+    "shareDialog": {
+      "title": "Share this space",
+      "copyLink": "Copy link",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "facebook": "Facebook",
+      "twitter": "X",
+      "moreOptions": "More options",
+      "linkCopied": "Link copied to clipboard",
+      "rentalUnit": "Rental unit"
+    }
   },
   "listSpace": {
     "title": "List Your Workspace",
@@ -392,5 +404,9 @@
     "confirmed": "confirmed",
     "pending": "pending",
     "completed": "completed"
+  },
+  "map": {
+    "viewDetails": "View details",
+    "searchThisArea": "Search this area"
   }
 }

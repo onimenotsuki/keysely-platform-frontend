@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { ShareDialog } from '@/components/ui/share-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -156,14 +157,24 @@ const SpaceDetail = () => {
               </span>
             </div>
             <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 text-foreground hover:bg-secondary"
+              <ShareDialog
+                title={space.title}
+                description={space.description}
+                image={space.images[0]}
+                location={`${space.city}, ${space.address}`}
+                rating={space.rating}
+                reviewCount={space.total_reviews}
+                spaceType={space.categories?.name}
               >
-                <Share2 className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('spaceDetail.share')}</span>
-              </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2 text-foreground hover:bg-secondary"
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t('spaceDetail.share')}</span>
+                </Button>
+              </ShareDialog>
               <Button
                 variant="ghost"
                 size="sm"

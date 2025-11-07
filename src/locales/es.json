@@ -126,6 +126,7 @@
   },
   "common": {
     "perHour": "/hora",
+    "perHourShort": "/h",
     "perDay": "/día",
     "perMonth": "/mes",
     "rating": "Calificación",
@@ -183,7 +184,18 @@
     "share": "Compartir",
     "save": "Guardar",
     "saved": "Guardado",
-    "showAllPhotos": "Ver todas las {{count}} fotos"
+    "showAllPhotos": "Ver todas las {{count}} fotos",
+    "shareDialog": {
+      "title": "Comparte este espacio",
+      "copyLink": "Copiar enlace",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "facebook": "Facebook",
+      "twitter": "X",
+      "moreOptions": "Más opciones",
+      "linkCopied": "Enlace copiado al portapapeles",
+      "rentalUnit": "Vivienda rentada"
+    }
   },
   "listSpace": {
     "title": "Lista tu espacio de trabajo",
@@ -393,5 +405,9 @@
     "confirmed": "confirmado",
     "pending": "pendiente",
     "completed": "completado"
+  },
+  "map": {
+    "viewDetails": "Ver detalles",
+    "searchThisArea": "Buscar en esta área"
   }
 }
