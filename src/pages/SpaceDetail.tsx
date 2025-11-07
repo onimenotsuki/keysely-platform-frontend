@@ -2,6 +2,8 @@ import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import ContactOwnerButton from '@/components/ContactOwnerButton';
 import ReviewsSection from '@/components/ReviewsSection';
 import { AmenityBadge } from '@/components/features/spaces/AmenityBadge';
+import { GoogleMapProvider, isGoogleMapsConfigured } from '@/components/map/GoogleMapView';
+import { SpaceLocationMap } from '@/components/map/SpaceLocationMap';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -323,24 +325,13 @@ const SpaceDetail = () => {
 
             {/* Policies */}
             {space.policies && (
-              <div className="pb-8 border-b">
+              <div className="pb-8">
                 <h3 className="text-xl font-semibold text-foreground mb-4">
                   {t('spaceDetail.bookingPolicies')}
                 </h3>
                 <p className="text-muted-foreground leading-relaxed">{space.policies}</p>
               </div>
             )}
-
-            {/* Reviews Section */}
-            <div className="pb-8">
-              <div className="flex items-center gap-2 mb-6">
-                <Star className="h-6 w-6 fill-current text-yellow-500" />
-                <h3 className="text-xl font-semibold text-foreground">
-                  {space.rating} · {space.total_reviews} reviews
-                </h3>
-              </div>
-              <ReviewsSection spaceId={space.id} />
-            </div>
           </div>
 
           {/* Right Column - Booking Card (Sticky) */}
@@ -513,6 +504,49 @@ const SpaceDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Full Width Sections */}
+        {/* Reviews Section - Full Width */}
+        <div className="mt-12 pt-12 border-t">
+          <div className="flex items-center gap-2 mb-6">
+            <Star className="h-6 w-6 fill-current text-yellow-500" />
+            <h3 className="text-2xl font-semibold text-foreground">
+              {space.rating} · {space.total_reviews} reviews
+            </h3>
+          </div>
+          <ReviewsSection spaceId={space.id} />
+        </div>
+
+        {/* Location Map Section - Full Width */}
+        {!!(space.latitude && space.longitude) && (
+          <div className="mt-12 pt-12 border-t">
+            <h3 className="text-2xl font-semibold text-foreground mb-2">
+              {t('spaceDetail.whereYoullBe')}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {space.address}, {space.city}
+            </p>
+            {isGoogleMapsConfigured() ? (
+              <div className="h-[480px] w-full rounded-xl overflow-hidden border">
+                <GoogleMapProvider>
+                  <SpaceLocationMap
+                    latitude={space.latitude}
+                    longitude={space.longitude}
+                    zoom={15}
+                  />
+                </GoogleMapProvider>
+              </div>
+            ) : (
+              <div className="h-[480px] w-full rounded-xl overflow-hidden border bg-muted flex items-center justify-center">
+                <div className="text-center p-8">
+                  <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">{t('spaceDetail.mapNotAvailable')}</h3>
+                  <p className="text-muted-foreground">{t('spaceDetail.mapNotConfigured')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <Footer />
