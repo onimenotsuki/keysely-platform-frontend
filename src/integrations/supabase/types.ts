@@ -251,16 +251,21 @@ export type Database = {
       };
       profiles: {
         Row: {
+          address: Json | null;
           avatar_url: string | null;
           bio: string | null;
           company: string | null;
           created_at: string;
+          date_of_birth: string | null;
           full_name: string | null;
           id: string;
           is_host: boolean | null;
           is_identity_verified: boolean | null;
           is_superhost: boolean | null;
           languages: string[] | null;
+          occupation: string | null;
+          onboarding_completed: boolean | null;
+          onboarding_completed_at: string | null;
           phone: string | null;
           response_rate: number | null;
           response_time_hours: number | null;
@@ -269,16 +274,21 @@ export type Database = {
           work_description: string | null;
         };
         Insert: {
+          address?: Json | null;
           avatar_url?: string | null;
           bio?: string | null;
           company?: string | null;
           created_at?: string;
+          date_of_birth?: string | null;
           full_name?: string | null;
           id?: string;
           is_host?: boolean | null;
           is_identity_verified?: boolean | null;
           is_superhost?: boolean | null;
           languages?: string[] | null;
+          occupation?: string | null;
+          onboarding_completed?: boolean | null;
+          onboarding_completed_at?: string | null;
           phone?: string | null;
           response_rate?: number | null;
           response_time_hours?: number | null;
@@ -287,16 +297,21 @@ export type Database = {
           work_description?: string | null;
         };
         Update: {
+          address?: Json | null;
           avatar_url?: string | null;
           bio?: string | null;
           company?: string | null;
           created_at?: string;
+          date_of_birth?: string | null;
           full_name?: string | null;
           id?: string;
           is_host?: boolean | null;
           is_identity_verified?: boolean | null;
           is_superhost?: boolean | null;
           languages?: string[] | null;
+          occupation?: string | null;
+          onboarding_completed?: boolean | null;
+          onboarding_completed_at?: string | null;
           phone?: string | null;
           response_rate?: number | null;
           response_time_hours?: number | null;

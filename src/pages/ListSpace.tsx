@@ -251,9 +251,15 @@ const ListSpace = () => {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('listSpace.spaceTitle')} *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          {t('listSpace.spaceTitle')} *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder={t('listSpace.spaceTitlePlaceholder')} {...field} />
+                          <Input
+                            placeholder={t('listSpace.spaceTitlePlaceholder')}
+                            className="h-12 px-4"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -265,11 +271,13 @@ const ListSpace = () => {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('listSpace.description')} *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          {t('listSpace.description')} *
+                        </FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder={t('listSpace.descriptionPlaceholder')}
-                            className="min-h-32"
+                            className="min-h-32 px-4"
                             {...field}
                           />
                         </FormControl>
@@ -284,10 +292,12 @@ const ListSpace = () => {
                       name="category_id"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('listSpace.category')} *</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">
+                            {t('listSpace.category')} *
+                          </FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger>
+                              <SelectTrigger className="h-12 px-4">
                                 <SelectValue placeholder={t('listSpace.selectCategory')} />
                               </SelectTrigger>
                             </FormControl>
@@ -309,11 +319,14 @@ const ListSpace = () => {
                       name="capacity"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>{t('listSpace.capacity')} *</FormLabel>
+                          <FormLabel className="text-sm font-medium text-gray-700">
+                            {t('listSpace.capacity')} *
+                          </FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               placeholder={t('listSpace.capacityPlaceholder')}
+                              className="h-12 px-4"
                               {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                             />
@@ -329,11 +342,14 @@ const ListSpace = () => {
                     name="area_sqm"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('listSpace.area')}</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          {t('listSpace.area')}
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             placeholder={t('listSpace.areaPlaceholder')}
+                            className="h-12 px-4"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
                           />
@@ -359,9 +375,15 @@ const ListSpace = () => {
                     name="address"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('listSpace.streetAddress')} *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          {t('listSpace.streetAddress')} *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder={t('listSpace.streetAddressPlaceholder')} {...field} />
+                          <Input
+                            placeholder={t('listSpace.streetAddressPlaceholder')}
+                            className="h-12 px-4"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -373,9 +395,15 @@ const ListSpace = () => {
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('listSpace.city')} *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          {t('listSpace.city')} *
+                        </FormLabel>
                         <FormControl>
-                          <Input placeholder={t('listSpace.cityPlaceholder')} {...field} />
+                          <Input
+                            placeholder={t('listSpace.cityPlaceholder')}
+                            className="h-12 px-4"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -385,7 +413,9 @@ const ListSpace = () => {
                   {/* Location Picker */}
                   {isGoogleMapsConfigured() && (
                     <div className="space-y-2">
-                      <Label>Ubicación en el mapa</Label>
+                      <Label className="text-sm font-medium text-gray-700">
+                        Ubicación en el mapa
+                      </Label>
                       <GoogleMapProvider>
                         <LocationPicker
                           address={`${form.watch('address')}, ${form.watch('city')}`}
@@ -416,10 +446,12 @@ const ListSpace = () => {
                     name="rental_period"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('listSpace.rentalPeriod')} *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          {t('listSpace.rentalPeriod')} *
+                        </FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className="h-12 px-4">
                               <SelectValue placeholder={t('listSpace.selectRentalPeriod')} />
                             </SelectTrigger>
                           </FormControl>
@@ -441,11 +473,14 @@ const ListSpace = () => {
                     name="price_per_hour"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{getPriceLabel(form.watch('rental_period'))} *</FormLabel>
+                        <FormLabel className="text-sm font-medium text-gray-700">
+                          {getPriceLabel(form.watch('rental_period'))} *
+                        </FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             placeholder="e.g., 25"
+                            className="h-12 px-4"
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                           />
@@ -509,7 +544,7 @@ const ListSpace = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <Label className="text-base font-medium mb-4 block">
+                    <Label className="text-sm font-medium text-gray-700 mb-4 block">
                       {t('listSpace.availableDays')}
                     </Label>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -529,7 +564,7 @@ const ListSpace = () => {
                   </div>
 
                   <div>
-                    <Label className="text-base font-medium mb-4 block">
+                    <Label className="text-sm font-medium text-gray-700 mb-4 block">
                       {t('listSpace.availableHours')}
                     </Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -538,9 +573,11 @@ const ListSpace = () => {
                         name="available_times.start_time"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>{t('listSpace.startTime')}</FormLabel>
+                            <FormLabel className="text-sm font-medium text-gray-700">
+                              {t('listSpace.startTime')}
+                            </FormLabel>
                             <FormControl>
-                              <Input type="time" {...field} />
+                              <Input type="time" className="h-12 px-4" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -551,9 +588,11 @@ const ListSpace = () => {
                         name="available_times.end_time"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>{t('listSpace.endTime')}</FormLabel>
+                            <FormLabel className="text-sm font-medium text-gray-700">
+                              {t('listSpace.endTime')}
+                            </FormLabel>
                             <FormControl>
-                              <Input type="time" {...field} />
+                              <Input type="time" className="h-12 px-4" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -583,7 +622,11 @@ const ListSpace = () => {
 
               {/* Submit */}
               <div className="flex justify-center space-x-4">
-                <Button type="submit" className="btn-primary" size="lg" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  className="h-12 bg-primary hover:bg-[#3B82F6] text-white font-semibold shadow-md hover:shadow-lg transition-all px-8"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? (
                     <>
                       <i className="fas fa-spinner fa-spin mr-2"></i>

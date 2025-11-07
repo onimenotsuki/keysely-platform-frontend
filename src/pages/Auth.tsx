@@ -1,6 +1,8 @@
+import { Logo } from '@/components/layout/Header/Logo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -9,7 +11,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import logoImage from '../assets/logo.png';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +51,7 @@ const Auth = () => {
           .from('profiles')
           .select('onboarding_completed')
           .eq('user_id', data.user?.id)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error('Error checking onboarding status:', profileError);
@@ -129,7 +130,7 @@ const Auth = () => {
       <Card className="w-full max-w-md border-gray-200 shadow-lg">
         <CardHeader className="space-y-4 pb-6">
           <div className="flex justify-center">
-            <img src={logoImage} alt="Keysely Logo" className="h-10 w-auto" />
+            <Logo isScrolled={true} size="sm" />
           </div>
           <h1 className="text-2xl font-semibold text-center text-gray-900">{t('auth.title')}</h1>
         </CardHeader>
@@ -153,6 +154,9 @@ const Auth = () => {
             <TabsContent value="signin" className="space-y-4 mt-0">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="signin-email" className="text-sm font-medium text-gray-700">
+                    {t('auth.email')}
+                  </Label>
                   <Input
                     id="signin-email"
                     name="email"
@@ -160,10 +164,13 @@ const Auth = () => {
                     placeholder={t('auth.email')}
                     required
                     disabled={isLoading}
-                    className="h-14 px-4 border-gray-300 rounded-lg focus:border-[#1A2B42] focus:ring-[#1A2B42]"
+                    className="h-12 px-4 border-gray-300 rounded-lg focus:border-primary focus:ring-primary"
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="signin-password" className="text-sm font-medium text-gray-700">
+                    {t('auth.password')}
+                  </Label>
                   <Input
                     id="signin-password"
                     name="password"
@@ -171,12 +178,12 @@ const Auth = () => {
                     placeholder={t('auth.password')}
                     required
                     disabled={isLoading}
-                    className="h-14 px-4 border-gray-300 rounded-lg focus:border-[#1A2B42] focus:ring-[#1A2B42]"
+                    className="h-12 px-4 border-gray-300 rounded-lg focus:border-primary focus:ring-primary"
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="w-full h-14 bg-primary hover:bg-[#3B82F6] text-white font-semibold rounded-lg text-base shadow-md hover:shadow-lg transition-all duration-300"
+                  className="w-full h-12 bg-primary hover:bg-[#3B82F6] text-white font-semibold rounded-lg text-base shadow-md hover:shadow-lg transition-all duration-300"
                   disabled={isLoading}
                 >
                   {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
@@ -199,7 +206,7 @@ const Auth = () => {
                 <button
                   type="button"
                   disabled
-                  className="w-full h-14 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
@@ -225,7 +232,7 @@ const Auth = () => {
                 <button
                   type="button"
                   disabled
-                  className="w-full h-14 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -236,7 +243,7 @@ const Auth = () => {
                 <button
                   type="button"
                   disabled
-                  className="w-full h-14 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -249,6 +256,9 @@ const Auth = () => {
             <TabsContent value="signup" className="space-y-4 mt-0">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="signup-name" className="text-sm font-medium text-gray-700">
+                    {t('auth.fullName')}
+                  </Label>
                   <Input
                     id="signup-name"
                     name="fullName"
@@ -256,10 +266,13 @@ const Auth = () => {
                     placeholder={t('auth.fullName')}
                     required
                     disabled={isLoading}
-                    className="h-14 px-4 border-gray-300 rounded-lg focus:border-[#1A2B42] focus:ring-[#1A2B42]"
+                    className="h-12 px-4 border-gray-300 rounded-lg focus:border-primary focus:ring-primary"
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">
+                    {t('auth.email')}
+                  </Label>
                   <Input
                     id="signup-email"
                     name="email"
@@ -267,10 +280,13 @@ const Auth = () => {
                     placeholder={t('auth.email')}
                     required
                     disabled={isLoading}
-                    className="h-14 px-4 border-gray-300 rounded-lg focus:border-[#1A2B42] focus:ring-[#1A2B42]"
+                    className="h-12 px-4 border-gray-300 rounded-lg focus:border-primary focus:ring-primary"
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">
+                    {t('auth.password')}
+                  </Label>
                   <Input
                     id="signup-password"
                     name="password"
@@ -278,7 +294,7 @@ const Auth = () => {
                     placeholder={t('auth.passwordMin')}
                     required
                     disabled={isLoading}
-                    className="h-14 px-4 border-gray-300 rounded-lg focus:border-[#1A2B42] focus:ring-[#1A2B42]"
+                    className="h-12 px-4 border-gray-300 rounded-lg focus:border-primary focus:ring-primary"
                   />
                 </div>
 
@@ -308,7 +324,7 @@ const Auth = () => {
 
                 <Button
                   type="submit"
-                  className="w-full h-14 bg-primary hover:bg-[#3B82F6] text-white font-semibold rounded-lg text-base shadow-md hover:shadow-lg transition-all duration-300"
+                  className="w-full h-12 bg-primary hover:bg-[#3B82F6] text-white font-semibold rounded-lg text-base shadow-md hover:shadow-lg transition-all duration-300"
                   disabled={isLoading}
                 >
                   {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
@@ -331,7 +347,7 @@ const Auth = () => {
                 <button
                   type="button"
                   disabled
-                  className="w-full h-14 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
@@ -357,7 +373,7 @@ const Auth = () => {
                 <button
                   type="button"
                   disabled
-                  className="w-full h-14 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -368,7 +384,7 @@ const Auth = () => {
                 <button
                   type="button"
                   disabled
-                  className="w-full h-14 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />

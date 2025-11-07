@@ -28,7 +28,7 @@ export const StepBirthday = ({ value, onChange, error }: StepBirthdayProps) => {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={t('onboarding.birthday.placeholder')}
-          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent"
+          className="h-14 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           max={new Date().toISOString().split('T')[0]}
           autoFocus
         />

@@ -374,7 +374,7 @@ const SpaceDetail = () => {
                   {/* Date & Time Selection */}
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-sm font-semibold mb-2 block">
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
                         {t('spaceDetail.selectDate')}
                       </Label>
                       <Calendar
@@ -388,31 +388,31 @@ const SpaceDetail = () => {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
                           {t('spaceDetail.startTime')}
                         </Label>
                         <Input
                           type="time"
                           value={startTime}
                           onChange={(e) => setStartTime(e.target.value)}
-                          className="w-full"
+                          className="h-12 px-4"
                         />
                       </div>
                       <div>
-                        <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
                           {t('spaceDetail.endTime')}
                         </Label>
                         <Input
                           type="time"
                           value={endTime}
                           onChange={(e) => setEndTime(e.target.value)}
-                          className="w-full"
+                          className="h-12 px-4"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
                         {t('spaceDetail.numberOfGuests')}
                       </Label>
                       <Input
@@ -421,7 +421,7 @@ const SpaceDetail = () => {
                         max={space.capacity}
                         value={guestsCount}
                         onChange={(e) => setGuestsCount(Number.parseInt(e.target.value, 10) || 1)}
-                        className="w-full"
+                        className="h-12 px-4"
                       />
                     </div>
                   </div>
@@ -487,8 +487,7 @@ const SpaceDetail = () => {
 
                   {/* Booking Button */}
                   <Button
-                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-                    size="lg"
+                    className="w-full h-12 bg-primary hover:bg-[#3B82F6] text-white font-semibold shadow-md hover:shadow-lg transition-all"
                     onClick={handleBooking}
                     disabled={!selectedDate || createBooking.isPending || isCreatingPayment}
                   >

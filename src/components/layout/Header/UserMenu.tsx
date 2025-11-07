@@ -1,7 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTranslation } from '@/hooks/useTranslation';
-import { useLanguageContext } from '@/contexts/LanguageContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,8 +7,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, LayoutDashboard, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguageContext } from '@/contexts/LanguageContext';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
+import { useTranslation } from '@/hooks/useTranslation';
+import { LayoutDashboard, LogOut, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface UserMenuProps {
   isScrolled?: boolean;
@@ -20,12 +21,12 @@ interface UserMenuProps {
 export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
-  const { language } = useLanguageContext();
+  const { createLocalizedPath } = useLanguageRouting();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
-    navigate(`/${language}`);
+    navigate(createLocalizedPath(`/`));
   };
 
   // Get user initials for avatar fallback
@@ -48,7 +49,7 @@ export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
         asChild
         className={`${buttonClass} font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ml-4`}
       >
-        <Link to="/auth">{t('header.userMenu.signInOrRegister')}</Link>
+        <Link to={createLocalizedPath('/auth')}>{t('header.userMenu.signInOrRegister')}</Link>
       </Button>
     );
   }
@@ -74,13 +75,13 @@ export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to={`/${language}/profile`} className="cursor-pointer flex items-center">
+          <Link to={createLocalizedPath(`/profile`)} className="cursor-pointer flex items-center">
             <User className="mr-2 h-4 w-4" />
             <span>{t('header.userMenu.profile')}</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to={`/${language}/dashboard`} className="cursor-pointer flex items-center">
+          <Link to={createLocalizedPath(`/dashboard`)} className="cursor-pointer flex items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>{t('header.userMenu.dashboard')}</span>
           </Link>

@@ -26,7 +26,7 @@ export const StepBio = ({ value, onChange }: StepBioProps) => {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={t('onboarding.bio.placeholder')}
-          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent min-h-[120px]"
+          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent min-h-32"
           autoFocus
         />
         <p className="text-xs text-gray-500 mt-1">

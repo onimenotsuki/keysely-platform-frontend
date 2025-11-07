@@ -30,7 +30,7 @@ export const StepOccupation = ({ value, onChange, error }: StepOccupationProps) 
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={t('onboarding.occupation.placeholder')}
-          className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent"
+          className="h-14 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           autoFocus
         />
         {error && <p className="text-sm text-red-500 mt-1">{error}</p>}

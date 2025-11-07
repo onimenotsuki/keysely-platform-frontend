@@ -398,7 +398,9 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="fullName">Full Name</Label>
+                    <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">
+                      Full Name
+                    </Label>
                     <Input
                       id="fullName"
                       value={profileData.full_name}
@@ -406,58 +408,82 @@ const Profile = () => {
                         setProfileData((prev) => ({ ...prev, full_name: e.target.value }))
                       }
                       disabled={!isEditing}
+                      className="h-12 px-4"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" value={user.email} disabled />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                      Email
+                    </Label>
                     <Input
-                      id="phone"
-                      value={profileData.phone}
-                      onChange={(e) =>
-                        setProfileData((prev) => ({ ...prev, phone: e.target.value }))
-                      }
-                      disabled={!isEditing}
+                      id="email"
+                      type="email"
+                      value={user.email}
+                      disabled
+                      className="h-12 px-4"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="company">Company</Label>
-                    <Input
-                      id="company"
-                      value={profileData.company}
-                      onChange={(e) =>
-                        setProfileData((prev) => ({ ...prev, company: e.target.value }))
-                      }
-                      disabled={!isEditing}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                        Phone
+                      </Label>
+                      <Input
+                        id="phone"
+                        value={profileData.phone}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({ ...prev, phone: e.target.value }))
+                        }
+                        disabled={!isEditing}
+                        className="h-12 px-4"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="company" className="text-sm font-medium text-gray-700">
+                        Company
+                      </Label>
+                      <Input
+                        id="company"
+                        value={profileData.company}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({ ...prev, company: e.target.value }))
+                        }
+                        disabled={!isEditing}
+                        className="h-12 px-4"
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="bio">Bio</Label>
+                    <Label htmlFor="bio" className="text-sm font-medium text-gray-700">
+                      Bio
+                    </Label>
                     <Textarea
                       id="bio"
                       value={profileData.bio}
                       onChange={(e) => setProfileData((prev) => ({ ...prev, bio: e.target.value }))}
                       disabled={!isEditing}
+                      className="min-h-32 px-4"
                     />
                   </div>
 
                   {isEditing && (
                     <div className="flex space-x-2">
                       <Button
-                        className="btn-primary"
+                        className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
                         onClick={handleSaveProfile}
                         disabled={updateProfile.isPending}
                       >
                         {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
                       </Button>
-                      <Button variant="outline" onClick={() => setIsEditing(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditing(false)}
+                        className="h-12"
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -472,7 +498,9 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="streetAddress">Street Address</Label>
+                    <Label htmlFor="streetAddress" className="text-sm font-medium text-gray-700">
+                      Street Address
+                    </Label>
                     <Input
                       id="streetAddress"
                       value={profileData.address.streetAddress}
@@ -484,12 +512,15 @@ const Profile = () => {
                       }
                       disabled={!isEditing}
                       placeholder="Street and number"
+                      className="h-12 px-4"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city" className="text-sm font-medium text-gray-700">
+                        City
+                      </Label>
                       <Input
                         id="city"
                         value={profileData.address.city}
@@ -501,11 +532,14 @@ const Profile = () => {
                         }
                         disabled={!isEditing}
                         placeholder="Your city"
+                        className="h-12 px-4"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="state">State</Label>
+                      <Label htmlFor="state" className="text-sm font-medium text-gray-700">
+                        State
+                      </Label>
                       <Input
                         id="state"
                         value={profileData.address.state}
@@ -517,13 +551,16 @@ const Profile = () => {
                         }
                         disabled={!isEditing}
                         placeholder="Your state"
+                        className="h-12 px-4"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="postalCode">Postal Code</Label>
+                      <Label htmlFor="postalCode" className="text-sm font-medium text-gray-700">
+                        Postal Code
+                      </Label>
                       <Input
                         id="postalCode"
                         value={profileData.address.postalCode}
@@ -535,11 +572,14 @@ const Profile = () => {
                         }
                         disabled={!isEditing}
                         placeholder="12345"
+                        className="h-12 px-4"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="country">Country</Label>
+                      <Label htmlFor="country" className="text-sm font-medium text-gray-700">
+                        Country
+                      </Label>
                       <Input
                         id="country"
                         value={profileData.address.country}
@@ -551,6 +591,7 @@ const Profile = () => {
                         }
                         disabled={!isEditing}
                         placeholder="México"
+                        className="h-12 px-4"
                       />
                     </div>
                   </div>
@@ -558,13 +599,17 @@ const Profile = () => {
                   {isEditing && (
                     <div className="flex space-x-2">
                       <Button
-                        className="btn-primary"
+                        className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
                         onClick={handleSaveProfile}
                         disabled={updateProfile.isPending}
                       >
                         {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
                       </Button>
-                      <Button variant="outline" onClick={() => setIsEditing(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditing(false)}
+                        className="h-12"
+                      >
                         Cancel
                       </Button>
                     </div>
@@ -587,7 +632,9 @@ const Profile = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="workDescription">{t('hostProfile.workDescription')}</Label>
+                    <Label htmlFor="workDescription" className="text-sm font-medium text-gray-700">
+                      {t('hostProfile.workDescription')}
+                    </Label>
                     <Textarea
                       id="workDescription"
                       value={profileData.work_description}
@@ -597,12 +644,15 @@ const Profile = () => {
                       disabled={!isEditing}
                       placeholder={t('hostProfile.workDescription')}
                       rows={3}
+                      className="min-h-32 px-4"
                     />
                   </div>
 
                   <div>
-                    <Label>{t('hostProfile.languages')}</Label>
-                    <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">
+                      {t('hostProfile.languages')}
+                    </Label>
+                    <div className="space-y-2 mt-2">
                       <div className="flex flex-wrap gap-2 mb-2">
                         {profileData.languages.map((lang, index) => (
                           <Badge key={index} variant="secondary" className="px-3 py-1">
@@ -629,6 +679,7 @@ const Profile = () => {
                             value={newLanguage}
                             onChange={(e) => setNewLanguage(e.target.value)}
                             placeholder={t('hostProfile.addLanguage')}
+                            className="h-12 px-4"
                             onKeyPress={(e) => {
                               if (e.key === 'Enter' && newLanguage.trim()) {
                                 e.preventDefault();
@@ -643,6 +694,7 @@ const Profile = () => {
                           <Button
                             type="button"
                             variant="outline"
+                            className="h-12"
                             onClick={() => {
                               if (newLanguage.trim()) {
                                 setProfileData((prev) => ({
@@ -663,13 +715,17 @@ const Profile = () => {
                   {isEditing && (
                     <div className="flex space-x-2">
                       <Button
-                        className="btn-primary"
+                        className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
                         onClick={handleSaveProfile}
                         disabled={updateProfile.isPending}
                       >
                         {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
                       </Button>
-                      <Button variant="outline" onClick={() => setIsEditing(false)}>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditing(false)}
+                        className="h-12"
+                      >
                         Cancel
                       </Button>
                     </div>

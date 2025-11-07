@@ -36,7 +36,7 @@ export const StepAddress = ({ value, onChange }: StepAddressProps) => {
             value={value.streetAddress}
             onChange={(e) => handleFieldChange('streetAddress', e.target.value)}
             placeholder={t('onboarding.address.streetPlaceholder')}
-            className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent"
+            className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
 
@@ -51,7 +51,7 @@ export const StepAddress = ({ value, onChange }: StepAddressProps) => {
               value={value.city}
               onChange={(e) => handleFieldChange('city', e.target.value)}
               placeholder={t('onboarding.address.cityPlaceholder')}
-              className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent"
+              className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
 
@@ -65,7 +65,7 @@ export const StepAddress = ({ value, onChange }: StepAddressProps) => {
               value={value.state}
               onChange={(e) => handleFieldChange('state', e.target.value)}
               placeholder={t('onboarding.address.statePlaceholder')}
-              className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent"
+              className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
         </div>
@@ -81,7 +81,7 @@ export const StepAddress = ({ value, onChange }: StepAddressProps) => {
               value={value.postalCode}
               onChange={(e) => handleFieldChange('postalCode', e.target.value)}
               placeholder={t('onboarding.address.postalPlaceholder')}
-              className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent"
+              className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
 
@@ -95,7 +95,7 @@ export const StepAddress = ({ value, onChange }: StepAddressProps) => {
               value={value.country}
               onChange={(e) => handleFieldChange('country', e.target.value)}
               placeholder={t('onboarding.address.countryPlaceholder')}
-              className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3B82F6] focus:border-transparent"
+              className="h-14 px-4 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             />
           </div>
         </div>
