@@ -14,7 +14,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useProfile, useUpdateProfile, type AddressData } from '@/hooks/useProfile';
 import { useTranslation } from '@/hooks/useTranslation';
-import { ExternalLink, Star, X } from 'lucide-react';
+import { ExternalLink, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
@@ -29,7 +29,6 @@ const Profile = () => {
   const { data: bookings, isLoading: bookingsLoading } = useBookings();
   const favoritesQuery = useFavorites();
   const favorites = favoritesQuery.data || [];
-  const favoritesLoading = favoritesQuery.isLoading;
   const updateProfile = useUpdateProfile();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -75,10 +74,20 @@ const Profile = () => {
     try {
       await updateProfile.mutateAsync(profileData);
       setIsEditing(false);
-      toast({ title: 'Profile updated successfully!' });
-    } catch (error) {
-      toast({ title: 'Failed to update profile', variant: 'destructive' });
+      toast({ title: t('profile.profileUpdated') || 'Profile updated successfully!' });
+    } catch (error: unknown) {
+      console.error('Profile update error:', error);
+      toast({
+        title: t('profile.updateFailed') || 'Failed to update profile',
+        variant: 'destructive',
+      });
     }
+  };
+
+  const yearsOnPlatform = () => {
+    if (!profile?.created_at) return '< 1';
+    const years = new Date().getFullYear() - new Date(profile.created_at).getFullYear();
+    return years > 0 ? years : '< 1';
   };
 
   if (!user) {
@@ -86,9 +95,9 @@ const Profile = () => {
       <div className="min-h-screen bg-background">
         <Header forceScrolled={true} />
         <div className="container mx-auto px-4 py-16 text-center mt-12">
-          <h1 className="text-2xl font-bold mb-4">Please sign in to view your profile</h1>
+          <h1 className="text-2xl font-bold mb-4">{t('profile.pleaseSignIn')}</h1>
           <Link to="/auth">
-            <Button>Sign In</Button>
+            <Button className="bg-primary hover:bg-[#3B82F6]">{t('auth.signIn')}</Button>
           </Link>
         </div>
       </div>
@@ -100,19 +109,16 @@ const Profile = () => {
       <div className="min-h-screen bg-background">
         <Header forceScrolled={true} />
         <div className="container mx-auto px-4 py-16 mt-12">
-          <div className="max-w-4xl mx-auto">
-            <Card className="mb-8">
-              <CardContent className="p-8">
-                <div className="flex items-center space-x-6">
-                  <Skeleton className="w-24 h-24 rounded-full" />
-                  <div className="flex-1">
-                    <Skeleton className="w-64 h-8 mb-2" />
-                    <Skeleton className="w-32 h-4 mb-2" />
-                    <Skeleton className="w-96 h-4" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="border-0 shadow-sm">
+                <CardContent className="p-8">
+                  <Skeleton className="w-32 h-32 rounded-full mx-auto mb-4" />
+                  <Skeleton className="w-32 h-6 mx-auto mb-2" />
+                  <Skeleton className="w-24 h-4 mx-auto" />
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>
@@ -123,159 +129,274 @@ const Profile = () => {
     <div className="min-h-screen bg-background">
       <Header forceScrolled={true} />
 
-      <div className="container mx-auto px-4 py-16 mt-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Profile Header */}
-          <Card className="mb-8">
-            <CardContent className="p-8">
-              <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-                <Avatar className="w-24 h-24">
-                  <AvatarImage src={profile?.avatar_url} alt={profile?.full_name || user.email} />
-                  <AvatarFallback>
-                    {(profile?.full_name || user.email || 'U')[0].toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+      <div className="container mx-auto px-4 py-12 mt-16">
+        {!isEditing ? (
+          // Vista principal del perfil (estilo Airbnb)
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Columna izquierda - Información del perfil */}
+              <div className="lg:col-span-1">
+                <Card className="border-0 shadow-sm sticky top-24">
+                  <CardContent className="p-8 text-center">
+                    {/* Avatar y nombre */}
+                    <div className="flex flex-col items-center mb-6">
+                      <div className="relative mb-4">
+                        <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
+                          <AvatarImage
+                            src={profile?.avatar_url}
+                            alt={profile?.full_name || user.email}
+                          />
+                          <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
+                            {(profile?.full_name || user.email || 'U')[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute bottom-0 right-0 bg-success rounded-full p-2 shadow-md">
+                          <i className="fas fa-check text-white text-sm"></i>
+                        </div>
+                      </div>
 
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-2">
-                    <h1 className="text-3xl font-bold text-foreground">
-                      {profile?.full_name || user.email}
-                    </h1>
-                    <Badge className="bg-success text-success-foreground">
-                      <i className="fas fa-check-circle mr-1"></i>
-                      Verified
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground mb-2">
-                    Member since{' '}
-                    {new Date(profile?.created_at || '').toLocaleDateString('en-US', {
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </p>
-                  <p className="text-foreground">{profile?.bio || 'No bio available'}</p>
-                </div>
+                      <h1 className="text-3xl font-bold text-foreground mb-1">
+                        {profile?.full_name || user.email?.split('@')[0]}
+                      </h1>
+                      <p className="text-sm text-muted-foreground">
+                        {profile?.company || t('profile.member')}
+                      </p>
+                    </div>
 
-                <Button variant="outline" onClick={() => setIsEditing(!isEditing)}>
-                  <i className="fas fa-edit mr-2"></i>
-                  {isEditing ? 'Cancel' : 'Edit Profile'}
-                </Button>
+                    <div className="border-t border-border border-b py-6 space-y-4 mb-6">
+                      <div className="flex items-center space-x-3 text-left">
+                        <i className="fas fa-calendar-check text-xl"></i>
+                        <div className="flex-1">
+                          <p className="text-2xl font-bold text-foreground">
+                            {bookings?.length || 0}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {bookings?.length === 1 ? t('profile.booking') : t('profile.bookings')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3 text-left">
+                        <i className="fas fa-star text-xl"></i>
+                        <div className="flex-1">
+                          <p className="text-2xl font-bold text-foreground">
+                            {bookings?.filter((b) => b.status === 'completed').length || 0}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {bookings?.filter((b) => b.status === 'completed').length === 1
+                              ? t('profile.review')
+                              : t('profile.reviews')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-3 text-left">
+                        <i className="fas fa-clock text-xl"></i>
+                        <div className="flex-1">
+                          <p className="text-2xl font-bold text-foreground">{yearsOnPlatform()}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {t('profile.yearsOnPlatform')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Botón editar */}
+                    <Button
+                      variant="outline"
+                      className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      <i className="fas fa-edit mr-2"></i>
+                      {t('profile.editProfile')}
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Profile Tabs */}
-          <Tabs defaultValue="bookings" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="bookings">My Bookings</TabsTrigger>
-              <TabsTrigger value="favorites">Favorites</TabsTrigger>
-              <TabsTrigger value="spaces">My Spaces</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
+              {/* Columna derecha - Contenido principal */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* Identidad verificada */}
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-primary rounded-full p-3">
+                        <i className="fas fa-shield-alt text-white text-xl"></i>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-foreground">
+                          {t('profile.verifiedIdentity')}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {t('profile.verifiedIdentityDesc')}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {/* Bookings Tab */}
-            <TabsContent value="bookings" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>My Bookings</CardTitle>
-                </CardHeader>
-                <CardContent>
+                {/* Acerca de */}
+                {profile?.bio && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground mb-4">
+                      {t('profile.aboutMe')}
+                    </h2>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-6">
+                        <p className="text-foreground leading-relaxed">{profile.bio}</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Información adicional */}
+                {(profile?.work_description ||
+                  (profile?.languages && profile.languages.length > 0)) && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground mb-4">
+                      {t('profile.additionalInfo')}
+                    </h2>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-6 space-y-4">
+                        {profile?.work_description && (
+                          <div>
+                            <p className="font-semibold text-sm text-muted-foreground mb-2">
+                              {t('hostProfile.workDescription')}
+                            </p>
+                            <p className="text-foreground">{profile.work_description}</p>
+                          </div>
+                        )}
+
+                        {profile?.languages && profile.languages.length > 0 && (
+                          <div>
+                            <p className="font-semibold text-sm text-muted-foreground mb-2">
+                              {t('hostProfile.languages')}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {profile.languages.map((lang, index) => (
+                                <Badge
+                                  key={`lang-${lang}-${index}`}
+                                  variant="secondary"
+                                  className="px-3 py-1"
+                                >
+                                  {lang}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Mis Reservas */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold text-foreground">
+                      {t('profile.myBookings')}
+                    </h2>
+                    {bookings && bookings.length > 3 && (
+                      <Button variant="link" className="text-primary">
+                        {t('common.seeAll')}
+                      </Button>
+                    )}
+                  </div>
+
                   {bookingsLoading ? (
                     <div className="space-y-4">
-                      {Array(3)
-                        .fill(0)
-                        .map((_, i) => (
-                          <Skeleton key={i} className="w-full h-24" />
-                        ))}
+                      {new Array(2).fill(0).map((_, i) => (
+                        <Skeleton key={`booking-skeleton-${i}`} className="w-full h-32" />
+                      ))}
                     </div>
                   ) : bookings && bookings.length > 0 ? (
                     <div className="space-y-4">
                       {bookings.slice(0, 3).map((booking) => (
-                        <div
+                        <Card
                           key={booking.id}
-                          className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow"
+                          className="border-0 shadow-sm hover:shadow-md transition-shadow"
                         >
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-foreground mb-1">
-                                {booking.spaces?.title || 'Space'}
-                              </h3>
-                              <p className="text-muted-foreground text-sm mb-2">
-                                <i className="fas fa-map-marker-alt mr-1"></i>
-                                {booking.spaces?.address}, {booking.spaces?.city}
-                              </p>
-                              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                                <span>
-                                  <i className="fas fa-calendar mr-1"></i>
-                                  {booking.start_date}
-                                </span>
-                                <span>
-                                  <i className="fas fa-clock mr-1"></i>
-                                  {booking.start_time} - {booking.end_time}
-                                </span>
+                          <CardContent className="p-6">
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-start justify-between mb-2">
+                                  <h3 className="font-semibold text-lg text-foreground">
+                                    {booking.spaces?.title || 'Space'}
+                                  </h3>
+                                  <Badge
+                                    className={
+                                      booking.status === 'confirmed'
+                                        ? 'bg-primary text-primary-foreground'
+                                        : booking.status === 'completed'
+                                          ? 'bg-success text-success-foreground'
+                                          : 'bg-warning text-warning-foreground'
+                                    }
+                                  >
+                                    {booking.status}
+                                  </Badge>
+                                </div>
+                                <p className="text-muted-foreground text-sm mb-3">
+                                  <i className="fas fa-map-marker-alt mr-2"></i>
+                                  {booking.spaces?.address}, {booking.spaces?.city}
+                                </p>
+                                <div className="flex items-center flex-wrap gap-4 text-sm">
+                                  <span className="text-muted-foreground">
+                                    <i className="fas fa-calendar mr-2"></i>
+                                    {booking.start_date}
+                                  </span>
+                                  <span className="text-muted-foreground">
+                                    <i className="fas fa-clock mr-2"></i>
+                                    {booking.start_time} - {booking.end_time}
+                                  </span>
+                                  <span className="font-semibold text-foreground ml-auto">
+                                    €{booking.total_amount}
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <Badge
-                                className={
-                                  booking.status === 'confirmed'
-                                    ? 'bg-primary text-primary-foreground'
-                                    : booking.status === 'completed'
-                                      ? 'bg-success text-success-foreground'
-                                      : 'bg-yellow-500 text-white'
-                                }
-                              >
-                                {booking.status}
-                              </Badge>
-                              <p className="font-semibold text-foreground mt-2">
-                                €{booking.total_amount}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No bookings yet</p>
-                      <Button asChild className="mt-4">
-                        <Link to="/explore">Explore Spaces</Link>
-                      </Button>
-                    </div>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-12 text-center">
+                        <i className="fas fa-calendar-alt text-4xl text-muted-foreground mb-4"></i>
+                        <p className="text-muted-foreground mb-4">{t('profile.noBookings')}</p>
+                        <Button asChild className="bg-primary hover:bg-[#3B82F6]">
+                          <Link to="/explore">{t('common.exploreSpaces')}</Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
 
-            {/* Favorites Tab */}
-            <TabsContent value="favorites" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Saved Workspaces</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {favoritesLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Array(4)
-                        .fill(0)
-                        .map((_, i) => (
-                          <Skeleton key={i} className="w-full h-64" />
-                        ))}
+                {/* Espacios Favoritos */}
+                {favorites && favorites.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold text-foreground">
+                        {t('profile.favorites')}
+                      </h2>
+                      {favorites.length > 2 && (
+                        <Button variant="link" className="text-primary">
+                          {t('common.seeAll')}
+                        </Button>
+                      )}
                     </div>
-                  ) : favorites && favorites.length > 0 ? (
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {favorites.map((favorite) => (
-                        <div
+                      {favorites.slice(0, 2).map((favorite) => (
+                        <Card
                           key={favorite.id}
-                          className="border border-border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                          className="border-0 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                         >
                           <Link to={`/space/${favorite.spaces?.id}`}>
-                            <div className="w-full h-40 overflow-hidden">
+                            <div className="w-full h-48 overflow-hidden">
                               <img
                                 src={favorite.spaces?.images?.[0] || '/placeholder.svg'}
                                 alt={favorite.spaces?.title}
-                                className="w-full h-full object-cover hover:opacity-90 transition-opacity"
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
                                   target.src = '/placeholder.svg';
@@ -283,7 +404,7 @@ const Profile = () => {
                               />
                             </div>
                           </Link>
-                          <div className="p-4">
+                          <CardContent className="p-4">
                             <Link to={`/space/${favorite.spaces?.id}`}>
                               <h3 className="font-semibold text-foreground mb-2 hover:text-primary transition-colors">
                                 {favorite.spaces?.title}
@@ -293,371 +414,305 @@ const Profile = () => {
                               <i className="fas fa-map-marker-alt mr-1"></i>
                               {favorite.spaces?.city}
                             </p>
-                            <div className="flex justify-between items-center mb-3">
-                              <span className="font-semibold">
-                                €{favorite.spaces?.price_per_hour}/hour
+                            <div className="flex justify-between items-center">
+                              <span className="font-semibold text-foreground">
+                                €{favorite.spaces?.price_per_hour}/hr
                               </span>
                               <div className="flex items-center space-x-1 text-yellow-500 text-sm">
                                 <i className="fas fa-star"></i>
                                 <span>{favorite.spaces?.rating}</span>
                               </div>
                             </div>
-                            <div className="flex space-x-2">
-                              <Button asChild className="flex-1">
-                                <Link to={`/space/${favorite.spaces?.id}`}>Ver Detalles</Link>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  // Here we could add remove from favorites functionality
-                                }}
-                              >
-                                <i className="fas fa-heart text-red-500"></i>
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No saved workspaces yet</p>
-                      <Button asChild className="mt-4">
-                        <Link to="/explore">Explore Spaces</Link>
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* My Spaces Tab */}
-            <TabsContent value="spaces" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('common.manageSpaces')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <i className="fas fa-building text-4xl text-muted-foreground mb-4"></i>
-                    <h3 className="text-lg font-medium mb-2">{t('common.spaceManagement')}</h3>
-                    <p className="text-muted-foreground mb-6">{t('common.spaceManagementDesc')}</p>
-                    <div className="flex justify-center space-x-4">
-                      <Link to="/owner-dashboard">
-                        <Button>
-                          <i className="fas fa-chart-line mr-2"></i>
-                          {t('common.goToDashboard')}
-                        </Button>
-                      </Link>
-                      <Link to="/list-space">
-                        <Button variant="outline">
-                          <i className="fas fa-plus mr-2"></i>
-                          {t('header.listSpace')}
-                        </Button>
-                      </Link>
-                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Vista de edición de perfil
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6">
+              <Button variant="ghost" onClick={() => setIsEditing(false)} className="mb-4">
+                <i className="fas fa-arrow-left mr-2"></i>
+                {t('common.back')}
+              </Button>
+              <h1 className="text-3xl font-bold text-foreground">{t('profile.editProfile')}</h1>
+            </div>
 
-            {/* Reviews Tab */}
-            <TabsContent value="reviews" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>My Reviews</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Gestiona tus Reviews</h3>
-                    <p className="text-muted-foreground mb-2">
-                      Ve todas las reviews que has escrito y edita las que necesites.
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-6">
-                      ¡Reserva un espacio y deja tu primera review!
-                    </p>
-                    <Link to="/my-reviews">
-                      <Button>
-                        <Star className="h-4 w-4 mr-2" />
-                        Ver Mis Reviews
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+            {/* Profile Tabs para edición */}
+            <Tabs defaultValue="personal" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="personal">{t('profile.personalInfo')}</TabsTrigger>
+                <TabsTrigger value="address">{t('profile.address')}</TabsTrigger>
+                <TabsTrigger value="host">{t('profile.hostInfo')}</TabsTrigger>
+              </TabsList>
 
-            {/* Settings Tab */}
-            <TabsContent value="settings" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Personal Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">
-                      Full Name
-                    </Label>
-                    <Input
-                      id="fullName"
-                      value={profileData.full_name}
-                      onChange={(e) =>
-                        setProfileData((prev) => ({ ...prev, full_name: e.target.value }))
-                      }
-                      disabled={!isEditing}
-                      className="h-12 px-4"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={user.email}
-                      disabled
-                      className="h-12 px-4"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Personal Information Tab */}
+              <TabsContent value="personal" className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle>{t('profile.personalInfo')}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div>
-                      <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-                        Phone
+                      <Label htmlFor="fullName" className="text-sm font-medium">
+                        {t('profile.fullName')}
                       </Label>
                       <Input
-                        id="phone"
-                        value={profileData.phone}
+                        id="fullName"
+                        value={profileData.full_name}
                         onChange={(e) =>
-                          setProfileData((prev) => ({ ...prev, phone: e.target.value }))
+                          setProfileData((prev) => ({ ...prev, full_name: e.target.value }))
                         }
-                        disabled={!isEditing}
                         className="h-12 px-4"
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="company" className="text-sm font-medium text-gray-700">
-                        Company
+                      <Label htmlFor="email" className="text-sm font-medium">
+                        {t('profile.email')}
                       </Label>
                       <Input
-                        id="company"
-                        value={profileData.company}
-                        onChange={(e) =>
-                          setProfileData((prev) => ({ ...prev, company: e.target.value }))
-                        }
-                        disabled={!isEditing}
-                        className="h-12 px-4"
+                        id="email"
+                        type="email"
+                        value={user.email}
+                        disabled
+                        className="h-12 px-4 bg-muted"
                       />
                     </div>
-                  </div>
 
-                  <div>
-                    <Label htmlFor="bio" className="text-sm font-medium text-gray-700">
-                      Bio
-                    </Label>
-                    <Textarea
-                      id="bio"
-                      value={profileData.bio}
-                      onChange={(e) => setProfileData((prev) => ({ ...prev, bio: e.target.value }))}
-                      disabled={!isEditing}
-                      className="min-h-32 px-4"
-                    />
-                  </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="phone" className="text-sm font-medium">
+                          {t('profile.phone')}
+                        </Label>
+                        <Input
+                          id="phone"
+                          value={profileData.phone}
+                          onChange={(e) =>
+                            setProfileData((prev) => ({ ...prev, phone: e.target.value }))
+                          }
+                          className="h-12 px-4"
+                        />
+                      </div>
 
-                  {isEditing && (
-                    <div className="flex space-x-2">
+                      <div>
+                        <Label htmlFor="company" className="text-sm font-medium">
+                          {t('profile.company')}
+                        </Label>
+                        <Input
+                          id="company"
+                          value={profileData.company}
+                          onChange={(e) =>
+                            setProfileData((prev) => ({ ...prev, company: e.target.value }))
+                          }
+                          className="h-12 px-4"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="bio" className="text-sm font-medium">
+                        {t('profile.bio')}
+                      </Label>
+                      <Textarea
+                        id="bio"
+                        value={profileData.bio}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({ ...prev, bio: e.target.value }))
+                        }
+                        className="min-h-32 px-4"
+                        placeholder={t('profile.bioPlaceholder')}
+                      />
+                    </div>
+
+                    <div className="flex space-x-2 pt-4">
                       <Button
                         className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
                         onClick={handleSaveProfile}
                         disabled={updateProfile.isPending}
                       >
-                        {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                        {updateProfile.isPending ? t('common.saving') : t('common.saveChanges')}
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => setIsEditing(false)}
                         className="h-12"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </Button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-              {/* Address Information Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Address Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="streetAddress" className="text-sm font-medium text-gray-700">
-                      Street Address
-                    </Label>
-                    <Input
-                      id="streetAddress"
-                      value={profileData.address.streetAddress}
-                      onChange={(e) =>
-                        setProfileData((prev) => ({
-                          ...prev,
-                          address: { ...prev.address, streetAddress: e.target.value },
-                        }))
-                      }
-                      disabled={!isEditing}
-                      placeholder="Street and number"
-                      className="h-12 px-4"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Address Tab */}
+              <TabsContent value="address" className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle>{t('profile.addressInformation')}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div>
-                      <Label htmlFor="city" className="text-sm font-medium text-gray-700">
-                        City
+                      <Label htmlFor="streetAddress" className="text-sm font-medium">
+                        {t('profile.streetAddress')}
                       </Label>
                       <Input
-                        id="city"
-                        value={profileData.address.city}
+                        id="streetAddress"
+                        value={profileData.address.streetAddress}
                         onChange={(e) =>
                           setProfileData((prev) => ({
                             ...prev,
-                            address: { ...prev.address, city: e.target.value },
+                            address: { ...prev.address, streetAddress: e.target.value },
                           }))
                         }
-                        disabled={!isEditing}
-                        placeholder="Your city"
+                        placeholder={t('profile.streetAddressPlaceholder')}
                         className="h-12 px-4"
                       />
                     </div>
 
-                    <div>
-                      <Label htmlFor="state" className="text-sm font-medium text-gray-700">
-                        State
-                      </Label>
-                      <Input
-                        id="state"
-                        value={profileData.address.state}
-                        onChange={(e) =>
-                          setProfileData((prev) => ({
-                            ...prev,
-                            address: { ...prev.address, state: e.target.value },
-                          }))
-                        }
-                        disabled={!isEditing}
-                        placeholder="Your state"
-                        className="h-12 px-4"
-                      />
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="city" className="text-sm font-medium">
+                          {t('profile.city')}
+                        </Label>
+                        <Input
+                          id="city"
+                          value={profileData.address.city}
+                          onChange={(e) =>
+                            setProfileData((prev) => ({
+                              ...prev,
+                              address: { ...prev.address, city: e.target.value },
+                            }))
+                          }
+                          placeholder={t('profile.cityPlaceholder')}
+                          className="h-12 px-4"
+                        />
+                      </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="postalCode" className="text-sm font-medium text-gray-700">
-                        Postal Code
-                      </Label>
-                      <Input
-                        id="postalCode"
-                        value={profileData.address.postalCode}
-                        onChange={(e) =>
-                          setProfileData((prev) => ({
-                            ...prev,
-                            address: { ...prev.address, postalCode: e.target.value },
-                          }))
-                        }
-                        disabled={!isEditing}
-                        placeholder="12345"
-                        className="h-12 px-4"
-                      />
+                      <div>
+                        <Label htmlFor="state" className="text-sm font-medium">
+                          {t('profile.state')}
+                        </Label>
+                        <Input
+                          id="state"
+                          value={profileData.address.state}
+                          onChange={(e) =>
+                            setProfileData((prev) => ({
+                              ...prev,
+                              address: { ...prev.address, state: e.target.value },
+                            }))
+                          }
+                          placeholder={t('profile.statePlaceholder')}
+                          className="h-12 px-4"
+                        />
+                      </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="country" className="text-sm font-medium text-gray-700">
-                        Country
-                      </Label>
-                      <Input
-                        id="country"
-                        value={profileData.address.country}
-                        onChange={(e) =>
-                          setProfileData((prev) => ({
-                            ...prev,
-                            address: { ...prev.address, country: e.target.value },
-                          }))
-                        }
-                        disabled={!isEditing}
-                        placeholder="México"
-                        className="h-12 px-4"
-                      />
-                    </div>
-                  </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="postalCode" className="text-sm font-medium">
+                          {t('profile.postalCode')}
+                        </Label>
+                        <Input
+                          id="postalCode"
+                          value={profileData.address.postalCode}
+                          onChange={(e) =>
+                            setProfileData((prev) => ({
+                              ...prev,
+                              address: { ...prev.address, postalCode: e.target.value },
+                            }))
+                          }
+                          placeholder="12345"
+                          className="h-12 px-4"
+                        />
+                      </div>
 
-                  {isEditing && (
-                    <div className="flex space-x-2">
+                      <div>
+                        <Label htmlFor="country" className="text-sm font-medium">
+                          {t('profile.country')}
+                        </Label>
+                        <Input
+                          id="country"
+                          value={profileData.address.country}
+                          onChange={(e) =>
+                            setProfileData((prev) => ({
+                              ...prev,
+                              address: { ...prev.address, country: e.target.value },
+                            }))
+                          }
+                          placeholder="México"
+                          className="h-12 px-4"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex space-x-2 pt-4">
                       <Button
                         className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
                         onClick={handleSaveProfile}
                         disabled={updateProfile.isPending}
                       >
-                        {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                        {updateProfile.isPending ? t('common.saving') : t('common.saveChanges')}
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => setIsEditing(false)}
                         className="h-12"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </Button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-              {/* Host Information Card */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>{t('hostProfile.hostInformation')}</CardTitle>
-                    <Button asChild variant="outline" size="sm" className="gap-2">
-                      <Link to={createLocalizedPath(`/host/${user.id}`)}>
-                        <ExternalLink className="h-4 w-4" />
-                        {t('hostProfile.viewPublicProfile')}
-                      </Link>
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="workDescription" className="text-sm font-medium text-gray-700">
-                      {t('hostProfile.workDescription')}
-                    </Label>
-                    <Textarea
-                      id="workDescription"
-                      value={profileData.work_description}
-                      onChange={(e) =>
-                        setProfileData((prev) => ({ ...prev, work_description: e.target.value }))
-                      }
-                      disabled={!isEditing}
-                      placeholder={t('hostProfile.workDescription')}
-                      rows={3}
-                      className="min-h-32 px-4"
-                    />
-                  </div>
+              {/* Host Information Tab */}
+              <TabsContent value="host" className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>{t('hostProfile.hostInformation')}</CardTitle>
+                      <Button asChild variant="outline" size="sm" className="gap-2">
+                        <Link to={createLocalizedPath(`/host/${user.id}`)}>
+                          <ExternalLink className="h-4 w-4" />
+                          {t('hostProfile.viewPublicProfile')}
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor="workDescription" className="text-sm font-medium">
+                        {t('hostProfile.workDescription')}
+                      </Label>
+                      <Textarea
+                        id="workDescription"
+                        value={profileData.work_description}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({ ...prev, work_description: e.target.value }))
+                        }
+                        placeholder={t('hostProfile.workDescription')}
+                        rows={3}
+                        className="min-h-32 px-4"
+                      />
+                    </div>
 
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">
-                      {t('hostProfile.languages')}
-                    </Label>
-                    <div className="space-y-2 mt-2">
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {profileData.languages.map((lang, index) => (
-                          <Badge key={index} variant="secondary" className="px-3 py-1">
-                            {lang}
-                            {isEditing && (
+                    <div>
+                      <Label className="text-sm font-medium">{t('hostProfile.languages')}</Label>
+                      <div className="space-y-2 mt-2">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {profileData.languages.map((lang, index) => (
+                            <Badge
+                              key={`edit-lang-${lang}-${index}`}
+                              variant="secondary"
+                              className="px-3 py-1"
+                            >
+                              {lang}
                               <button
                                 onClick={() =>
                                   setProfileData((prev) => ({
@@ -666,21 +721,20 @@ const Profile = () => {
                                   }))
                                 }
                                 className="ml-2 hover:text-destructive"
+                                aria-label={`Remove ${lang}`}
                               >
                                 <X className="h-3 w-3" />
                               </button>
-                            )}
-                          </Badge>
-                        ))}
-                      </div>
-                      {isEditing && (
+                            </Badge>
+                          ))}
+                        </div>
                         <div className="flex gap-2">
                           <Input
                             value={newLanguage}
                             onChange={(e) => setNewLanguage(e.target.value)}
                             placeholder={t('hostProfile.addLanguage')}
                             className="h-12 px-4"
-                            onKeyPress={(e) => {
+                            onKeyDown={(e) => {
                               if (e.key === 'Enter' && newLanguage.trim()) {
                                 e.preventDefault();
                                 setProfileData((prev) => ({
@@ -705,36 +759,34 @@ const Profile = () => {
                               }
                             }}
                           >
-                            {t('hostProfile.addLanguage')}
+                            {t('common.add')}
                           </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
 
-                  {isEditing && (
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 pt-4">
                       <Button
                         className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
                         onClick={handleSaveProfile}
                         disabled={updateProfile.isPending}
                       >
-                        {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                        {updateProfile.isPending ? t('common.saving') : t('common.saveChanges')}
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => setIsEditing(false)}
                         className="h-12"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </Button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
       </div>
 
       <Footer />

@@ -4,11 +4,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLanguageContext } from '@/contexts/LanguageContext';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useTranslation } from '@/hooks/useTranslation';
 import { LayoutDashboard, LogOut, User } from 'lucide-react';
@@ -73,7 +71,6 @@ export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
           </p>
           <p className="text-xs text-gray-500">{user.email}</p>
         </div>
-        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to={createLocalizedPath(`/profile`)} className="cursor-pointer flex items-center">
             <User className="mr-2 h-4 w-4" />
@@ -86,10 +83,9 @@ export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
             <span>{t('header.userMenu.dashboard')}</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleSignOut}
-          className="cursor-pointer text-red-600 focus:text-red-600 flex items-center"
+          className="cursor-pointer text-red-600 focus:text-white focus:bg-red-600 flex items-center"
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>{t('header.userMenu.signOut')}</span>
