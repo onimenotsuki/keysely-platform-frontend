@@ -1,6 +1,14 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+export interface AddressData {
+  streetAddress: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
 
 export interface Profile {
   id: string;
@@ -10,6 +18,7 @@ export interface Profile {
   phone?: string;
   bio?: string;
   company?: string;
+  address?: AddressData;
   languages?: string[];
   response_rate?: number;
   response_time_hours?: number;

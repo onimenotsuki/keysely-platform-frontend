@@ -5,7 +5,13 @@
     "howItWorks": "Cómo funciona",
     "listSpace": "Lista tu espacio",
     "profile": "Perfil",
-    "dashboard": "Panel de Propietario"
+    "dashboard": "Panel de Propietario",
+    "userMenu": {
+      "signInOrRegister": "Inicia sesión o regístrate",
+      "profile": "Perfil",
+      "dashboard": "Dashboard de usuario",
+      "signOut": "Cerrar sesión"
+    }
   },
   "hero": {
     "title": "Encuentra el espacio de trabajo perfecto",

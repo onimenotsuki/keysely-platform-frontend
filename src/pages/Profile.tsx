@@ -11,10 +11,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useBookings } from '@/hooks/useBookings';
 import { useFavorites } from '@/hooks/useFavorites';
-import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
-import { useTranslation } from '@/hooks/useTranslation';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
-import { Star, X, ExternalLink } from 'lucide-react';
+import { useProfile, useUpdateProfile, type AddressData } from '@/hooks/useProfile';
+import { useTranslation } from '@/hooks/useTranslation';
+import { ExternalLink, Star, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
@@ -40,6 +40,13 @@ const Profile = () => {
     company: '',
     work_description: '',
     languages: [] as string[],
+    address: {
+      streetAddress: '',
+      city: '',
+      state: '',
+      postalCode: '',
+      country: '',
+    } as AddressData,
   });
 
   const [newLanguage, setNewLanguage] = useState('');
@@ -53,6 +60,13 @@ const Profile = () => {
         company: profile.company || '',
         work_description: profile.work_description || '',
         languages: profile.languages || [],
+        address: profile.address || {
+          streetAddress: '',
+          city: '',
+          state: '',
+          postalCode: '',
+          country: '',
+        },
       });
     }
   }, [profile]);
@@ -70,8 +84,8 @@ const Profile = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
+        <Header forceScrolled={true} />
+        <div className="container mx-auto px-4 py-16 text-center mt-12">
           <h1 className="text-2xl font-bold mb-4">Please sign in to view your profile</h1>
           <Link to="/auth">
             <Button>Sign In</Button>
@@ -84,8 +98,8 @@ const Profile = () => {
   if (profileLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16">
+        <Header forceScrolled={true} />
+        <div className="container mx-auto px-4 py-16 mt-12">
           <div className="max-w-4xl mx-auto">
             <Card className="mb-8">
               <CardContent className="p-8">
@@ -107,9 +121,9 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header forceScrolled={true} />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 mt-12">
         <div className="max-w-4xl mx-auto">
           {/* Profile Header */}
           <Card className="mb-8">
@@ -432,6 +446,113 @@ const Profile = () => {
                       onChange={(e) => setProfileData((prev) => ({ ...prev, bio: e.target.value }))}
                       disabled={!isEditing}
                     />
+                  </div>
+
+                  {isEditing && (
+                    <div className="flex space-x-2">
+                      <Button
+                        className="btn-primary"
+                        onClick={handleSaveProfile}
+                        disabled={updateProfile.isPending}
+                      >
+                        {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                      <Button variant="outline" onClick={() => setIsEditing(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Address Information Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Address Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="streetAddress">Street Address</Label>
+                    <Input
+                      id="streetAddress"
+                      value={profileData.address.streetAddress}
+                      onChange={(e) =>
+                        setProfileData((prev) => ({
+                          ...prev,
+                          address: { ...prev.address, streetAddress: e.target.value },
+                        }))
+                      }
+                      disabled={!isEditing}
+                      placeholder="Street and number"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={profileData.address.city}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            address: { ...prev.address, city: e.target.value },
+                          }))
+                        }
+                        disabled={!isEditing}
+                        placeholder="Your city"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="state">State</Label>
+                      <Input
+                        id="state"
+                        value={profileData.address.state}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            address: { ...prev.address, state: e.target.value },
+                          }))
+                        }
+                        disabled={!isEditing}
+                        placeholder="Your state"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="postalCode">Postal Code</Label>
+                      <Input
+                        id="postalCode"
+                        value={profileData.address.postalCode}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            address: { ...prev.address, postalCode: e.target.value },
+                          }))
+                        }
+                        disabled={!isEditing}
+                        placeholder="12345"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="country">Country</Label>
+                      <Input
+                        id="country"
+                        value={profileData.address.country}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            address: { ...prev.address, country: e.target.value },
+                          }))
+                        }
+                        disabled={!isEditing}
+                        placeholder="México"
+                      />
+                    </div>
                   </div>
 
                   {isEditing && (

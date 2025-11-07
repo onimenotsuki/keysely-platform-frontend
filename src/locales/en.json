@@ -4,7 +4,13 @@
     "explore": "Explore",
     "howItWorks": "How it works",
     "listSpace": "List your space",
-    "profile": "Profile"
+    "profile": "Profile",
+    "userMenu": {
+      "signInOrRegister": "Sign in or register",
+      "profile": "Profile",
+      "dashboard": "User dashboard",
+      "signOut": "Sign out"
+    }
   },
   "hero": {
     "title": "Find the perfect workspace",
