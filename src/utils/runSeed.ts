@@ -15,6 +15,13 @@
 import { generateSeedSpaces, clearAllSpaces, AMENITIES_LIST } from './seedSpaces';
 import { createSeedData } from './seedData';
 import { seedHostProfiles, clearHostProfiles, getHostProfileStats } from './seedHostProfiles';
+import { createHostUsers, clearHostUsers, getHostUserIds, getHostUserStats } from './seedHostUsers';
+import {
+  markSpaceOwnersAsHosts,
+  markNonOwnersAsNonHosts,
+  fixAllHostData,
+  getHostDataConsistency,
+} from './fixHostData';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SeedOptions {
@@ -74,6 +81,87 @@ export const runFullSeed = async (options: SeedOptions = {}) => {
 };
 
 /**
+ * Run full seed with multiple hosts
+ * Creates 23 host users, adds current user to the list, and distributes spaces equitably
+ */
+export const runFullSeedWithHosts = async (options: SeedOptions = {}) => {
+  const { clearExisting = false } = options;
+
+  try {
+    // Check if user is authenticated
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error('❌ User not authenticated. Please login first.');
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    console.log('🌱 Starting full seed with hosts...');
+    console.log(`👤 Current User ID: ${user.id}`);
+
+    // Optional: Clear existing data
+    if (clearExisting) {
+      console.log('🗑️  Clearing existing spaces...');
+      await clearAllSpaces();
+      console.log('✅ Existing spaces cleared');
+    }
+
+    // Step 1: Create 23 host users
+    console.log('📦 Step 1: Creating 23 host users...');
+    const hostUsersResult = await createHostUsers();
+
+    if (!hostUsersResult.success || hostUsersResult.userIds.length === 0) {
+      console.error('❌ Failed to create host users');
+      return { success: false, error: 'Failed to create host users' };
+    }
+
+    console.log(`✅ Created/found ${hostUsersResult.userIds.length} host users`);
+
+    // Step 2: Add current user to host list (24 hosts total)
+    const allHostIds = [...hostUsersResult.userIds, user.id];
+    console.log(`👥 Total hosts (including current user): ${allHostIds.length}`);
+
+    // Step 3: Generate initial sample spaces distributed among hosts
+    console.log('📦 Step 2: Creating initial sample spaces...');
+    await createSeedData(allHostIds);
+    console.log('✅ Initial sample spaces created');
+
+    // Step 4: Generate bulk spaces distributed among all hosts
+    console.log('📦 Step 3: Generating bulk spaces across cities...');
+    const spaces = await generateSeedSpaces(allHostIds);
+    console.log(`✅ Generated ${spaces?.length || 0} additional spaces`);
+
+    // Step 5: Apply host profile data to all hosts
+    console.log('📦 Step 4: Applying host profile data...');
+    const profileResult = await seedHostProfiles(allHostIds);
+    console.log(`✅ ${profileResult.message}`);
+
+    // Step 6: Ensure all space owners are marked as hosts
+    console.log('📦 Step 5: Verifying is_host field consistency...');
+    const fixResult = await markSpaceOwnersAsHosts();
+    console.log(`✅ ${fixResult.message}`);
+
+    const totalSpaces = (spaces?.length || 0) + 3; // 3 from initial seed
+    const message = `🎉 Full seed with hosts completed successfully!\n👥 Hosts: ${allHostIds.length}\n🏢 Total Spaces: ${totalSpaces}\n📊 ~${Math.floor(totalSpaces / allHostIds.length)} spaces per host`;
+    console.log(message);
+
+    return {
+      success: true,
+      stats: {
+        hosts: allHostIds.length,
+        spaces: totalSpaces,
+        spacesPerHost: Math.floor(totalSpaces / allHostIds.length),
+      },
+    };
+  } catch (error) {
+    console.error('❌ Error during seed process with hosts:', error);
+    return { success: false, error };
+  }
+};
+
+/**
  * Run seed for initial user data only (3 spaces)
  */
 export const runBasicSeed = async () => {
@@ -100,8 +188,9 @@ export const runBasicSeed = async () => {
 
 /**
  * Run seed for multiple spaces across cities (55 spaces)
+ * @param hostIds - Optional array of host IDs to distribute spaces among
  */
-export const runBulkSeed = async () => {
+export const runBulkSeed = async (hostIds?: string[]) => {
   try {
     const {
       data: { user },
@@ -109,11 +198,14 @@ export const runBulkSeed = async () => {
 
     if (!user) {
       console.error('❌ User not authenticated. Please login first.');
-      return;
+      return { success: false, error: 'User not authenticated' };
     }
 
+    const ownerIds = hostIds && hostIds.length > 0 ? hostIds : [user.id];
+
     console.log('🌱 Generating bulk spaces...');
-    const spaces = await generateSeedSpaces(user.id);
+    console.log(`📊 Distributing among ${ownerIds.length} host(s)`);
+    const spaces = await generateSeedSpaces(ownerIds);
     console.log(`✅ Generated ${spaces?.length || 0} spaces across multiple cities`);
 
     return { success: true, count: spaces?.length };
@@ -226,17 +318,107 @@ export const getHostStats = async () => {
   }
 };
 
+/**
+ * Create host users (23 users with authentication)
+ */
+export const createHosts = async () => {
+  try {
+    console.log('🌱 Creating host users...');
+    const result = await createHostUsers();
+    return result;
+  } catch (error) {
+    console.error('❌ Error creating host users:', error);
+    return {
+      success: false,
+      error,
+      userIds: [],
+      message: 'Failed to create hosts',
+      stats: { created: 0, existing: 0, failed: 0 },
+    };
+  }
+};
+
+/**
+ * Clear all host-related data (host users and profiles)
+ */
+export const clearAllHostData = async () => {
+  try {
+    console.log('🗑️  Clearing all host data...');
+
+    // Clear host profiles first
+    const profileResult = await clearHostProfiles();
+    console.log(`✅ ${profileResult.message}`);
+
+    // Clear host users
+    const userResult = await clearHostUsers();
+    console.log(`✅ ${userResult.message}`);
+
+    return {
+      success: true,
+      message: 'All host data cleared successfully',
+    };
+  } catch (error) {
+    console.error('❌ Error clearing host data:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Get all host user IDs
+ */
+export const getHostIds = async () => {
+  try {
+    const hostIds = await getHostUserIds();
+    console.log(`📊 Found ${hostIds.length} host users`);
+    return hostIds;
+  } catch (error) {
+    console.error('❌ Error getting host IDs:', error);
+    return [];
+  }
+};
+
+/**
+ * Get statistics about host users
+ */
+export const getHostUserStatistics = async () => {
+  try {
+    const stats = await getHostUserStats();
+    return stats;
+  } catch (error) {
+    console.error('❌ Error getting host user stats:', error);
+    return null;
+  }
+};
+
 // Export all functions for easy access
 export const seedUtils = {
+  // Main seeding functions
   runFullSeed,
+  runFullSeedWithHosts,
   runBasicSeed,
   runBulkSeed,
+
+  // Space management
   clearSpaces,
   getSpaceStats,
   showAvailableAmenities,
+
+  // Host profile management
   seedHostData,
   clearHostData,
   getHostStats,
+
+  // Host user management
+  createHosts,
+  clearAllHostData,
+  getHostIds,
+  getHostUserStatistics,
+
+  // Host data correction utilities
+  fixAllHostData,
+  markSpaceOwnersAsHosts,
+  markNonOwnersAsNonHosts,
+  getHostDataConsistency,
 };
 
 // Make it available in the browser console for development

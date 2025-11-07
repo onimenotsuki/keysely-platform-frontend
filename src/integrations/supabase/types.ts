@@ -257,6 +257,7 @@ export type Database = {
           created_at: string;
           full_name: string | null;
           id: string;
+          is_host: boolean | null;
           is_identity_verified: boolean | null;
           is_superhost: boolean | null;
           languages: string[] | null;
@@ -274,6 +275,7 @@ export type Database = {
           created_at?: string;
           full_name?: string | null;
           id?: string;
+          is_host?: boolean | null;
           is_identity_verified?: boolean | null;
           is_superhost?: boolean | null;
           languages?: string[] | null;
@@ -291,6 +293,7 @@ export type Database = {
           created_at?: string;
           full_name?: string | null;
           id?: string;
+          is_host?: boolean | null;
           is_identity_verified?: boolean | null;
           is_superhost?: boolean | null;
           languages?: string[] | null;

@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export const createSeedData = async () => {
+export const createSeedData = async (hostIds?: string[]) => {
   try {
     // Get current user
     const {
@@ -8,16 +8,31 @@ export const createSeedData = async () => {
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Check if user already has spaces
-    const { data: existingSpaces } = await supabase
-      .from('spaces')
-      .select('id')
-      .eq('owner_id', user.id)
-      .limit(1);
+    // Determine owner IDs for the 3 sample spaces
+    let ownerIds: string[];
+    if (hostIds && hostIds.length > 0) {
+      // Distribute among provided host IDs
+      ownerIds = [
+        hostIds[0 % hostIds.length],
+        hostIds[1 % hostIds.length],
+        hostIds[2 % hostIds.length],
+      ];
+      console.log(`📊 Creating 3 sample spaces distributed among ${hostIds.length} hosts`);
+    } else {
+      // Use current user for all spaces (legacy behavior)
+      ownerIds = [user.id, user.id, user.id];
 
-    if (existingSpaces && existingSpaces.length > 0) {
-      console.log('User already has spaces, skipping seed data creation');
-      return;
+      // Check if user already has spaces
+      const { data: existingSpaces } = await supabase
+        .from('spaces')
+        .select('id')
+        .eq('owner_id', user.id)
+        .limit(1);
+
+      if (existingSpaces && existingSpaces.length > 0) {
+        console.log('User already has spaces, skipping seed data creation');
+        return;
+      }
     }
 
     // Get categories
@@ -32,7 +47,7 @@ export const createSeedData = async () => {
     const meetingCategory = categories.find((c) => c.name === 'Sala de Reuniones')?.id;
     const coworkingCategory = categories.find((c) => c.name === 'Coworking')?.id;
 
-    // Create sample spaces for the current user
+    // Create sample spaces with distributed ownership
     const sampleSpaces = [
       {
         title: 'Oficina Privada Premium Polanco',
@@ -73,7 +88,7 @@ export const createSeedData = async () => {
         },
         policies:
           'No se permite fumar. Política de cancelación: 24 horas de anticipación. Depósito reembolsable requerido.',
-        owner_id: user.id,
+        owner_id: ownerIds[0],
         category_id: officeCategory,
         is_active: true,
       },
@@ -118,7 +133,7 @@ export const createSeedData = async () => {
         },
         policies:
           'Reserva mínima de 2 horas. Incluye servicio básico de café. Cancelación gratuita 24 horas antes.',
-        owner_id: user.id,
+        owner_id: ownerIds[1],
         category_id: meetingCategory,
         is_active: true,
       },
@@ -166,7 +181,7 @@ export const createSeedData = async () => {
         },
         policies:
           'Espacio pet-friendly. No fumar. Cancelación gratuita 24 horas antes. Membresías mensuales disponibles.',
-        owner_id: user.id,
+        owner_id: ownerIds[2],
         category_id: coworkingCategory,
         is_active: true,
       },
