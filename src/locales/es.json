@@ -473,5 +473,75 @@
     "addLanguage": "Agregar idioma",
     "saveChanges": "Guardar cambios",
     "cancel": "Cancelar"
+  },
+  "onboarding": {
+    "title": "Completa tu perfil",
+    "subtitle": "Ayúdanos a conocerte mejor",
+    "step": "Paso {{current}} de {{total}}",
+    "continue": "Continuar",
+    "back": "Atrás",
+    "skip": "Omitir",
+    "complete": "Completar",
+    "fullName": {
+      "title": "¿Cómo te llamas?",
+      "label": "Nombre completo",
+      "placeholder": "Tu nombre completo"
+    },
+    "occupation": {
+      "title": "¿A qué te dedicas?",
+      "label": "Ocupación",
+      "placeholder": "Ej: Diseñador, Desarrollador, Emprendedor"
+    },
+    "birthday": {
+      "title": "¿Cuándo es tu cumpleaños?",
+      "label": "Fecha de nacimiento",
+      "placeholder": "DD/MM/AAAA"
+    },
+    "address": {
+      "title": "¿Dónde te encuentras?",
+      "label": "Dirección",
+      "streetAddress": "Dirección",
+      "streetPlaceholder": "Calle y número",
+      "city": "Ciudad",
+      "cityPlaceholder": "Tu ciudad",
+      "state": "Estado",
+      "statePlaceholder": "Tu estado",
+      "postalCode": "Código postal",
+      "postalPlaceholder": "12345",
+      "country": "País",
+      "countryPlaceholder": "México",
+      "optional": "Puedes omitir este paso si prefieres no compartir tu dirección"
+    },
+    "bio": {
+      "title": "Cuéntanos sobre ti",
+      "label": "Biografía",
+      "placeholder": "Comparte un poco sobre ti y tus intereses (opcional)"
+    }
+  },
+  "auth": {
+    "title": "Inicia sesión o regístrate",
+    "signIn": "Iniciar Sesión",
+    "signUp": "Registrarse",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "passwordMin": "Contraseña (mínimo 6 caracteres)",
+    "fullName": "Nombre completo",
+    "continue": "Continuar",
+    "or": "o",
+    "continueWithGoogle": "Continuar con Google",
+    "continueWithApple": "Continuar con Apple",
+    "continueWithFacebook": "Continuar con Facebook",
+    "termsText": "Al registrarte, aceptas nuestros",
+    "termsLink": "Términos y Condiciones",
+    "and": "y",
+    "privacyLink": "Política de Privacidad",
+    "welcome": "¡Bienvenido!",
+    "signInSuccess": "Has iniciado sesión correctamente",
+    "accountCreated": "¡Cuenta creada!",
+    "checkEmail": "Revisa tu email para confirmar tu cuenta",
+    "signInError": "Error de inicio de sesión",
+    "signUpError": "Error de registro",
+    "passwordError": "Error de contraseña",
+    "passwordMinLength": "La contraseña debe tener al menos 6 caracteres"
   }
 }

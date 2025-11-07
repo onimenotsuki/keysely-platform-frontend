@@ -472,5 +472,75 @@
     "addLanguage": "Add language",
     "saveChanges": "Save changes",
     "cancel": "Cancel"
+  },
+  "onboarding": {
+    "title": "Complete your profile",
+    "subtitle": "Help us get to know you better",
+    "step": "Step {{current}} of {{total}}",
+    "continue": "Continue",
+    "back": "Back",
+    "skip": "Skip",
+    "complete": "Complete",
+    "fullName": {
+      "title": "What's your name?",
+      "label": "Full name",
+      "placeholder": "Your full name"
+    },
+    "occupation": {
+      "title": "What do you do?",
+      "label": "Occupation",
+      "placeholder": "e.g: Designer, Developer, Entrepreneur"
+    },
+    "birthday": {
+      "title": "When is your birthday?",
+      "label": "Date of birth",
+      "placeholder": "MM/DD/YYYY"
+    },
+    "address": {
+      "title": "Where are you located?",
+      "label": "Address",
+      "streetAddress": "Street Address",
+      "streetPlaceholder": "Street and number",
+      "city": "City",
+      "cityPlaceholder": "Your city",
+      "state": "State",
+      "statePlaceholder": "Your state",
+      "postalCode": "Postal Code",
+      "postalPlaceholder": "12345",
+      "country": "Country",
+      "countryPlaceholder": "United States",
+      "optional": "You can skip this step if you prefer not to share your address"
+    },
+    "bio": {
+      "title": "Tell us about yourself",
+      "label": "Biography",
+      "placeholder": "Share a bit about yourself and your interests (optional)"
+    }
+  },
+  "auth": {
+    "title": "Sign in or sign up",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "passwordMin": "Password (minimum 6 characters)",
+    "fullName": "Full name",
+    "continue": "Continue",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "continueWithFacebook": "Continue with Facebook",
+    "termsText": "By signing up, you agree to our",
+    "termsLink": "Terms and Conditions",
+    "and": "and",
+    "privacyLink": "Privacy Policy",
+    "welcome": "Welcome!",
+    "signInSuccess": "You have successfully signed in",
+    "accountCreated": "Account created!",
+    "checkEmail": "Check your email to confirm your account",
+    "signInError": "Sign in error",
+    "signUpError": "Sign up error",
+    "passwordError": "Password error",
+    "passwordMinLength": "Password must be at least 6 characters"
   }
 }

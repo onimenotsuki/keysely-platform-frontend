@@ -19,6 +19,7 @@ import ListSpaceNew from './pages/ListSpaceNew';
 import Messages from './pages/Messages';
 import MyReviews from './pages/MyReviews';
 import NotFound from './pages/NotFound';
+import Onboarding from './pages/Onboarding';
 import OwnerDashboard from './pages/OwnerDashboard';
 import PaymentCancelled from './pages/PaymentCancelled';
 import PaymentSuccess from './pages/PaymentSuccess';
@@ -38,6 +39,9 @@ const App = () => (
             <Routes>
               {/* Redirect root to default language */}
               <Route path="/" element={<Navigate to="/es" replace />} />
+
+              {/* Onboarding route - no language prefix, accessible right after signup */}
+              <Route path="/onboarding" element={<Onboarding />} />
 
               {/* Language-prefixed routes */}
               <Route

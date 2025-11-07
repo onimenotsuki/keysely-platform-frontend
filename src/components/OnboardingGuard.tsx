@@ -1,23 +1,22 @@
+import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
-import { ReactNode, useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
 
-interface ProtectedRouteProps {
-  children: ReactNode;
+interface OnboardingGuardProps {
+  children: React.ReactNode;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+export const OnboardingGuard = ({ children }: OnboardingGuardProps) => {
   const { user, loading: authLoading } = useAuth();
-  const location = useLocation();
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
-  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       if (!user) {
-        setIsCheckingOnboarding(false);
+        setIsLoading(false);
         return;
       }
 
@@ -40,7 +39,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         // If there's an error, allow access
         setOnboardingCompleted(true);
       } finally {
-        setIsCheckingOnboarding(false);
+        setIsLoading(false);
       }
     };
 
@@ -49,8 +48,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [user, authLoading]);
 
-  // Show loading spinner while checking authentication or onboarding
-  if (authLoading || isCheckingOnboarding) {
+  // Show loading spinner while checking auth or onboarding status
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-[#1A2B42]" />
@@ -58,18 +57,11 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  // If not authenticated, redirect to auth page
-  if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
-  }
-
-  // If authenticated but onboarding not completed, redirect to onboarding
+  // If user is authenticated but hasn't completed onboarding, redirect to onboarding
   if (user && onboardingCompleted === false) {
     return <Navigate to="/onboarding" replace />;
   }
 
-  // User is authenticated and has completed onboarding
+  // Otherwise, render the protected content
   return <>{children}</>;
 };
-
-export default ProtectedRoute;

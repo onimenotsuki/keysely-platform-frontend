@@ -143,6 +143,14 @@ If linting fails, the commit is blocked. Fix errors before committing.
 - Trailing commas in multiline
 - 80-character line length (soft limit)
 
+### Design System Rules
+
+- **Never use CSS gradients** - Use solid colors from the Tailwind theme only
+- Use `bg-primary` and `hover:bg-[#3B82F6]` for primary buttons
+- Use theme colors defined in `tailwind.config.ts`
+- Avoid inline color values when possible, prefer theme variables
+- Keep designs clean and modern with flat colors
+
 ### File Organization
 
 ```

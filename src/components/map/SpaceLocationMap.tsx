@@ -1,6 +1,6 @@
 import mapOptions from '@/utils/mapOptions';
 import { GoogleMap, MarkerF } from '@react-google-maps/api';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const mapContainerStyle = {
   width: '100%',
@@ -23,10 +23,13 @@ interface SpaceLocationMapProps {
 export const SpaceLocationMap = ({ latitude, longitude, zoom = 14 }: SpaceLocationMapProps) => {
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  const center = {
-    lat: latitude,
-    lng: longitude,
-  };
+  const center = useMemo(
+    () => ({
+      lat: latitude,
+      lng: longitude,
+    }),
+    [latitude, longitude]
+  );
 
   const onLoad = useCallback((map: google.maps.Map) => {
     setMap(map);
@@ -41,7 +44,7 @@ export const SpaceLocationMap = ({ latitude, longitude, zoom = 14 }: SpaceLocati
     if (map) {
       map.panTo(center);
     }
-  }, [map, latitude, longitude]);
+  }, [map, center]);
 
   // Custom marker icon for the space location
   const markerIcon: google.maps.Icon = {
