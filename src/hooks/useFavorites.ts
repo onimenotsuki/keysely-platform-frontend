@@ -19,25 +19,27 @@ export interface Favorite {
 
 export const useFavorites = () => {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['favorites', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
+
       const { data, error } = await supabase
         .from('favorites')
-        .select(`
+        .select(
+          `
           *,
           spaces(id, title, city, price_per_hour, images, rating)
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as Favorite[];
     },
-    enabled: !!user
+    enabled: !!user,
   });
 };
 
@@ -59,50 +61,48 @@ export const useToggleFavorite = () => {
 
       if (existing) {
         // Remove favorite
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('id', existing.id);
-        
+        const { error } = await supabase.from('favorites').delete().eq('id', existing.id);
+
         if (error) throw error;
         return { action: 'removed' };
       } else {
         // Add favorite
-        const { error } = await supabase
-          .from('favorites')
-          .insert({
-            user_id: user.id,
-            space_id: spaceId
-          });
-        
+        const { error } = await supabase.from('favorites').insert({
+          user_id: user.id,
+          space_id: spaceId,
+        });
+
         if (error) throw error;
         return { action: 'added' };
       }
     },
     onSuccess: () => {
+      // Invalidate all favorites queries (including those with user?.id)
       queryClient.invalidateQueries({ queryKey: ['favorites'] });
-    }
+      // Invalidate all favorite-status queries to update heart icons everywhere
+      queryClient.invalidateQueries({ queryKey: ['favorite-status'] });
+    },
   });
 };
 
 export const useIsFavorite = (spaceId: string) => {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['favorite-status', spaceId, user?.id],
     queryFn: async () => {
       if (!user) return false;
-      
+
       const { data, error } = await supabase
         .from('favorites')
         .select('id')
         .eq('user_id', user.id)
         .eq('space_id', spaceId)
         .maybeSingle();
-      
+
       if (error) throw error;
       return !!data;
     },
-    enabled: !!user && !!spaceId
+    enabled: !!user && !!spaceId,
   });
 };

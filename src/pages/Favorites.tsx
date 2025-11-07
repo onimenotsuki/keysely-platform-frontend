@@ -1,10 +1,12 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Heart, MapPin, Star, Users } from 'lucide-react';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -14,6 +16,8 @@ import { Header } from '../components/layout/Header';
 const Favorites = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const { createLocalizedPath } = useLanguageRouting();
   const { data: favorites, isLoading } = useFavorites();
   const toggleFavorite = useToggleFavorite();
 
@@ -21,13 +25,13 @@ const Favorites = () => {
     try {
       await toggleFavorite.mutateAsync(spaceId);
       toast({
-        title: 'Eliminado de favoritos',
-        description: `${spaceTitle} se eliminó de tus favoritos`,
+        title: t('favorites.removed'),
+        description: `${spaceTitle} ${t('favorites.removedDescription')}`,
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'No se pudo eliminar de favoritos',
+        title: t('common.error'),
+        description: t('favorites.couldNotRemove'),
         variant: 'destructive',
       });
     }
@@ -38,9 +42,9 @@ const Favorites = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">Inicia sesión para ver tus favoritos</h1>
-          <Link to="/auth">
-            <Button>Iniciar Sesión</Button>
+          <h1 className="text-2xl font-bold mb-4">{t('favorites.loginToView')}</h1>
+          <Link to={createLocalizedPath('/auth')}>
+            <Button>{t('auth.signIn')}</Button>
           </Link>
         </div>
         <Footer />
@@ -50,16 +54,14 @@ const Favorites = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header forceScrolled={true} />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 mt-12">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Mis Favoritos</h1>
-            <p className="text-muted-foreground">
-              Espacios que has guardado para reservar más tarde
-            </p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t('favorites.title')}</h1>
+            <p className="text-muted-foreground">{t('favorites.subtitle')}</p>
           </div>
 
           {/* Content */}
@@ -79,7 +81,7 @@ const Favorites = () => {
                   className="group hover:shadow-lg transition-all duration-300 overflow-hidden"
                 >
                   <div className="relative w-full h-48 overflow-hidden">
-                    <Link to={`/space/${favorite.spaces?.id}`}>
+                    <Link to={createLocalizedPath(`/space/${favorite.spaces?.id}`)}>
                       <img
                         src={favorite.spaces?.images?.[0] || '/placeholder.svg'}
                         alt={favorite.spaces?.title}
@@ -103,13 +105,15 @@ const Favorites = () => {
                       <Heart className="h-4 w-4 fill-red-500 text-red-500" />
                     </Button>
                     <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-                      €{favorite.spaces?.price_per_hour}/hora
+                      {t('common.currency')}
+                      {favorite.spaces?.price_per_hour}
+                      {t('favorites.perHour')}
                     </Badge>
                   </div>
 
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
-                      <Link to={`/space/${favorite.spaces?.id}`}>
+                      <Link to={createLocalizedPath(`/space/${favorite.spaces?.id}`)}>
                         <h3 className="font-semibold text-lg truncate flex-1 mr-2 hover:text-primary transition-colors">
                           {favorite.spaces?.title}
                         </h3>
@@ -127,25 +131,14 @@ const Favorites = () => {
 
                     <div className="flex items-center text-muted-foreground mb-4">
                       <Users className="h-4 w-4 mr-1" />
-                      <span className="text-sm">Espacio disponible</span>
+                      <span className="text-sm">{t('favorites.spaceAvailable')}</span>
                     </div>
 
-                    <div className="flex space-x-2">
-                      <Button asChild className="flex-1">
-                        <Link to={`/space/${favorite.spaces?.id}`}>Ver Detalles</Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (favorite.spaces?.id && favorite.spaces?.title) {
-                            handleRemoveFavorite(favorite.spaces.id, favorite.spaces.title);
-                          }
-                        }}
-                      >
-                        <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                      </Button>
-                    </div>
+                    <Button asChild className="w-full">
+                      <Link to={createLocalizedPath(`/space/${favorite.spaces?.id}`)}>
+                        {t('favorites.viewDetails')}
+                      </Link>
+                    </Button>
                   </CardContent>
                 </Card>
               ))}
@@ -154,12 +147,10 @@ const Favorites = () => {
             <Card>
               <CardContent className="p-12 text-center">
                 <Heart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No tienes favoritos aún</h2>
-                <p className="text-muted-foreground mb-6">
-                  Explora espacios y guarda los que más te gusten para encontrarlos fácilmente
-                </p>
+                <h2 className="text-xl font-semibold mb-2">{t('favorites.noFavoritesYet')}</h2>
+                <p className="text-muted-foreground mb-6">{t('favorites.noFavoritesDesc')}</p>
                 <Button asChild>
-                  <Link to="/explore">Explorar Espacios</Link>
+                  <Link to={createLocalizedPath('/explore')}>{t('common.exploreSpaces')}</Link>
                 </Button>
               </CardContent>
             </Card>

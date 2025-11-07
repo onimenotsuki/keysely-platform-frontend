@@ -9,6 +9,7 @@
       "signInOrRegister": "Sign in or register",
       "profile": "Profile",
       "dashboard": "User dashboard",
+      "favorites": "Favorites list",
       "signOut": "Sign out"
     }
   },
@@ -593,5 +594,18 @@
     "profileUpdated": "Profile updated successfully!",
     "updateFailed": "Failed to update profile",
     "pleaseSignIn": "Please sign in to view your profile"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "subtitle": "Spaces you've saved to book later",
+    "loginToView": "Sign in to view your favorites",
+    "removed": "Removed from favorites",
+    "removedDescription": "was removed from your favorites",
+    "couldNotRemove": "Could not remove from favorites",
+    "perHour": "/hour",
+    "spaceAvailable": "Space available",
+    "viewDetails": "View Details",
+    "noFavoritesYet": "No favorites yet",
+    "noFavoritesDesc": "Explore spaces and save the ones you like to find them easily"
   }
 }

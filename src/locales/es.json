@@ -10,6 +10,7 @@
       "signInOrRegister": "Inicia sesión o regístrate",
       "profile": "Perfil",
       "dashboard": "Dashboard de usuario",
+      "favorites": "Lista de favoritos",
       "signOut": "Cerrar sesión"
     }
   },
@@ -594,5 +595,18 @@
     "profileUpdated": "¡Perfil actualizado exitosamente!",
     "updateFailed": "Error al actualizar el perfil",
     "pleaseSignIn": "Por favor inicia sesión para ver tu perfil"
+  },
+  "favorites": {
+    "title": "Mis Favoritos",
+    "subtitle": "Espacios que has guardado para reservar más tarde",
+    "loginToView": "Inicia sesión para ver tus favoritos",
+    "removed": "Eliminado de favoritos",
+    "removedDescription": "se eliminó de tus favoritos",
+    "couldNotRemove": "No se pudo eliminar de favoritos",
+    "perHour": "/hora",
+    "spaceAvailable": "Espacio disponible",
+    "viewDetails": "Ver Detalles",
+    "noFavoritesYet": "No tienes favoritos aún",
+    "noFavoritesDesc": "Explora espacios y guarda los que más te gusten para encontrarlos fácilmente"
   }
 }

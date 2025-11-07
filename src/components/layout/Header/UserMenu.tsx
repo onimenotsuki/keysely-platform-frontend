@@ -9,7 +9,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useTranslation } from '@/hooks/useTranslation';
-import { LayoutDashboard, LogOut, User } from 'lucide-react';
+import { Heart, LayoutDashboard, LogOut, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface UserMenuProps {
@@ -81,6 +81,12 @@ export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
           <Link to={createLocalizedPath(`/dashboard`)} className="cursor-pointer flex items-center">
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>{t('header.userMenu.dashboard')}</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to={createLocalizedPath(`/favorites`)} className="cursor-pointer flex items-center">
+            <Heart className="mr-2 h-4 w-4" />
+            <span>{t('header.userMenu.favorites')}</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem
