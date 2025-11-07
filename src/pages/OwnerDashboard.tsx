@@ -3,18 +3,23 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
 import { useOwnerBookings, useOwnerSpaces, useOwnerStats } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
 import StripeConnectOnboarding from '../components/StripeConnectOnboarding';
+import { ExternalLink } from 'lucide-react';
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { t } = useTranslation();
+  const { createLocalizedPath } = useLanguageRouting();
   const { data: ownerSpaces = [], isLoading: spacesLoading } = useOwnerSpaces();
   const { data: ownerStats, isLoading: statsLoading } = useOwnerStats();
   const { data: ownerBookings = [], isLoading: bookingsLoading } = useOwnerBookings();
@@ -72,6 +77,35 @@ const OwnerDashboard = () => {
               {t('ownerDashboard.addNewListing')}
             </Button>
           </div>
+
+          {/* Public Profile Card */}
+          {user && (
+            <Card className="mb-8 bg-accent/5 border-accent/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center">
+                      <i className="fas fa-user-circle text-accent text-2xl"></i>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground text-lg">
+                        {t('hostProfile.viewPublicProfile')}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {t('hostProfile.editHostInfo')}
+                      </p>
+                    </div>
+                  </div>
+                  <Button asChild variant="outline" className="gap-2">
+                    <Link to={createLocalizedPath(`/host/${user.id}`)}>
+                      <ExternalLink className="h-4 w-4" />
+                      {t('hostProfile.title')}
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats Cards */}
           {statsLoading ? (

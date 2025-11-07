@@ -10,28 +10,34 @@ export interface Profile {
   phone?: string;
   bio?: string;
   company?: string;
+  languages?: string[];
+  response_rate?: number;
+  response_time_hours?: number;
+  is_identity_verified?: boolean;
+  is_superhost?: boolean;
+  work_description?: string;
   created_at: string;
   updated_at: string;
 }
 
 export const useProfile = () => {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
-      
+
       if (error) throw error;
       return data as Profile;
     },
-    enabled: !!user
+    enabled: !!user,
   });
 };
 
@@ -55,6 +61,6 @@ export const useUpdateProfile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-    }
+    },
   });
 };

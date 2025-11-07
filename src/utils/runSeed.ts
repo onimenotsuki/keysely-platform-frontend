@@ -14,6 +14,7 @@
 
 import { generateSeedSpaces, clearAllSpaces, AMENITIES_LIST } from './seedSpaces';
 import { createSeedData } from './seedData';
+import { seedHostProfiles, clearHostProfiles, getHostProfileStats } from './seedHostProfiles';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SeedOptions {
@@ -184,6 +185,47 @@ export const showAvailableAmenities = () => {
   return AMENITIES_LIST;
 };
 
+/**
+ * Seed host profile data for existing space owners
+ */
+export const seedHostData = async () => {
+  try {
+    console.log('🌱 Seeding host profiles...');
+    const result = await seedHostProfiles();
+    return result;
+  } catch (error) {
+    console.error('❌ Error seeding host profiles:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Clear all host profile data
+ */
+export const clearHostData = async () => {
+  try {
+    console.log('🗑️  Clearing host profiles...');
+    const result = await clearHostProfiles();
+    return result;
+  } catch (error) {
+    console.error('❌ Error clearing host profiles:', error);
+    return { success: false, error };
+  }
+};
+
+/**
+ * Get statistics about host profiles
+ */
+export const getHostStats = async () => {
+  try {
+    const stats = await getHostProfileStats();
+    return stats;
+  } catch (error) {
+    console.error('❌ Error getting host stats:', error);
+    return null;
+  }
+};
+
 // Export all functions for easy access
 export const seedUtils = {
   runFullSeed,
@@ -192,6 +234,9 @@ export const seedUtils = {
   clearSpaces,
   getSpaceStats,
   showAvailableAmenities,
+  seedHostData,
+  clearHostData,
+  getHostStats,
 };
 
 // Make it available in the browser console for development

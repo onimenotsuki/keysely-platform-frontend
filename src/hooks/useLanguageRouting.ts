@@ -26,5 +26,14 @@ export const useLanguageRouting = () => {
     navigate(`/${language}/${cleanPath}`);
   };
 
-  return { navigateWithLang, currentLanguage: language };
+  /**
+   * Create a localized path with the current language prefix
+   * This is useful for Link components
+   */
+  const createLocalizedPath = (path: string) => {
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return `/${language}/${cleanPath}`;
+  };
+
+  return { navigateWithLang, createLocalizedPath, currentLanguage: language };
 };

@@ -412,5 +412,66 @@
   "map": {
     "viewDetails": "Ver detalles",
     "searchThisArea": "Buscar en esta área"
+  },
+  "hostProfile": {
+    "title": "Perfil de Anfitrión",
+    "hostSince": "Anfitrión desde {{year}}",
+    "superhost": "Superanfitrión",
+    "superhostDescription": "Anfitriones experimentados con excelentes calificaciones",
+    "verifications": "Verificaciones",
+    "emailVerified": "Email verificado",
+    "phoneVerified": "Teléfono verificado",
+    "identityVerified": "Identidad verificada",
+    "languages": "Idiomas",
+    "noLanguages": "No se han especificado idiomas",
+    "about": "Acerca de",
+    "aboutHost": "Acerca de {{name}}",
+    "workDescription": "Trabajo",
+    "company": "Empresa",
+    "stats": {
+      "reviews": "Reseñas",
+      "rating": "Calificación",
+      "yearsHosting": "Años como anfitrión",
+      "spaces": "Espacios",
+      "activeSpaces": "Espacios activos",
+      "responseRate": "Tasa de respuesta",
+      "responseTime": "Tiempo de respuesta",
+      "within1Hour": "En menos de 1 hora",
+      "withinHours": "En {{hours}} horas",
+      "within1Day": "En 1 día"
+    },
+    "spaces": {
+      "title": "Espacios de {{name}}",
+      "activeSpaces": "{{count}} espacios activos",
+      "noSpaces": "Este anfitrión no tiene espacios activos en este momento",
+      "inactiveSpaces": "{{count}} espacios inactivos"
+    },
+    "reviews": {
+      "title": "Reseñas para {{name}}",
+      "totalReviews": "{{count}} reseñas",
+      "averageRating": "Calificación promedio: {{rating}}",
+      "noReviews": "Este anfitrión aún no ha recibido reseñas",
+      "reviewFor": "Reseña para {{space}}",
+      "showMore": "Mostrar más reseñas",
+      "showLess": "Mostrar menos"
+    },
+    "contact": {
+      "contactHost": "Contactar a {{name}}",
+      "sendMessage": "Enviar mensaje"
+    },
+    "errors": {
+      "notFound": "Anfitrión no encontrado",
+      "notFoundDescription": "Lo sentimos, no pudimos encontrar el perfil del anfitrión que buscas",
+      "goBack": "Volver atrás",
+      "loadingError": "Error al cargar el perfil"
+    },
+    "viewPublicProfile": "Ver perfil público",
+    "editHostInfo": "Editar información de anfitrión",
+    "hostInformation": "Información de Anfitrión",
+    "editLanguages": "Editar idiomas",
+    "selectLanguages": "Selecciona los idiomas que hablas",
+    "addLanguage": "Agregar idioma",
+    "saveChanges": "Guardar cambios",
+    "cancel": "Cancelar"
   }
 }

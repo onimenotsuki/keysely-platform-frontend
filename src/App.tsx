@@ -12,6 +12,7 @@ import Auth from './pages/Auth';
 import Bookings from './pages/Bookings';
 import Explore from './pages/Explore';
 import Favorites from './pages/Favorites';
+import HostProfile from './pages/HostProfile';
 import Index from './pages/Index';
 import ListSpace from './pages/ListSpace';
 import ListSpaceNew from './pages/ListSpaceNew';
@@ -60,6 +61,14 @@ const App = () => (
                 element={
                   <LanguageWrapper>
                     <SpaceDetail />
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/host/:id"
+                element={
+                  <LanguageWrapper>
+                    <HostProfile />
                   </LanguageWrapper>
                 }
               />

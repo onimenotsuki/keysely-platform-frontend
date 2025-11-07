@@ -13,7 +13,8 @@ import { useBookings } from '@/hooks/useBookings';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useProfile, useUpdateProfile } from '@/hooks/useProfile';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Star } from 'lucide-react';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
+import { Star, X, ExternalLink } from 'lucide-react';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
@@ -23,6 +24,7 @@ const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { createLocalizedPath } = useLanguageRouting();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: bookings, isLoading: bookingsLoading } = useBookings();
   const favoritesQuery = useFavorites();
@@ -36,7 +38,11 @@ const Profile = () => {
     phone: '',
     bio: '',
     company: '',
+    work_description: '',
+    languages: [] as string[],
   });
+
+  const [newLanguage, setNewLanguage] = useState('');
 
   React.useEffect(() => {
     if (profile) {
@@ -45,6 +51,8 @@ const Profile = () => {
         phone: profile.phone || '',
         bio: profile.bio || '',
         company: profile.company || '',
+        work_description: profile.work_description || '',
+        languages: profile.languages || [],
       });
     }
   }, [profile]);
@@ -424,6 +432,111 @@ const Profile = () => {
                       onChange={(e) => setProfileData((prev) => ({ ...prev, bio: e.target.value }))}
                       disabled={!isEditing}
                     />
+                  </div>
+
+                  {isEditing && (
+                    <div className="flex space-x-2">
+                      <Button
+                        className="btn-primary"
+                        onClick={handleSaveProfile}
+                        disabled={updateProfile.isPending}
+                      >
+                        {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                      <Button variant="outline" onClick={() => setIsEditing(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Host Information Card */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>{t('hostProfile.hostInformation')}</CardTitle>
+                    <Button asChild variant="outline" size="sm" className="gap-2">
+                      <Link to={createLocalizedPath(`/host/${user.id}`)}>
+                        <ExternalLink className="h-4 w-4" />
+                        {t('hostProfile.viewPublicProfile')}
+                      </Link>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="workDescription">{t('hostProfile.workDescription')}</Label>
+                    <Textarea
+                      id="workDescription"
+                      value={profileData.work_description}
+                      onChange={(e) =>
+                        setProfileData((prev) => ({ ...prev, work_description: e.target.value }))
+                      }
+                      disabled={!isEditing}
+                      placeholder={t('hostProfile.workDescription')}
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>{t('hostProfile.languages')}</Label>
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {profileData.languages.map((lang, index) => (
+                          <Badge key={index} variant="secondary" className="px-3 py-1">
+                            {lang}
+                            {isEditing && (
+                              <button
+                                onClick={() =>
+                                  setProfileData((prev) => ({
+                                    ...prev,
+                                    languages: prev.languages.filter((_, i) => i !== index),
+                                  }))
+                                }
+                                className="ml-2 hover:text-destructive"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            )}
+                          </Badge>
+                        ))}
+                      </div>
+                      {isEditing && (
+                        <div className="flex gap-2">
+                          <Input
+                            value={newLanguage}
+                            onChange={(e) => setNewLanguage(e.target.value)}
+                            placeholder={t('hostProfile.addLanguage')}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && newLanguage.trim()) {
+                                e.preventDefault();
+                                setProfileData((prev) => ({
+                                  ...prev,
+                                  languages: [...prev.languages, newLanguage.trim()],
+                                }));
+                                setNewLanguage('');
+                              }
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              if (newLanguage.trim()) {
+                                setProfileData((prev) => ({
+                                  ...prev,
+                                  languages: [...prev.languages, newLanguage.trim()],
+                                }));
+                                setNewLanguage('');
+                              }
+                            }}
+                          >
+                            {t('hostProfile.addLanguage')}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {isEditing && (

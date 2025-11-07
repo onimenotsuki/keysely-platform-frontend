@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useCreateBooking } from '@/hooks/useBookings';
 import { useBookingsBySpace } from '@/hooks/useBookingsBySpace';
 import { useIsFavorite, useToggleFavorite } from '@/hooks/useFavorites';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useMarketplacePayment } from '@/hooks/useMarketplacePayment';
 import { useSpace } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -32,6 +33,7 @@ const SpaceDetail = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { createLocalizedPath } = useLanguageRouting();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [startTime, setStartTime] = useState('09:00');
   const [endTime, setEndTime] = useState('17:00');
@@ -242,10 +244,25 @@ const SpaceDetail = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Host Info Header */}
             <div className="flex items-center justify-between pb-6 border-b">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">
-                  {t('spaceDetail.hostedBy', { name: space.profiles?.full_name || 'Host' })}
-                </h2>
+              <div className="flex-1">
+                <Link
+                  to={createLocalizedPath(`/host/${space.owner_id}`)}
+                  className="group inline-block"
+                >
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-lg group-hover:bg-primary/90 transition-colors">
+                      {(space.profiles?.full_name || 'H')[0]}
+                    </div>
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {t('spaceDetail.hostedBy', { name: space.profiles?.full_name || 'Host' })}
+                      </h2>
+                      <span className="text-sm text-muted-foreground group-hover:underline">
+                        {t('hostProfile.title')}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
                 <div className="flex items-center gap-3 text-muted-foreground text-sm">
                   <span className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
@@ -261,11 +278,6 @@ const SpaceDetail = () => {
                     <Clock className="h-4 w-4" />
                     {t('spaceDetail.hourlyBooking')}
                   </span>
-                </div>
-              </div>
-              <div className="hidden sm:block">
-                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-lg">
-                  {(space.profiles?.full_name || 'H')[0]}
                 </div>
               </div>
             </div>

@@ -411,5 +411,66 @@
   "map": {
     "viewDetails": "View details",
     "searchThisArea": "Search this area"
+  },
+  "hostProfile": {
+    "title": "Host Profile",
+    "hostSince": "Host since {{year}}",
+    "superhost": "Superhost",
+    "superhostDescription": "Experienced hosts with excellent ratings",
+    "verifications": "Verifications",
+    "emailVerified": "Email verified",
+    "phoneVerified": "Phone verified",
+    "identityVerified": "Identity verified",
+    "languages": "Languages",
+    "noLanguages": "No languages specified",
+    "about": "About",
+    "aboutHost": "About {{name}}",
+    "workDescription": "Work",
+    "company": "Company",
+    "stats": {
+      "reviews": "Reviews",
+      "rating": "Rating",
+      "yearsHosting": "Years hosting",
+      "spaces": "Spaces",
+      "activeSpaces": "Active spaces",
+      "responseRate": "Response rate",
+      "responseTime": "Response time",
+      "within1Hour": "Within 1 hour",
+      "withinHours": "Within {{hours}} hours",
+      "within1Day": "Within 1 day"
+    },
+    "spaces": {
+      "title": "{{name}}'s spaces",
+      "activeSpaces": "{{count}} active spaces",
+      "noSpaces": "This host doesn't have any active spaces at this time",
+      "inactiveSpaces": "{{count}} inactive spaces"
+    },
+    "reviews": {
+      "title": "Reviews for {{name}}",
+      "totalReviews": "{{count}} reviews",
+      "averageRating": "Average rating: {{rating}}",
+      "noReviews": "This host hasn't received any reviews yet",
+      "reviewFor": "Review for {{space}}",
+      "showMore": "Show more reviews",
+      "showLess": "Show less"
+    },
+    "contact": {
+      "contactHost": "Contact {{name}}",
+      "sendMessage": "Send message"
+    },
+    "errors": {
+      "notFound": "Host not found",
+      "notFoundDescription": "Sorry, we couldn't find the host profile you're looking for",
+      "goBack": "Go back",
+      "loadingError": "Error loading profile"
+    },
+    "viewPublicProfile": "View public profile",
+    "editHostInfo": "Edit host information",
+    "hostInformation": "Host Information",
+    "editLanguages": "Edit languages",
+    "selectLanguages": "Select the languages you speak",
+    "addLanguage": "Add language",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel"
   }
 }
