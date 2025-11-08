@@ -1,7 +1,32 @@
+import React, { useMemo, useRef, useState } from 'react';
+
+import {
+  getEditorDefaults,
+  plugin_crop,
+  plugin_filter,
+  plugin_finetune,
+  setPlugins,
+  type PinturaEditorDefaultOptions,
+  type PinturaEditor as PinturaEditorInstance,
+} from '@pqina/pintura';
+import pinturaLocaleEs from '@pqina/pintura/locale/es_ES';
+import '@pqina/pintura/pintura.css';
+import { PinturaEditor } from '@pqina/react-pintura';
+import { ExternalLink, Loader2, X } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,44 +36,77 @@ import { useToast } from '@/hooks/use-toast';
 import { useBookings } from '@/hooks/useBookings';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
-import { useProfile, useUpdateProfile, type AddressData } from '@/hooks/useProfile';
+import {
+  useProfile,
+  useUpdateProfile,
+  type AddressData,
+  type Profile as ProfileRecord,
+} from '@/hooks/useProfile';
 import { useTranslation } from '@/hooks/useTranslation';
-import { ExternalLink, X } from 'lucide-react';
-import React, { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
+
+if (typeof window !== 'undefined') {
+  setPlugins(plugin_crop, plugin_finetune, plugin_filter);
+}
 
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { createLocalizedPath } = useLanguageRouting();
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: bookings, isLoading: bookingsLoading } = useBookings();
   const favoritesQuery = useFavorites();
   const favorites = favoritesQuery.data || [];
   const updateProfile = useUpdateProfile();
+  const pinturaEditorOptions = useMemo<PinturaEditorDefaultOptions>(() => {
+    if (typeof window === 'undefined') {
+      return {} as PinturaEditorDefaultOptions;
+    }
 
-  const [profileData, setProfileData] = useState({
+    return getEditorDefaults({
+      utils: ['crop', 'finetune', 'filter'],
+      locale: language === 'es' ? pinturaLocaleEs : undefined,
+      imageCropAspectRatio: 1,
+      imageCropLimitToImage: true,
+    });
+  }, [language]);
+
+  const createEmptyAddress = (): AddressData => ({
+    streetAddress: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+  });
+
+  const [profileData, setProfileData] = useState<
+    Partial<ProfileRecord> & {
+      address: AddressData;
+      languages: string[];
+    }
+  >({
     full_name: '',
     phone: '',
     bio: '',
     company: '',
     work_description: '',
     languages: [] as string[],
-    address: {
-      streetAddress: '',
-      city: '',
-      state: '',
-      postalCode: '',
-      country: '',
-    } as AddressData,
+    address: createEmptyAddress(),
+    avatar_url: '',
   });
 
   const [newLanguage, setNewLanguage] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const isEditing = searchParams.get('edit') === 'true';
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const avatarEditorRef = useRef<PinturaEditorInstance | null>(null);
+  const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
+  const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [isAvatarEditorReady, setIsAvatarEditorReady] = useState(false);
 
   const enterEditMode = () => {
     setSearchParams((prev) => {
@@ -75,16 +133,121 @@ const Profile = () => {
         company: profile.company || '',
         work_description: profile.work_description || '',
         languages: profile.languages || [],
-        address: profile.address || {
-          streetAddress: '',
-          city: '',
-          state: '',
-          postalCode: '',
-          country: '',
-        },
+        address: profile.address
+          ? {
+              ...profile.address,
+            }
+          : createEmptyAddress(),
+        avatar_url: profile.avatar_url || '',
       });
     }
   }, [profile]);
+
+  const currentAvatarUrl = profileData.avatar_url || profile?.avatar_url || '';
+
+  const handleAvatarButtonClick = () => {
+    if (isAvatarUploading) return;
+    avatarInputRef.current?.click();
+  };
+
+  const closeAvatarDialog = () => {
+    setIsAvatarDialogOpen(false);
+    setSelectedAvatarFile(null);
+    avatarEditorRef.current = null;
+    setIsAvatarEditorReady(false);
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = '';
+    }
+  };
+
+  const handleAvatarDialogOpenChange = (open: boolean) => {
+    if (!open && !isAvatarUploading) {
+      closeAvatarDialog();
+    }
+  };
+
+  const handleAvatarFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: t('profile.avatarInvalidType') || 'Only image files are allowed',
+        variant: 'destructive',
+      });
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: t('profile.avatarTooLarge') || 'Image cannot exceed 5MB',
+        variant: 'destructive',
+      });
+      event.target.value = '';
+      return;
+    }
+
+    setSelectedAvatarFile(file);
+    setIsAvatarEditorReady(false);
+    setIsAvatarDialogOpen(true);
+  };
+
+  const uploadAvatarFile = async (file: File) => {
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    const fileExt = file.name.split('.').pop() || 'jpg';
+    const filePath = `avatars/${user.id}/${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage.from('space-images').upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType: file.type,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    const storagePath = data?.path ?? filePath;
+    const { data: publicUrlData } = supabase.storage.from('space-images').getPublicUrl(storagePath);
+
+    return publicUrlData.publicUrl;
+  };
+
+  const handleAvatarSave = async () => {
+    if (!avatarEditorRef.current) {
+      return;
+    }
+
+    try {
+      setIsAvatarUploading(true);
+      const result = await avatarEditorRef.current.processImage();
+      const publicUrl = await uploadAvatarFile(result.dest);
+      await updateProfile.mutateAsync({ avatar_url: publicUrl });
+      setProfileData((prev) => ({
+        ...prev,
+        avatar_url: publicUrl,
+      }));
+      toast({
+        title:
+          t('profile.avatarUpdated') ||
+          t('profile.profileUpdated') ||
+          'Profile photo updated successfully!',
+      });
+      closeAvatarDialog();
+    } catch (error: unknown) {
+      console.error('Avatar update error:', error);
+      toast({
+        title: t('profile.updateFailed') || 'Failed to update profile',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAvatarUploading(false);
+    }
+  };
 
   const handleSaveProfile = async () => {
     try {
@@ -145,6 +308,69 @@ const Profile = () => {
     <div className="min-h-screen bg-background">
       <Header forceScrolled={true} />
 
+      <input
+        ref={avatarInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleAvatarFileChange}
+      />
+
+      <Dialog open={isAvatarDialogOpen} onOpenChange={handleAvatarDialogOpenChange}>
+        {selectedAvatarFile ? (
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>{t('profile.updateAvatar')}</DialogTitle>
+              <DialogDescription>
+                {t('profile.updateAvatarDescription') ||
+                  'Upload an image to update your profile photo.'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <PinturaEditor
+                {...pinturaEditorOptions}
+                key={`${selectedAvatarFile.name}-${selectedAvatarFile.lastModified}`}
+                className="h-[420px]"
+                src={selectedAvatarFile}
+                imageCropAspectRatio={1}
+                imageCropLimitToImage
+                onReady={() => setIsAvatarEditorReady(true)}
+                onInit={(instance) => {
+                  avatarEditorRef.current = instance;
+                }}
+                onDestroy={() => {
+                  avatarEditorRef.current = null;
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={closeAvatarDialog}
+                disabled={isAvatarUploading}
+                className="h-12"
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                className="h-12 bg-primary hover:bg-[#3B82F6]"
+                onClick={handleAvatarSave}
+                disabled={isAvatarUploading || !isAvatarEditorReady}
+              >
+                {isAvatarUploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('common.saving')}
+                  </>
+                ) : (
+                  t('profile.savePhoto') || t('common.saveChanges')
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        ) : null}
+      </Dialog>
+
       <div className="container mx-auto px-4 py-12 mt-16">
         {!isEditing ? (
           // Vista principal del perfil (estilo Airbnb)
@@ -159,8 +385,8 @@ const Profile = () => {
                       <div className="relative mb-4">
                         <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
                           <AvatarImage
-                            src={profile?.avatar_url}
-                            alt={profile?.full_name || user.email}
+                            src={currentAvatarUrl || undefined}
+                            alt={profile?.full_name || user.email || 'Avatar'}
                           />
                           <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
                             {(profile?.full_name || user.email || 'U')[0].toUpperCase()}
@@ -466,11 +692,11 @@ const Profile = () => {
                     <div className="relative">
                       <Avatar className="w-40 h-40 border-4 border-background shadow-lg">
                         <AvatarImage
-                          src={profile?.avatar_url}
-                          alt={profile?.full_name || user.email || 'Avatar'}
+                          src={currentAvatarUrl || undefined}
+                          alt={profileData.full_name || user.email || 'Avatar'}
                         />
                         <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
-                          {(profile?.full_name || user.email || 'U')[0].toUpperCase()}
+                          {(profileData.full_name || user.email || 'U')[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <Button
@@ -478,9 +704,15 @@ const Profile = () => {
                         variant="secondary"
                         className="absolute bottom-2 right-2 shadow-md"
                         type="button"
+                        onClick={handleAvatarButtonClick}
+                        disabled={isAvatarUploading}
                       >
-                        <i className="fas fa-camera mr-2" />
-                        {t('common.edit') || 'Editar'}
+                        {isAvatarUploading ? (
+                          <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <i className="fas fa-camera mr-2" />
+                        )}
+                        {isAvatarUploading ? t('common.saving') : t('profile.changePhoto')}
                       </Button>
                     </div>
 
