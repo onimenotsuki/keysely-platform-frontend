@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom';
+
+import { createListSpaceStepPath } from '@/pages/list-space/paths';
+
 import { useAuth } from '../../../contexts/AuthContext';
 import { useLanguageContext } from '../../../contexts/LanguageContext';
 import { useTranslation } from '../../../hooks/useTranslation';
@@ -51,7 +54,7 @@ export const HeaderActions = ({ isScrolled = false }: HeaderActionsProps) => {
               Favoritos
             </button>
           </Link>
-          <Link to={`/${language}/list-space`}>
+          <Link to={createListSpaceStepPath(language, user.id, 0)}>
             <button className={buttonClass}>
               <i className="fas fa-plus mr-2"></i>
               {t('header.listSpace')}

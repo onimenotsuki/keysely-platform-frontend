@@ -376,6 +376,7 @@ export type Database = {
       spaces: {
         Row: {
           address: string;
+          address_object: Json | null;
           amenities: string[] | null;
           area_sqm: number | null;
           availability_hours: Json | null;
@@ -385,6 +386,7 @@ export type Database = {
           created_at: string;
           description: string | null;
           features: string[] | null;
+          discounts: Json | null;
           id: string;
           images: string[] | null;
           is_active: boolean | null;
@@ -392,12 +394,14 @@ export type Database = {
           policies: string | null;
           price_per_hour: number;
           rating: number | null;
+          service_hours: Json | null;
           title: string;
           total_reviews: number | null;
           updated_at: string;
         };
         Insert: {
           address: string;
+          address_object?: Json | null;
           amenities?: string[] | null;
           area_sqm?: number | null;
           availability_hours?: Json | null;
@@ -407,6 +411,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           features?: string[] | null;
+          discounts?: Json | null;
           id?: string;
           images?: string[] | null;
           is_active?: boolean | null;
@@ -414,12 +419,14 @@ export type Database = {
           policies?: string | null;
           price_per_hour: number;
           rating?: number | null;
+          service_hours?: Json | null;
           title: string;
           total_reviews?: number | null;
           updated_at?: string;
         };
         Update: {
           address?: string;
+          address_object?: Json | null;
           amenities?: string[] | null;
           area_sqm?: number | null;
           availability_hours?: Json | null;
@@ -429,6 +436,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           features?: string[] | null;
+          discounts?: Json | null;
           id?: string;
           images?: string[] | null;
           is_active?: boolean | null;
@@ -436,6 +444,7 @@ export type Database = {
           policies?: string | null;
           price_per_hour?: number;
           rating?: number | null;
+          service_hours?: Json | null;
           title?: string;
           total_reviews?: number | null;
           updated_at?: string;
@@ -495,6 +504,115 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [];
+      };
+      amenities: {
+        Row: {
+          created_at: string | null;
+          created_by: string | null;
+          description: string | null;
+          icon_key: string | null;
+          id: string;
+          name: string;
+          slug: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          created_by?: string | null;
+          description?: string | null;
+          icon_key?: string | null;
+          id?: string;
+          name: string;
+          slug: string;
+        };
+        Update: {
+          created_at?: string | null;
+          created_by?: string | null;
+          description?: string | null;
+          icon_key?: string | null;
+          id?: string;
+          name?: string;
+          slug?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'amenities_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['user_id'];
+          },
+        ];
+      };
+      space_amenities: {
+        Row: {
+          amenity_id: string;
+          created_at: string | null;
+          id: string;
+          space_id: string;
+        };
+        Insert: {
+          amenity_id: string;
+          created_at?: string | null;
+          id?: string;
+          space_id: string;
+        };
+        Update: {
+          amenity_id?: string;
+          created_at?: string | null;
+          id?: string;
+          space_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'space_amenities_amenity_id_fkey';
+            columns: ['amenity_id'];
+            isOneToOne: false;
+            referencedRelation: 'amenities';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'space_amenities_space_id_fkey';
+            columns: ['space_id'];
+            isOneToOne: false;
+            referencedRelation: 'spaces';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      space_characteristics: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          icon_key: string | null;
+          id: string;
+          space_id: string;
+          title: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          icon_key?: string | null;
+          id?: string;
+          space_id: string;
+          title: string;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          icon_key?: string | null;
+          id?: string;
+          space_id?: string;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'space_characteristics_space_id_fkey';
+            columns: ['space_id'];
+            isOneToOne: false;
+            referencedRelation: 'spaces';
+            referencedColumns: ['id'];
+          },
+        ];
       };
     };
     Views: {

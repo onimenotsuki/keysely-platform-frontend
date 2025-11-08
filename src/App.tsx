@@ -14,7 +14,6 @@ import Explore from './pages/Explore';
 import Favorites from './pages/Favorites';
 import HostProfile from './pages/HostProfile';
 import Index from './pages/Index';
-import ListSpace from './pages/ListSpace';
 import ListSpaceNew from './pages/ListSpaceNew';
 import Messages from './pages/Messages';
 import MyReviews from './pages/MyReviews';
@@ -25,6 +24,15 @@ import PaymentCancelled from './pages/PaymentCancelled';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Profile from './pages/Profile';
 import SpaceDetail from './pages/SpaceDetail';
+import {
+  ListSpaceEntryRedirect,
+  ListSpaceLayout,
+  Step1BasicInfo,
+  Step2Address,
+  Step3Amenities,
+  Step4Media,
+  Step5Pricing,
+} from './pages/list-space';
 
 const queryClient = new QueryClient();
 
@@ -135,11 +143,28 @@ const App = () => (
                 element={
                   <LanguageWrapper>
                     <ProtectedRoute>
-                      <ListSpace />
+                      <ListSpaceEntryRedirect />
                     </ProtectedRoute>
                   </LanguageWrapper>
                 }
               />
+              <Route
+                path="/:lang/list-space/:userId"
+                element={
+                  <LanguageWrapper>
+                    <ProtectedRoute>
+                      <ListSpaceLayout />
+                    </ProtectedRoute>
+                  </LanguageWrapper>
+                }
+              >
+                <Route index element={<Navigate to="step-1" replace />} />
+                <Route path="step-1" element={<Step1BasicInfo />} />
+                <Route path="step-2" element={<Step2Address />} />
+                <Route path="step-3" element={<Step3Amenities />} />
+                <Route path="step-4" element={<Step4Media />} />
+                <Route path="step-5" element={<Step5Pricing />} />
+              </Route>
               <Route
                 path="/:lang/owner-dashboard"
                 element={

@@ -7,8 +7,10 @@ export interface Space {
   title: string;
   description: string;
   address: string;
+  address_object?: Record<string, unknown> | null;
   city: string;
   price_per_hour: number;
+  discounts?: Record<string, number> | null;
   capacity: number;
   area_sqm?: number;
   images: string[];

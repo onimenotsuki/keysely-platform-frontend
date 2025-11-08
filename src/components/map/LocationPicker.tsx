@@ -8,6 +8,49 @@ const mapContainerStyle = {
   height: '400px',
 };
 
+const mapStyles: google.maps.MapTypeStyle[] = [
+  {
+    featureType: 'all',
+    elementType: 'geometry',
+    stylers: [{ color: '#EEF2FF' }],
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry.fill',
+    stylers: [{ color: '#C7D7FE' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#E0E7FF' }],
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#94A3B8' }, { weight: 0.3 }],
+  },
+  {
+    featureType: 'poi',
+    elementType: 'geometry.fill',
+    stylers: [{ color: '#DBEAFE' }],
+  },
+  {
+    featureType: 'poi.business',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#1A2B42' }],
+  },
+  {
+    featureType: 'landscape.man_made',
+    elementType: 'geometry',
+    stylers: [{ color: '#E2E8F0' }],
+  },
+  {
+    featureType: 'administrative',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#1A2B42' }],
+  },
+];
+
 const defaultCenter = {
   lat: 19.4326,
   lng: -99.1332,
@@ -19,6 +62,8 @@ const mapOptions: google.maps.MapOptions = {
   streetViewControl: false,
   mapTypeControl: false,
   fullscreenControl: true,
+  backgroundColor: '#EEF2FF',
+  styles: mapStyles,
   // mapId: 'keysely-map', // Commented out - causes issues with @react-google-maps/api v2.20.7
 };
 
@@ -120,6 +165,14 @@ export const LocationPicker = ({
             position={{ lat: marker.lat(), lng: marker.lng() }}
             draggable={true}
             onDragEnd={handleMarkerDragEnd}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 9,
+              fillColor: '#1A2B42',
+              fillOpacity: 1,
+              strokeColor: '#60A5FA',
+              strokeWeight: 2,
+            }}
           />
         )}
       </GoogleMap>

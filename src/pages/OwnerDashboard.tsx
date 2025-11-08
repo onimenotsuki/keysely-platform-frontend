@@ -4,22 +4,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useOwnerBookings, useOwnerSpaces, useOwnerStats } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useLanguageRouting } from '@/hooks/useLanguageRouting';
+import { createListSpaceStepPath } from '@/pages/list-space/paths';
 import { format } from 'date-fns';
-import { useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import StripeConnectOnboarding from '../components/StripeConnectOnboarding';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
-import StripeConnectOnboarding from '../components/StripeConnectOnboarding';
-import { ExternalLink } from 'lucide-react';
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { createLocalizedPath } = useLanguageRouting();
+  const { createLocalizedPath, currentLanguage } = useLanguageRouting();
   const { data: ownerSpaces = [], isLoading: spacesLoading } = useOwnerSpaces();
   const { data: ownerStats, isLoading: statsLoading } = useOwnerStats();
   const { data: ownerBookings = [], isLoading: bookingsLoading } = useOwnerBookings();
@@ -58,6 +58,69 @@ const OwnerDashboard = () => {
     }
   };
 
+  const renderBookingsContent = () => {
+    if (bookingsLoading) {
+      return (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="animate-pulse p-4 border border-border rounded-lg">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 bg-muted rounded-full" />
+                <div className="flex-1">
+                  <div className="h-4 bg-muted rounded w-1/4 mb-2" />
+                  <div className="h-3 bg-muted rounded w-1/2" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (ownerBookings.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <i className="fas fa-calendar-times text-4xl text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">{t('ownerDashboard.noBookings')}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {ownerBookings.map((booking) => (
+          <div
+            key={booking.id}
+            className="flex items-center justify-between p-4 border border-border rounded-lg"
+          >
+            <div className="flex items-center space-x-4">
+              <Avatar>
+                <AvatarImage src={booking.profiles?.avatar_url} alt={booking.profiles?.full_name} />
+                <AvatarFallback>{booking.profiles?.full_name?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium text-foreground">
+                  {booking.profiles?.full_name || t('ownerDashboard.unknownGuest')}
+                </p>
+                <p className="text-sm text-muted-foreground">{booking.spaces?.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  {format(new Date(booking.start_date), 'MMM dd, yyyy')} • {booking.start_time} -{' '}
+                  {booking.end_time} • {booking.guests_count} {t('ownerDashboard.guests')}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="font-semibold text-foreground">${booking.total_amount}</p>
+              <Badge variant="secondary" className={`capitalize ${getStatusColor(booking.status)}`}>
+                {getStatusText(booking.status)}
+              </Badge>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -72,7 +135,15 @@ const OwnerDashboard = () => {
               </h1>
               <p className="text-xl text-muted-foreground">{t('ownerDashboard.subtitle')}</p>
             </div>
-            <Button className="btn-primary" onClick={() => navigate('/list-space')}>
+            <Button
+              className="btn-primary"
+              onClick={() => {
+                if (user) {
+                  navigate(createListSpaceStepPath(currentLanguage, user.id, 0));
+                }
+              }}
+              disabled={!user}
+            >
               <i className="fas fa-plus mr-2"></i>
               {t('ownerDashboard.addNewListing')}
             </Button>
@@ -306,7 +377,11 @@ const OwnerDashboard = () => {
                   {/* Add New Listing Card */}
                   <Card
                     className="border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer"
-                    onClick={() => navigate('/list-space')}
+                    onClick={() => {
+                      if (user) {
+                        navigate(createListSpaceStepPath(currentLanguage, user.id, 0));
+                      }
+                    }}
                   >
                     <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-64">
                       <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
@@ -331,76 +406,7 @@ const OwnerDashboard = () => {
                 <CardHeader>
                   <CardTitle>{t('ownerDashboard.recentBookings')}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  {bookingsLoading ? (
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse p-4 border border-border rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-muted rounded-full"></div>
-                            <div className="flex-1">
-                              <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
-                              <div className="h-3 bg-muted rounded w-1/2"></div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : ownerBookings.length === 0 ? (
-                    <div className="text-center py-12">
-                      <i className="fas fa-calendar-times text-4xl text-muted-foreground mb-4"></i>
-                      <p className="text-muted-foreground">{t('ownerDashboard.noBookings')}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {ownerBookings.map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="flex items-center justify-between p-4 border border-border rounded-lg"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <Avatar>
-                              <AvatarImage
-                                src={booking.profiles?.avatar_url}
-                                alt={booking.profiles?.full_name}
-                              />
-                              <AvatarFallback>
-                                {booking.profiles?.full_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium text-foreground">
-                                {booking.profiles?.full_name || t('ownerDashboard.unknownGuest')}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {booking.spaces?.title}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(new Date(booking.start_date), 'MMM dd, yyyy')} •{' '}
-                                {booking.start_time} - {booking.end_time} • {booking.guests_count}{' '}
-                                {t('ownerDashboard.guests')}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-4">
-                            <div className="text-right">
-                              <p className="font-semibold text-foreground">
-                                ${booking.total_amount}
-                              </p>
-                              <Badge className={getStatusColor(booking.status)}>
-                                {getStatusText(booking.status)}
-                              </Badge>
-                            </div>
-                            <Button variant="outline" size="sm">
-                              <i className="fas fa-envelope mr-2"></i>
-                              {t('ownerDashboard.message')}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
+                <CardContent>{renderBookingsContent()}</CardContent>
               </Card>
             </TabsContent>
 

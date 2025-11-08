@@ -162,7 +162,12 @@
     "saving": "Saving...",
     "saveChanges": "Save Changes",
     "cancel": "Cancel",
-    "add": "Add"
+    "add": "Add",
+    "delete": "Delete"
+  },
+  "errors": {
+    "notAuthenticated": "You must be signed in to perform this action.",
+    "genericError": "Something went wrong. Please try again."
   },
   "spaceDetail": {
     "home": "Home",
@@ -382,6 +387,254 @@
         "title": "Ready to Start Earning?",
         "subtitle": "Join thousands of successful hosts and turn your unused space into a valuable income source",
         "cta": "List Your Space Now"
+      }
+    }
+  },
+  "listSpaceOnboarding": {
+    "badge": "Step {{current}} of {{total}}",
+    "stepCounter": "Step {{current}} of {{total}}",
+    "progressLabel": "Progress: {{current}} of {{total}} steps",
+    "steps": {
+      "describe": {
+        "title": "Describe your space",
+        "subtitle": "Share the essential details so professionals can understand what you offer.",
+        "helper": "Tell us the basics: name of the space, its capacity, and where guests will find it. You can adjust these details later."
+      },
+      "highlight": {
+        "title": "Make it stand out",
+        "subtitle": "Showcase what makes your workspace unique with photos, amenities, and a compelling story.",
+        "helper": "Add amenities, describe the experience, and upload high-quality photos so guests feel confident booking."
+      },
+      "publish": {
+        "title": "Finish and publish",
+        "subtitle": "Set your pricing, define availability, and get ready to go live.",
+        "helper": "Choose when your space is open, confirm your rates, and review our guidelines before publishing."
+      }
+    },
+    "sections": {
+      "basics": {
+        "title": "Basic details",
+        "mapLabel": "Pin the exact location of your space"
+      },
+      "highlight": {
+        "details": "Share the highlights",
+        "descriptionPlaceholder": "Tell guests what makes your workspace ideal for them, including amenities, ambiance, and any special rules.",
+        "amenitiesTitle": "Select the amenities available in your space",
+        "photosHelper": "Upload at least one high-quality image. Add up to 10 photos to showcase every angle of your workspace."
+      },
+      "publish": {
+        "pricePlaceholder": "e.g., 450",
+        "days": "Choose the days that guests can book",
+        "readyTitle": "Almost ready to publish",
+        "readyDescription": "Review your details and make sure everything looks accurate before you publish your listing."
+      }
+    },
+    "actions": {
+      "back": "Back",
+      "next": "Next step",
+      "publish": "Publish listing"
+    },
+    "errors": {
+      "titleRequired": "Title is required",
+      "titleMax": "Title must be fewer than 100 characters",
+      "descriptionRequired": "Description is required",
+      "descriptionMax": "Description must be fewer than 1000 characters",
+      "categoryRequired": "Category is required",
+      "capacityInvalid": "Enter a valid capacity",
+      "capacityMinimum": "Capacity must be at least 1",
+      "areaInvalid": "Enter a valid area in square meters",
+      "areaMinimum": "Area must be greater than 0",
+      "addressRequired": "Address is required",
+      "cityRequired": "City is required",
+      "priceInvalid": "Enter a valid price",
+      "priceRequired": "Price must be at least 1",
+      "imagesRequired": "Add at least one photo to continue"
+    }
+  },
+  "listSpaceWizard": {
+    "stepCounter": "Step {{current}} of {{total}}",
+    "badge": "Step {{current}} of {{total}}",
+    "progressLabel": "Progress: {{current}} of {{total}} steps",
+    "actions": {
+      "back": "Back",
+      "next": "Next step",
+      "review": "Finish"
+    },
+    "amenityLabels": {
+      "highSpeedWifi": "High-speed WiFi",
+      "printerScanner": "Printer/Scanner",
+      "coffeeAndTea": "Coffee & Tea",
+      "kitchenAccess": "Kitchen Access",
+      "airConditioning": "Air Conditioning",
+      "naturalLight": "Natural Light",
+      "ergonomicFurniture": "Ergonomic Furniture",
+      "whiteboard": "Whiteboard",
+      "projectorScreen": "Projector/Screen",
+      "videoConferencing": "Video Conferencing",
+      "securitySystem": "Security System",
+      "access24x7": "24/7 Access",
+      "receptionServices": "Reception Services",
+      "cleaningService": "Cleaning Service",
+      "parking": "Parking",
+      "publicTransport": "Public Transport",
+      "bikeStorage": "Bike Storage",
+      "showerFacilities": "Shower Facilities",
+      "phoneBooth": "Phone Booth",
+      "lockers": "Lockers"
+    },
+    "step1": {
+      "sectionTitle": "Tell us about your space",
+      "savedTitle": "Basic information saved",
+      "savedDescription": "Your space details were stored in the draft."
+    },
+    "step2": {
+      "sectionTitle": "Where is your space located?",
+      "streetAddress": "Street Address",
+      "streetAddressPlaceholder": "e.g., 123 Reforma Avenue",
+      "postalCode": "Postal Code",
+      "postalCodePlaceholder": "e.g., 44100",
+      "city": "City",
+      "cityPlaceholder": "e.g., Guadalajara",
+      "state": "State / Province",
+      "statePlaceholder": "e.g., Jalisco",
+      "country": "Country",
+      "countryPlaceholder": "e.g., Mexico",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "mapTitle": "Confirm the exact location",
+      "mapHelper": "Drag the marker to fine-tune the entrance of your space.",
+      "completeStep1Title": "Complete previous steps",
+      "completeStep1Description": "Finish the basic information step before adding the address.",
+      "mapsMissingTitle": "Google Maps is not configured",
+      "mapsMissingDescription": "Add your Google Maps API key to enable the location picker.",
+      "savedTitle": "Location saved",
+      "savedDescription": "Your address and coordinates were stored in the draft.",
+      "missingSpace": "Finish earlier steps before saving the address.",
+      "errors": {
+        "streetRequired": "Street address is required",
+        "cityRequired": "City is required",
+        "stateRequired": "State or province is required",
+        "countryRequired": "Country is required",
+        "postalCodeRequired": "Postal code is required",
+        "latitudeInvalid": "Enter a valid latitude",
+        "longitudeInvalid": "Enter a valid longitude",
+        "latitudeRequired": "Select a location on the map",
+        "longitudeRequired": "Select a location on the map"
+      }
+    },
+    "step3": {
+      "amenitiesSectionTitle": "Amenities & services",
+      "amenitiesHelper": "Highlight the services guests can expect.",
+      "addAmenity": "Add amenity",
+      "createAmenityTitle": "Create custom amenity",
+      "createAmenityDescription": "Custom amenities are visible only on your listings.",
+      "amenityNameLabel": "Amenity name",
+      "amenityNamePlaceholder": "e.g., Concierge assistance",
+      "amenityDescriptionLabel": "Description (optional)",
+      "amenityDescriptionPlaceholder": "Explain what the amenity includes.",
+      "iconSelectorLabel": "Choose an icon",
+      "noAmenitiesTitle": "No amenities available",
+      "noAmenitiesDescription": "Start by creating your own amenities.",
+      "selected": "Selected",
+      "serviceHoursTitle": "Service hours",
+      "serviceHoursHelper": "Define when guests can use your space.",
+      "dayColumn": "Day",
+      "opensAt": "Opens at",
+      "closesAt": "Closes at",
+      "dayEnabledHint": "This day is available for bookings.",
+      "dayDisabledHint": "This day is currently unavailable.",
+      "characteristicsSectionTitle": "Space characteristics",
+      "addCharacteristic": "Add characteristic",
+      "noCharacteristicsPlaceholder": "Describe the unique qualities of your space.",
+      "deleteCharacteristicTitle": "Delete characteristic",
+      "deleteCharacteristicDescription": "Are you sure you want to delete “{{name}}”?",
+      "createCharacteristicTitle": "Add characteristic",
+      "editCharacteristicTitle": "Edit characteristic",
+      "characteristicDialogDescription": "Help guests understand what makes your space special.",
+      "characteristicTitleLabel": "Title",
+      "characteristicTitlePlaceholder": "e.g., Private reception desk",
+      "characteristicDescriptionLabel": "Description (optional)",
+      "characteristicDescriptionPlaceholder": "Describe the benefit or context.",
+      "errors": {
+        "amenityNameRequired": "Amenity name is required",
+        "characteristicTitle": "Enter a title for this characteristic",
+        "invalidServiceHoursRange": "Closing time must be later than opening time"
+      },
+      "amenityCreatedTitle": "Amenity created",
+      "amenityCreatedDescription": "The amenity was added to your draft.",
+      "characteristicCreatedTitle": "Characteristic added",
+      "characteristicCreatedDescription": "The characteristic was added to your draft.",
+      "characteristicUpdatedTitle": "Characteristic updated",
+      "characteristicUpdatedDescription": "The characteristic was updated.",
+      "characteristicDeletedTitle": "Characteristic removed",
+      "characteristicDeletedDescription": "The characteristic was deleted."
+    },
+    "step4": {
+      "mediaSectionTitle": "Photos of your space",
+      "guidelineResolution": "Use high-resolution images (minimum 1600 × 900 px).",
+      "guidelineRatio": "Landscape orientation works best (16:9 ratio).",
+      "guidelineLighting": "Capture natural lighting and key areas like meeting rooms or entrances.",
+      "guidelineOrder": "Upload at least 3 photos to inspire trust in potential guests.",
+      "savedTitle": "Gallery saved",
+      "savedDescription": "Your photos were stored in the draft.",
+      "completePreviousStepsDescription": "Finish the previous steps before uploading images."
+    },
+    "step5": {
+      "sectionTitle": "Set your price and discounts",
+      "priceLabel": "Hourly price (MXN)",
+      "pricePlaceholder": "e.g., 450",
+      "priceHelper": "You can adjust prices later from your dashboard.",
+      "discounts": {
+        "title": "Optional discounts",
+        "helper": "Encourage bookings with recommended presets.",
+        "newListing": {
+          "title": "New listing promotion",
+          "description": "Offer 20% off the first 3 reservations."
+        },
+        "lastMinute": {
+          "title": "Last-minute discount",
+          "description": "12% off reservations booked within 14 days."
+        },
+        "weekly": {
+          "title": "Weekly discount",
+          "description": "10% off stays of 7 nights or longer."
+        },
+        "monthly": {
+          "title": "Monthly discount",
+          "description": "20% off stays of 28 nights or longer."
+        }
+      },
+      "savedTitle": "Listing saved",
+      "savedDescription": "Your space is ready. You can manage it from your owner dashboard.",
+      "errors": {
+        "priceRequired": "Enter an hourly price greater than 0"
+      }
+    },
+    "steps": {
+      "basicInfo": {
+        "title": "Describe your space",
+        "subtitle": "Share the essential details so professionals can understand what you offer.",
+        "helper": "Tell us the basics: name of the space, its capacity, and where guests will find it. You can adjust these details later."
+      },
+      "address": {
+        "title": "Where is it located?",
+        "subtitle": "Provide the exact address so guests can find you without trouble.",
+        "helper": "Accuracy helps guests trust your listing and plan their arrival."
+      },
+      "amenities": {
+        "title": "Amenities & highlights",
+        "subtitle": "Show what makes your workspace special.",
+        "helper": "Pick the amenities you offer and describe unique characteristics."
+      },
+      "media": {
+        "title": "Add your best photos",
+        "subtitle": "High-quality images increase booking confidence.",
+        "helper": "Show the main areas, natural light, and any equipment provided."
+      },
+      "pricing": {
+        "title": "Set your pricing",
+        "subtitle": "Choose your hourly price and optional discounts.",
+        "helper": "You can adjust pricing later from your dashboard."
       }
     }
   },
