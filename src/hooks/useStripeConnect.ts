@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  FunctionsFetchError,
+  FunctionsHttpError,
+  FunctionsRelayError,
+} from '@supabase/supabase-js';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 interface ConnectAccountStatus {
@@ -29,11 +34,26 @@ export const useStripeConnect = () => {
     queryKey: ['stripe-connect-status', user?.id],
     queryFn: async (): Promise<ConnectAccountStatus> => {
       if (!user) throw new Error('User not authenticated');
-      
+
       const { data, error } = await supabase.functions.invoke('check-connect-status');
-      
-      if (error) throw error;
-      return data;
+
+      if (error) {
+        if (error instanceof FunctionsHttpError) {
+          let message = 'Error checking Stripe status';
+          try {
+            const details = await error.context.json();
+            message = details?.error ?? details?.message ?? message;
+          } catch {
+            // ignore parse errors
+          }
+          throw new Error(message);
+        }
+        if (error instanceof FunctionsRelayError || error instanceof FunctionsFetchError) {
+          throw new Error(error.message);
+        }
+        throw error;
+      }
+      return data as ConnectAccountStatus;
     },
     enabled: !!user,
     refetchOnWindowFocus: true,
@@ -44,16 +64,31 @@ export const useStripeConnect = () => {
   const createConnectAccount = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error('User not authenticated');
-      
+
       const { data, error } = await supabase.functions.invoke('create-connect-account');
-      
-      if (error) throw error;
-      return data;
+
+      if (error) {
+        if (error instanceof FunctionsHttpError) {
+          let message = 'Error creating Stripe account';
+          try {
+            const details = await error.context.json();
+            message = details?.error ?? details?.message ?? message;
+          } catch {
+            // ignore parse error
+          }
+          throw new Error(message);
+        }
+        if (error instanceof FunctionsRelayError || error instanceof FunctionsFetchError) {
+          throw new Error(error.message);
+        }
+        throw error;
+      }
+      return data as { onboarding_url?: string };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['stripe-connect-status'] });
       toast.success('Cuenta de Stripe creada exitosamente');
-      
+
       // Open onboarding in new tab
       if (data.onboarding_url) {
         window.open(data.onboarding_url, '_blank');

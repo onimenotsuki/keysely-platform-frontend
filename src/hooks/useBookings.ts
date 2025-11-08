@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface Booking {
   id: string;
@@ -30,15 +30,16 @@ export interface Booking {
 
 export const useBookings = () => {
   const { user } = useAuth();
-  
+
   return useQuery({
     queryKey: ['bookings', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      
+
       const { data, error } = await supabase
         .from('bookings')
-        .select(`
+        .select(
+          `
           *,
           spaces(
             title,
@@ -47,14 +48,15 @@ export const useBookings = () => {
             images,
             profiles(full_name)
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data as Booking[];
     },
-    enabled: !!user
+    enabled: !!user,
   });
 };
 
@@ -80,7 +82,7 @@ export const useCreateBooking = () => {
         .from('bookings')
         .insert({
           ...bookingData,
-          user_id: user.id
+          user_id: user.id,
         })
         .select()
         .single();
@@ -90,7 +92,7 @@ export const useCreateBooking = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
-    }
+    },
   });
 };
 
@@ -111,6 +113,6 @@ export const useUpdateBooking = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] });
-    }
+    },
   });
 };

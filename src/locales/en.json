@@ -194,6 +194,8 @@
     "selectDate": "Select Date",
     "startTime": "Start Time",
     "endTime": "End Time",
+    "selectTimeSlot": "Select an hour",
+    "selectTimePlaceholder": "Choose an available hour",
     "selectEndTime": "Select an end time",
     "selectStartTimePrompt": "Choose a start time to continue.",
     "noAvailabilityForDay": "No hourly slots are available for this date.",

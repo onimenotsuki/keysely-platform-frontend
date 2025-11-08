@@ -195,6 +195,8 @@
     "selectDate": "Seleccionar fecha",
     "startTime": "Hora de inicio",
     "endTime": "Hora de fin",
+    "selectTimeSlot": "Selecciona una hora",
+    "selectTimePlaceholder": "Elige una hora disponible",
     "selectEndTime": "Selecciona una hora de fin",
     "selectStartTimePrompt": "Elige una hora de inicio para continuar.",
     "noAvailabilityForDay": "No hay horarios disponibles para esta fecha.",

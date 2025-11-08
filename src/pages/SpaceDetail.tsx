@@ -80,6 +80,7 @@ const SpaceDetail = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [startTime, setStartTime] = useState(DEFAULT_START_TIME);
   const [endTime, setEndTime] = useState(DEFAULT_END_TIME);
+  const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [guestsCount, setGuestsCount] = useState(1);
 
   const getCurrencySymbol = () => {
@@ -190,59 +191,33 @@ const SpaceDetail = () => {
     return slots;
   }, [dayAvailability.end, dayAvailability.start, selectedDate, unavailableSlots]);
 
-  const availableEndTimes = useMemo(() => {
-    if (!selectedDate || !startTime) return [];
-
-    if (!availableStartSlots.includes(startTime)) return [];
-
-    const endTimes: string[] = [];
-    const dayEnd = parse(dayAvailability.end, 'HH:mm', selectedDate);
-    let cursor = parse(startTime, 'HH:mm', selectedDate);
-
-    while (true) {
-      const nextCursor = addHours(cursor, 1);
-      if (nextCursor > dayEnd) break;
-
-      const currentSlotKey = format(cursor, 'HH:mm');
-      if (unavailableSlots.has(currentSlotKey) && currentSlotKey !== startTime) break;
-
-      endTimes.push(format(nextCursor, 'HH:mm'));
-
-      const nextSlotKey = format(nextCursor, 'HH:mm');
-      if (unavailableSlots.has(nextSlotKey) || !availableStartSlots.includes(nextSlotKey)) {
-        break;
-      }
-
-      cursor = nextCursor;
-    }
-
-    return endTimes;
-  }, [availableStartSlots, dayAvailability.end, selectedDate, startTime, unavailableSlots]);
-
   useEffect(() => {
     if (!selectedDate) return;
 
     if (availableStartSlots.length === 0) {
+      setSelectedSlot('');
       if (startTime) setStartTime('');
       if (endTime) setEndTime('');
       return;
     }
 
     if (!startTime || !availableStartSlots.includes(startTime)) {
-      setStartTime(availableStartSlots[0]);
+      const nextSlot = availableStartSlots[0];
+      setSelectedSlot(nextSlot);
+      setStartTime(nextSlot);
+      const startDateTime = parse(nextSlot, 'HH:mm', selectedDate);
+      setEndTime(format(addHours(startDateTime, 1), 'HH:mm'));
     }
   }, [availableStartSlots, endTime, selectedDate, startTime]);
 
-  useEffect(() => {
-    if (!startTime || availableEndTimes.length === 0) {
-      if (endTime) setEndTime('');
-      return;
-    }
-
-    if (!endTime || !availableEndTimes.includes(endTime)) {
-      setEndTime(availableEndTimes[0]);
-    }
-  }, [availableEndTimes, endTime, startTime]);
+  const handleTimeSlotChange = (slot: string) => {
+    if (!selectedDate) return;
+    setSelectedSlot(slot);
+    setStartTime(slot);
+    const startDateTime = parse(slot, 'HH:mm', selectedDate);
+    const endDateTime = addHours(startDateTime, 1);
+    setEndTime(format(endDateTime, 'HH:mm'));
+  };
 
   const computedTotalHours = useMemo(() => {
     if (!selectedDate || !startTime || !endTime) return 0;
@@ -273,13 +248,18 @@ const SpaceDetail = () => {
       return;
     }
 
-    if (!availableStartSlots.includes(startTime) || !availableEndTimes.includes(endTime)) {
+    if (!availableStartSlots.includes(startTime)) {
       toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
       return;
     }
 
     const startDateTime = parse(startTime, 'HH:mm', selectedDate);
     const endDateTime = parse(endTime, 'HH:mm', selectedDate);
+    const expectedEnd = addHours(startDateTime, 1);
+    if (endDateTime.getTime() !== expectedEnd.getTime()) {
+      toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
+      return;
+    }
     const totalMinutes = differenceInMinutes(endDateTime, startDateTime);
 
     if (totalMinutes <= 0 || totalMinutes % 60 !== 0) {
@@ -626,7 +606,7 @@ const SpaceDetail = () => {
                     <div className="space-y-4">
                       <div>
                         <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          {t('spaceDetail.startTime')}
+                          {t('spaceDetail.selectTimeSlot')}
                         </Label>
                         {availabilityLoading && (
                           <p className="mb-2 text-xs text-muted-foreground">
@@ -638,40 +618,30 @@ const SpaceDetail = () => {
                             {t('spaceDetail.noAvailabilityForDay')}
                           </div>
                         ) : (
-                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                            {availableStartSlots.map((slot) => (
-                              <Button
-                                key={slot}
-                                type="button"
-                                variant={slot === startTime ? 'default' : 'outline'}
-                                className="h-10 justify-center"
-                                onClick={() => setStartTime(slot)}
-                              >
-                                {format(parse(slot, 'HH:mm', new Date()), 'h:mm a')}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                          {t('spaceDetail.endTime')}
-                        </Label>
-                        {!startTime || availableEndTimes.length === 0 ? (
-                          <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                            {t('spaceDetail.selectStartTimePrompt')}
-                          </div>
-                        ) : (
-                          <Select value={endTime} onValueChange={setEndTime}>
+                          <Select
+                            value={selectedSlot || undefined}
+                            onValueChange={(value) => {
+                              handleTimeSlotChange(value);
+                            }}
+                          >
                             <SelectTrigger className="h-12 px-4 text-left">
-                              <SelectValue placeholder={t('spaceDetail.selectEndTime')} />
+                              <SelectValue placeholder={t('spaceDetail.selectTimePlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
-                              {availableEndTimes.map((time) => (
-                                <SelectItem key={time} value={time}>
-                                  {format(parse(time, 'HH:mm', new Date()), 'h:mm a')}
-                                </SelectItem>
-                              ))}
+                              {availableStartSlots.map((slot) => {
+                                const slotDateTime = selectedDate
+                                  ? parse(slot, 'HH:mm', selectedDate)
+                                  : parse(slot, 'HH:mm', new Date());
+                                const label = `${format(slotDateTime, 'h:mm a')} - ${format(
+                                  addHours(slotDateTime, 1),
+                                  'h:mm a'
+                                )}`;
+                                return (
+                                  <SelectItem key={slot} value={slot}>
+                                    {label}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                         )}
