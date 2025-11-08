@@ -10,7 +10,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useProfile } from '@/hooks/useProfile';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Heart, LayoutDashboard, LogOut, User } from 'lucide-react';
+import {
+  Building2,
+  CalendarDays,
+  CreditCard,
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  User,
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface UserMenuProps {
@@ -80,15 +88,44 @@ export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
           </Link>
         </DropdownMenuItem>
         {profile?.is_host && (
-          <DropdownMenuItem asChild>
-            <Link
-              to={createLocalizedPath(`/owner-dashboard`)}
-              className="cursor-pointer flex items-center"
-            >
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              <span>{t('header.userMenu.hostDashboard')}</span>
-            </Link>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem asChild>
+              <Link
+                to={createLocalizedPath(`/owner-dashboard`)}
+                className="cursor-pointer flex items-center"
+              >
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                <span>{t('header.userMenu.hostDashboard')}</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                to={createLocalizedPath(`/owner-dashboard/payment-settings`)}
+                className="cursor-pointer flex items-center"
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                <span>{t('header.userMenu.paymentSettings')}</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                to={createLocalizedPath(`/owner-dashboard/my-spaces`)}
+                className="cursor-pointer flex items-center"
+              >
+                <Building2 className="mr-2 h-4 w-4" />
+                <span>{t('header.userMenu.mySpaces')}</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                to={createLocalizedPath(`/owner-dashboard/bookings`)}
+                className="cursor-pointer flex items-center"
+              >
+                <CalendarDays className="mr-2 h-4 w-4" />
+                <span>{t('header.userMenu.bookings')}</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
         )}
         <DropdownMenuItem asChild>
           <Link to={createLocalizedPath(`/favorites`)} className="cursor-pointer flex items-center">

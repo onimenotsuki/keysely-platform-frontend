@@ -1,34 +1,34 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-import { SpaceCard } from '@/components/features/spaces/SpaceCard';
 import { HostStatsCard } from '@/components/features/host/HostStatsCard';
 import { HostVerificationBadges } from '@/components/features/host/HostVerificationBadges';
 import { LanguagesList } from '@/components/features/host/LanguagesList';
-import { Header } from '@/components/layout/Header';
+import { SpaceCard } from '@/components/features/spaces/SpaceCard';
 import { Footer } from '@/components/layout/Footer';
-import { useTranslation } from '@/hooks/useTranslation';
+import { Header } from '@/components/layout/Header';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   useHostProfile,
-  useHostSpaces,
   useHostReviews,
+  useHostSpaces,
   useHostStats,
 } from '@/hooks/useHostProfile';
-import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from '@/hooks/useTranslation';
 import {
-  Star,
-  Clock,
-  MessageCircle,
   Award,
   Building2,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  MessageCircle,
+  Star,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 const HostProfile = () => {
   const { id } = useParams<{ id: string }>();

@@ -4,7 +4,7 @@ import { useLanguageContext } from '../../../contexts/LanguageContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import LanguageSelector from '../../LanguageSelector';
 import NotificationBell from '../../NotificationBell';
-import { User, LayoutDashboard, LogOut } from 'lucide-react';
+import { User, LayoutDashboard, LogOut, CreditCard, Building2, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useProfile } from '@/hooks/useProfile';
@@ -87,16 +87,57 @@ export const MobileNav = ({ isOpen, isScrolled = false }: MobileNavProps) => {
               </Button>
 
               {profile?.is_host && (
-                <Button
-                  asChild
-                  variant="ghost"
-                  className="w-full justify-start text-left font-normal"
-                >
-                  <Link to={`/${language}/owner-dashboard`} className="flex items-center">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>{t('header.userMenu.hostDashboard')}</span>
-                  </Link>
-                </Button>
+                <>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <Link to={`/${language}/owner-dashboard`} className="flex items-center">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>{t('header.userMenu.hostDashboard')}</span>
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <Link
+                      to={`/${language}/owner-dashboard/payment-settings`}
+                      className="flex items-center"
+                    >
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      <span>{t('header.userMenu.paymentSettings')}</span>
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <Link
+                      to={`/${language}/owner-dashboard/my-spaces`}
+                      className="flex items-center"
+                    >
+                      <Building2 className="mr-2 h-4 w-4" />
+                      <span>{t('header.userMenu.mySpaces')}</span>
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <Link
+                      to={`/${language}/owner-dashboard/bookings`}
+                      className="flex items-center"
+                    >
+                      <CalendarDays className="mr-2 h-4 w-4" />
+                      <span>{t('header.userMenu.bookings')}</span>
+                    </Link>
+                  </Button>
+                </>
               )}
 
               <Separator className="my-3" />

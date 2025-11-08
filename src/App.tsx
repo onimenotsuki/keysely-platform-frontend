@@ -33,6 +33,9 @@ import {
   Step4Media,
   Step5Pricing,
 } from './pages/list-space';
+import OwnerDashboardBookings from './pages/owner-dashboard/Bookings';
+import MySpaces from './pages/owner-dashboard/MySpaces';
+import PaymentSettings from './pages/owner-dashboard/PaymentSettings';
 
 const queryClient = new QueryClient();
 
@@ -171,6 +174,36 @@ const App = () => (
                   <LanguageWrapper>
                     <ProtectedRoute>
                       <OwnerDashboard />
+                    </ProtectedRoute>
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/owner-dashboard/payment-settings"
+                element={
+                  <LanguageWrapper>
+                    <ProtectedRoute>
+                      <PaymentSettings />
+                    </ProtectedRoute>
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/owner-dashboard/my-spaces"
+                element={
+                  <LanguageWrapper>
+                    <ProtectedRoute>
+                      <MySpaces />
+                    </ProtectedRoute>
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/owner-dashboard/bookings"
+                element={
+                  <LanguageWrapper>
+                    <ProtectedRoute>
+                      <OwnerDashboardBookings />
                     </ProtectedRoute>
                   </LanguageWrapper>
                 }
