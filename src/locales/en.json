@@ -791,9 +791,14 @@
       "showMore": "Show more reviews",
       "showLess": "Show less"
     },
+    "ownerProfile": {
+      "sendMessage": "Send message",
+      "goToOwnerDashboard": "Go to owner dashboard"
+    },
     "contact": {
       "contactHost": "Contact {{name}}",
-      "sendMessage": "Send message"
+      "sendMessage": "Send message",
+      "goToOwnerDashboard": "Go to owner dashboard"
     },
     "errors": {
       "notFound": "Host not found",

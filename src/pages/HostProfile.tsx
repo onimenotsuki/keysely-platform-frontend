@@ -10,12 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   useHostProfile,
   useHostReviews,
   useHostSpaces,
   useHostStats,
 } from '@/hooks/useHostProfile';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useTranslation } from '@/hooks/useTranslation';
 import {
   Award,
@@ -23,7 +25,7 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Clock,
+  LayoutDashboard,
   MessageCircle,
   Star,
 } from 'lucide-react';
@@ -33,6 +35,8 @@ import { Link, useParams } from 'react-router-dom';
 const HostProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { createLocalizedPath } = useLanguageRouting();
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [currentSpacePage, setCurrentSpacePage] = useState(1);
   const SPACES_PER_PAGE = 6;
@@ -106,6 +110,8 @@ const HostProfile = () => {
   }
 
   const hostYear = new Date(hostProfile.created_at).getFullYear();
+  const isViewingOwnProfile =
+    Boolean(user?.id) && user?.id === hostProfile.user_id && Boolean(hostProfile.is_host);
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,6 +170,17 @@ const HostProfile = () => {
                   </span>
                 </div>
               </div>
+
+              {isViewingOwnProfile && (
+                <div className="mt-6">
+                  <Button asChild variant="outline" className="gap-2">
+                    <Link to={createLocalizedPath('/owner-dashboard')}>
+                      <LayoutDashboard className="h-4 w-4" />
+                      {t('hostProfile.ownerProfile.goToOwnerDashboard')}
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

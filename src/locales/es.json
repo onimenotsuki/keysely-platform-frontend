@@ -793,9 +793,14 @@
       "showMore": "Mostrar más reseñas",
       "showLess": "Mostrar menos"
     },
+    "ownerProfile": {
+      "sendMessage": "Enviar mensaje",
+      "goToOwnerDashboard": "Ir al panel de anfitrión"
+    },
     "contact": {
       "contactHost": "Contactar a {{name}}",
-      "sendMessage": "Enviar mensaje"
+      "sendMessage": "Enviar mensaje",
+      "goToOwnerDashboard": "Ir al panel de anfitrión"
     },
     "errors": {
       "notFound": "Anfitrión no encontrado",
