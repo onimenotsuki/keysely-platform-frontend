@@ -1,3 +1,4 @@
+import { OwnerAvailabilityManager } from '@/components/features/owner-dashboard/OwnerAvailabilityManager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
@@ -272,18 +273,8 @@ const OwnerDashboard = () => {
             </Card>
           </div>
 
-          {/* Calendar */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('ownerDashboard.availabilityCalendar')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12">
-                <i className="fas fa-calendar-alt text-4xl text-muted-foreground mb-4"></i>
-                <p className="text-muted-foreground">{t('ownerDashboard.calendarPlaceholder')}</p>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Availability Manager */}
+          <OwnerAvailabilityManager spaces={ownerSpaces} />
         </div>
       </div>
 

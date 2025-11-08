@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
-import { Languages } from 'lucide-react';
 import { useTranslation } from '@/hooks/useTranslation';
+import { Languages } from 'lucide-react';
 
 interface LanguagesListProps {
   languages?: string[];

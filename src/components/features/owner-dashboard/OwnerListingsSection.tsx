@@ -1,11 +1,20 @@
+import { OwnerAvailabilityManager } from '@/components/features/owner-dashboard/OwnerAvailabilityManager';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useOwnerSpaces, type OwnerSpace } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
 import { createListSpaceStepPath } from '@/pages/list-space/paths';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const renderSpaceGrid = (
@@ -14,10 +23,11 @@ const renderSpaceGrid = (
     showAddCard?: boolean;
     onAddListing?: () => void;
     onViewSpace?: (spaceId: string) => void;
+    onManageAvailability?: (space: OwnerSpace) => void;
     t: ReturnType<typeof useTranslation>['t'];
   }
 ) => {
-  const { showAddCard = false, onAddListing, onViewSpace, t } = options;
+  const { showAddCard = false, onAddListing, onViewSpace, onManageAvailability, t } = options;
 
   if (spacesToRender.length === 0 && !showAddCard) {
     return null;
@@ -79,19 +89,30 @@ const renderSpaceGrid = (
               </div>
             </div>
 
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm" className="flex-1">
-                <i className="fas fa-edit mr-2"></i>
-                {t('ownerDashboard.edit')}
-              </Button>
+            <div className="flex flex-col gap-2">
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm" className="flex-1">
+                  <i className="fas fa-edit mr-2"></i>
+                  {t('ownerDashboard.edit')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => onViewSpace?.(space.id)}
+                >
+                  <i className="fas fa-eye mr-2"></i>
+                  {t('ownerDashboard.view')}
+                </Button>
+              </div>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="flex-1"
-                onClick={() => onViewSpace?.(space.id)}
+                className="w-full justify-center"
+                onClick={() => onManageAvailability?.(space)}
               >
-                <i className="fas fa-eye mr-2"></i>
-                {t('ownerDashboard.view')}
+                <i className="fas fa-clock mr-2"></i>
+                {t('ownerDashboard.manageAvailability')}
               </Button>
             </div>
           </CardContent>
@@ -131,6 +152,8 @@ export const OwnerListingsSection = ({ title }: OwnerListingsSectionProps) => {
   const { t } = useTranslation();
   const { createLocalizedPath, currentLanguage } = useLanguageRouting();
   const { data: ownerSpaces = [], isLoading } = useOwnerSpaces();
+  const [isAvailabilityDialogOpen, setAvailabilityDialogOpen] = useState(false);
+  const [selectedSpace, setSelectedSpace] = useState<OwnerSpace | null>(null);
 
   const publishedSpaces = ownerSpaces.filter((space) => space.is_active);
   const draftSpaces = ownerSpaces.filter((space) => !space.is_active);
@@ -144,6 +167,16 @@ export const OwnerListingsSection = ({ title }: OwnerListingsSectionProps) => {
   const handleViewSpace = (spaceId: string) => {
     navigate(createLocalizedPath(`/space/${spaceId}`));
   };
+
+  const handleManageAvailability = (space: OwnerSpace) => {
+    setSelectedSpace(space);
+    setAvailabilityDialogOpen(true);
+  };
+
+  const availabilityManagerSpaces = useMemo(
+    () => (selectedSpace ? [selectedSpace] : []),
+    [selectedSpace]
+  );
 
   return (
     <div className="space-y-10">
@@ -179,6 +212,7 @@ export const OwnerListingsSection = ({ title }: OwnerListingsSectionProps) => {
                 showAddCard: true,
                 onAddListing: handleAddListing,
                 onViewSpace: handleViewSpace,
+                onManageAvailability: handleManageAvailability,
                 t,
               })
             ) : (
@@ -204,6 +238,7 @@ export const OwnerListingsSection = ({ title }: OwnerListingsSectionProps) => {
               renderSpaceGrid(draftSpaces, {
                 onAddListing: handleAddListing,
                 onViewSpace: handleViewSpace,
+                onManageAvailability: handleManageAvailability,
                 t,
               })
             ) : (
@@ -216,6 +251,31 @@ export const OwnerListingsSection = ({ title }: OwnerListingsSectionProps) => {
           </section>
         </div>
       )}
+      <Dialog
+        open={isAvailabilityDialogOpen}
+        onOpenChange={(open) => {
+          setAvailabilityDialogOpen(open);
+          if (!open) {
+            setSelectedSpace(null);
+          }
+        }}
+      >
+        <DialogContent className="w-full max-w-5xl">
+          <DialogHeader>
+            <DialogTitle>{t('ownerDashboard.manageAvailabilityDialogTitle')}</DialogTitle>
+            <DialogDescription>
+              {t('ownerDashboard.manageAvailabilityDialogDescription', {
+                space: selectedSpace?.title ?? '',
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedSpace && (
+            <div className="mt-2">
+              <OwnerAvailabilityManager key={selectedSpace.id} spaces={availabilityManagerSpaces} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

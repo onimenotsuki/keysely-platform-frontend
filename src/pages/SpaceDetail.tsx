@@ -10,11 +10,19 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { ShareDialog } from '@/components/ui/share-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useBlockedHours } from '@/hooks/useBlockedHours';
 import { useCreateBooking } from '@/hooks/useBookings';
 import { useBookingsBySpace } from '@/hooks/useBookingsBySpace';
 import { useIsFavorite, useToggleFavorite } from '@/hooks/useFavorites';
@@ -22,8 +30,9 @@ import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useMarketplacePayment } from '@/hooks/useMarketplacePayment';
 import { useSpace } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
+import { addHours, differenceInMinutes, format, isBefore, isSameDay, parse } from 'date-fns';
 import { Clock, Heart, MapPin, Maximize2, Share2, Star, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
@@ -79,28 +88,178 @@ const SpaceDetail = () => {
 
   const { data: space, isLoading } = useSpace(id || '');
   const { data: spaceBookings } = useBookingsBySpace(id || '');
+  const {
+    data: blockedHours = [],
+    isLoading: isBlockedHoursLoading,
+    isFetching: isBlockedHoursFetching,
+  } = useBlockedHours(space?.id ?? null, selectedDate ?? new Date());
   const toggleFavorite = useToggleFavorite();
   const { data: isFavorite } = useIsFavorite(id || '');
   const createBooking = useCreateBooking();
   const { createPayment, isCreatingPayment } = useMarketplacePayment();
 
-  useEffect(() => {
-    if (!space || !selectedDate) return;
+  const selectedDateKey = useMemo(
+    () => (selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null),
+    [selectedDate]
+  );
 
-    const availability = (space.availability_hours ?? {}) as AvailabilitySchedule;
+  const availability = useMemo(
+    () => (space?.availability_hours ?? {}) as AvailabilitySchedule,
+    [space]
+  );
+
+  const dayAvailability = useMemo(() => {
+    if (!selectedDate) {
+      return { start: DEFAULT_START_TIME, end: DEFAULT_END_TIME };
+    }
+
     const dayKey = getDayKeyFromDate(selectedDate);
-    const dayAvailability = availability?.[dayKey];
-
-    const nextStartTime =
-      (typeof dayAvailability?.start === 'string' && dayAvailability.start.trim()) ||
+    const day = availability?.[dayKey];
+    const start =
+      (typeof day?.start === 'string' && day.start.trim()) ||
       resolveAvailabilityTime(availability, 'start');
-    const nextEndTime =
-      (typeof dayAvailability?.end === 'string' && dayAvailability.end.trim()) ||
+    const end =
+      (typeof day?.end === 'string' && day.end.trim()) ||
       resolveAvailabilityTime(availability, 'end');
 
-    setStartTime(nextStartTime);
-    setEndTime(nextEndTime);
-  }, [space, selectedDate]);
+    return { start, end };
+  }, [availability, selectedDate]);
+
+  const bookingsForDay = useMemo(() => {
+    if (!selectedDateKey) return [];
+
+    return (
+      spaceBookings?.filter(
+        (booking) =>
+          booking.start_date === selectedDateKey &&
+          (booking.status === 'confirmed' || booking.status === 'pending')
+      ) ?? []
+    );
+  }, [spaceBookings, selectedDateKey]);
+
+  const blockedHoursForDay = useMemo(
+    () => blockedHours.filter((blockedHour) => blockedHour.blocked_date === selectedDateKey) ?? [],
+    [blockedHours, selectedDateKey]
+  );
+
+  const unavailableSlots = useMemo(() => {
+    if (!selectedDate) return new Set<string>();
+
+    const unavailable = new Set<string>();
+
+    for (const blockedHour of blockedHoursForDay) {
+      unavailable.add(blockedHour.start_time);
+    }
+
+    for (const booking of bookingsForDay) {
+      const slotStart = parse(booking.start_time, 'HH:mm', selectedDate);
+      const slotEnd = parse(booking.end_time, 'HH:mm', selectedDate);
+      let cursor = slotStart;
+
+      while (cursor < slotEnd) {
+        unavailable.add(format(cursor, 'HH:mm'));
+        cursor = addHours(cursor, 1);
+      }
+    }
+
+    return unavailable;
+  }, [blockedHoursForDay, bookingsForDay, selectedDate]);
+
+  const availableStartSlots = useMemo(() => {
+    if (!selectedDate) return [];
+
+    const dayStart = parse(dayAvailability.start, 'HH:mm', selectedDate);
+    const dayEnd = parse(dayAvailability.end, 'HH:mm', selectedDate);
+    const slots: string[] = [];
+    const isTodaySelected = isSameDay(selectedDate, new Date());
+
+    let cursor = dayStart;
+
+    while (addHours(cursor, 1) <= dayEnd) {
+      const slotKey = format(cursor, 'HH:mm');
+      const slotDateTime = cursor;
+      const isPastSlot = isTodaySelected && isBefore(slotDateTime, new Date());
+
+      if (!unavailableSlots.has(slotKey) && !isPastSlot) {
+        slots.push(slotKey);
+      }
+
+      cursor = addHours(cursor, 1);
+    }
+
+    return slots;
+  }, [dayAvailability.end, dayAvailability.start, selectedDate, unavailableSlots]);
+
+  const availableEndTimes = useMemo(() => {
+    if (!selectedDate || !startTime) return [];
+
+    if (!availableStartSlots.includes(startTime)) return [];
+
+    const endTimes: string[] = [];
+    const dayEnd = parse(dayAvailability.end, 'HH:mm', selectedDate);
+    let cursor = parse(startTime, 'HH:mm', selectedDate);
+
+    while (true) {
+      const nextCursor = addHours(cursor, 1);
+      if (nextCursor > dayEnd) break;
+
+      const currentSlotKey = format(cursor, 'HH:mm');
+      if (unavailableSlots.has(currentSlotKey) && currentSlotKey !== startTime) break;
+
+      endTimes.push(format(nextCursor, 'HH:mm'));
+
+      const nextSlotKey = format(nextCursor, 'HH:mm');
+      if (unavailableSlots.has(nextSlotKey) || !availableStartSlots.includes(nextSlotKey)) {
+        break;
+      }
+
+      cursor = nextCursor;
+    }
+
+    return endTimes;
+  }, [availableStartSlots, dayAvailability.end, selectedDate, startTime, unavailableSlots]);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+
+    if (availableStartSlots.length === 0) {
+      if (startTime) setStartTime('');
+      if (endTime) setEndTime('');
+      return;
+    }
+
+    if (!startTime || !availableStartSlots.includes(startTime)) {
+      setStartTime(availableStartSlots[0]);
+    }
+  }, [availableStartSlots, endTime, selectedDate, startTime]);
+
+  useEffect(() => {
+    if (!startTime || availableEndTimes.length === 0) {
+      if (endTime) setEndTime('');
+      return;
+    }
+
+    if (!endTime || !availableEndTimes.includes(endTime)) {
+      setEndTime(availableEndTimes[0]);
+    }
+  }, [availableEndTimes, endTime, startTime]);
+
+  const computedTotalHours = useMemo(() => {
+    if (!selectedDate || !startTime || !endTime) return 0;
+
+    const startDateTime = parse(startTime, 'HH:mm', selectedDate);
+    const endDateTime = parse(endTime, 'HH:mm', selectedDate);
+    const minutes = differenceInMinutes(endDateTime, startDateTime);
+
+    return minutes > 0 ? minutes / 60 : 0;
+  }, [endTime, selectedDate, startTime]);
+
+  const rawSubtotal = computedTotalHours * (space?.price_per_hour ?? 0);
+  const subtotal = Math.round(rawSubtotal * 100) / 100;
+  const serviceFee = Math.round(subtotal * 0.15);
+  const totalDue = Math.round((subtotal + serviceFee) * 100) / 100;
+
+  const availabilityLoading = isBlockedHoursLoading || isBlockedHoursFetching;
 
   const handleBooking = async () => {
     if (!user) {
@@ -109,17 +268,43 @@ const SpaceDetail = () => {
     }
 
     if (!selectedDate || !space || !id) return;
+    if (!startTime || !endTime) {
+      toast({ title: t('spaceDetail.noTimeSelected'), variant: 'destructive' });
+      return;
+    }
 
-    const startDateTime = new Date(selectedDate);
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-    startDateTime.setHours(startHour, startMinute);
+    if (!availableStartSlots.includes(startTime) || !availableEndTimes.includes(endTime)) {
+      toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
+      return;
+    }
 
-    const endDateTime = new Date(selectedDate);
-    const [endHour, endMinute] = endTime.split(':').map(Number);
-    endDateTime.setHours(endHour, endMinute);
+    const startDateTime = parse(startTime, 'HH:mm', selectedDate);
+    const endDateTime = parse(endTime, 'HH:mm', selectedDate);
+    const totalMinutes = differenceInMinutes(endDateTime, startDateTime);
 
-    const totalHours = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60);
-    const totalAmount = totalHours * space.price_per_hour;
+    if (totalMinutes <= 0 || totalMinutes % 60 !== 0) {
+      toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
+      return;
+    }
+
+    const now = new Date();
+    const isTodaySelected = isSameDay(selectedDate, now);
+    let cursor = startDateTime;
+
+    while (cursor < endDateTime) {
+      const slotKey = format(cursor, 'HH:mm');
+      const isPastSlot = isTodaySelected && isBefore(cursor, now);
+
+      if (unavailableSlots.has(slotKey) || isPastSlot) {
+        toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
+        return;
+      }
+
+      cursor = addHours(cursor, 1);
+    }
+
+    const totalHoursSelected = totalMinutes / 60;
+    const totalAmount = totalHoursSelected * space.price_per_hour;
 
     try {
       // First create the booking
@@ -129,7 +314,7 @@ const SpaceDetail = () => {
         end_date: selectedDate.toISOString().split('T')[0],
         start_time: startTime,
         end_time: endTime,
-        total_hours: Math.round(totalHours),
+        total_hours: Math.round(totalHoursSelected),
         total_amount: totalAmount,
         guests_count: guestsCount,
       });
@@ -438,28 +623,58 @@ const SpaceDetail = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-4">
                       <div>
                         <Label className="text-sm font-medium text-gray-700 mb-2 block">
                           {t('spaceDetail.startTime')}
                         </Label>
-                        <Input
-                          type="time"
-                          value={startTime}
-                          onChange={(e) => setStartTime(e.target.value)}
-                          className="h-12 px-4"
-                        />
+                        {availabilityLoading && (
+                          <p className="mb-2 text-xs text-muted-foreground">
+                            {t('spaceDetail.loadingAvailability')}
+                          </p>
+                        )}
+                        {availableStartSlots.length === 0 ? (
+                          <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                            {t('spaceDetail.noAvailabilityForDay')}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            {availableStartSlots.map((slot) => (
+                              <Button
+                                key={slot}
+                                type="button"
+                                variant={slot === startTime ? 'default' : 'outline'}
+                                className="h-10 justify-center"
+                                onClick={() => setStartTime(slot)}
+                              >
+                                {format(parse(slot, 'HH:mm', new Date()), 'h:mm a')}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <Label className="text-sm font-medium text-gray-700 mb-2 block">
                           {t('spaceDetail.endTime')}
                         </Label>
-                        <Input
-                          type="time"
-                          value={endTime}
-                          onChange={(e) => setEndTime(e.target.value)}
-                          className="h-12 px-4"
-                        />
+                        {!startTime || availableEndTimes.length === 0 ? (
+                          <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                            {t('spaceDetail.selectStartTimePrompt')}
+                          </div>
+                        ) : (
+                          <Select value={endTime} onValueChange={setEndTime}>
+                            <SelectTrigger className="h-12 px-4 text-left">
+                              <SelectValue placeholder={t('spaceDetail.selectEndTime')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableEndTimes.map((time) => (
+                                <SelectItem key={time} value={time}>
+                                  {format(parse(time, 'HH:mm', new Date()), 'h:mm a')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
                       </div>
                     </div>
 
@@ -479,25 +694,18 @@ const SpaceDetail = () => {
                   </div>
 
                   {/* Price Breakdown */}
-                  {selectedDate && (
+                  {selectedDate && computedTotalHours > 0 && (
                     <>
                       <Separator />
                       <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground underline">
                             {getCurrencySymbol()}
-                            {space.price_per_hour} x{' '}
-                            {(new Date(`2000-01-01T${endTime}`).getTime() -
-                              new Date(`2000-01-01T${startTime}`).getTime()) /
-                              (1000 * 60 * 60)}{' '}
-                            {t('common.hours')}
+                            {space.price_per_hour} x {computedTotalHours} {t('common.hours')}
                           </span>
                           <span className="font-medium">
                             {getCurrencySymbol()}
-                            {((new Date(`2000-01-01T${endTime}`).getTime() -
-                              new Date(`2000-01-01T${startTime}`).getTime()) /
-                              (1000 * 60 * 60)) *
-                              space.price_per_hour}
+                            {subtotal}
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
@@ -506,13 +714,7 @@ const SpaceDetail = () => {
                           </span>
                           <span className="font-medium">
                             {getCurrencySymbol()}
-                            {Math.round(
-                              ((new Date(`2000-01-01T${endTime}`).getTime() -
-                                new Date(`2000-01-01T${startTime}`).getTime()) /
-                                (1000 * 60 * 60)) *
-                                space.price_per_hour *
-                                0.15
-                            )}
+                            {serviceFee}
                           </span>
                         </div>
                         <Separator />
@@ -520,17 +722,7 @@ const SpaceDetail = () => {
                           <span>{t('spaceDetail.total')}</span>
                           <span>
                             {getCurrencySymbol()}
-                            {((new Date(`2000-01-01T${endTime}`).getTime() -
-                              new Date(`2000-01-01T${startTime}`).getTime()) /
-                              (1000 * 60 * 60)) *
-                              space.price_per_hour +
-                              Math.round(
-                                ((new Date(`2000-01-01T${endTime}`).getTime() -
-                                  new Date(`2000-01-01T${startTime}`).getTime()) /
-                                  (1000 * 60 * 60)) *
-                                  space.price_per_hour *
-                                  0.15
-                              )}
+                            {totalDue}
                           </span>
                         </div>
                       </div>
@@ -541,7 +733,14 @@ const SpaceDetail = () => {
                   <Button
                     className="w-full h-12 bg-primary hover:bg-[#3B82F6] text-white font-semibold shadow-md hover:shadow-lg transition-all"
                     onClick={handleBooking}
-                    disabled={!selectedDate || createBooking.isPending || isCreatingPayment}
+                    disabled={
+                      !selectedDate ||
+                      !startTime ||
+                      !endTime ||
+                      computedTotalHours <= 0 ||
+                      createBooking.isPending ||
+                      isCreatingPayment
+                    }
                   >
                     {(() => {
                       if (createBooking.isPending) return t('spaceDetail.creatingBooking');

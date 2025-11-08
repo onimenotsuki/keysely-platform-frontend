@@ -8,6 +8,47 @@ export type Database = {
   };
   public: {
     Tables: {
+      blocked_hours: {
+        Row: {
+          blocked_date: string;
+          created_at: string;
+          end_time: string;
+          id: string;
+          reason: string | null;
+          space_id: string;
+          start_time: string;
+          updated_at: string;
+        };
+        Insert: {
+          blocked_date: string;
+          created_at?: string;
+          end_time: string;
+          id?: string;
+          reason?: string | null;
+          space_id: string;
+          start_time: string;
+          updated_at?: string;
+        };
+        Update: {
+          blocked_date?: string;
+          created_at?: string;
+          end_time?: string;
+          id?: string;
+          reason?: string | null;
+          space_id?: string;
+          start_time?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'blocked_hours_space_id_fkey';
+            columns: ['space_id'];
+            isOneToOne: false;
+            referencedRelation: 'spaces';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       bookings: {
         Row: {
           created_at: string;
