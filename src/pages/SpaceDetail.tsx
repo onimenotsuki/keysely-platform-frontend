@@ -23,10 +23,44 @@ import { useMarketplacePayment } from '@/hooks/useMarketplacePayment';
 import { useSpace } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Clock, Heart, MapPin, Maximize2, Share2, Star, Users } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
+
+const DEFAULT_START_TIME = '09:00';
+const DEFAULT_END_TIME = '17:00';
+const DAY_KEYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+] as const satisfies readonly string[];
+
+type AvailabilitySchedule = Record<
+  string,
+  {
+    start?: string | null;
+    end?: string | null;
+  } | null
+>;
+
+const getDayKeyFromDate = (date: Date) =>
+  new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(date).toLowerCase();
+
+const resolveAvailabilityTime = (availability: AvailabilitySchedule, type: 'start' | 'end') => {
+  for (const key of DAY_KEYS) {
+    const value = availability?.[key]?.[type];
+    if (typeof value === 'string' && value.trim()) {
+      return value;
+    }
+  }
+
+  return type === 'start' ? DEFAULT_START_TIME : DEFAULT_END_TIME;
+};
 
 const SpaceDetail = () => {
   const { id } = useParams();
@@ -35,8 +69,8 @@ const SpaceDetail = () => {
   const { t } = useTranslation();
   const { createLocalizedPath } = useLanguageRouting();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('17:00');
+  const [startTime, setStartTime] = useState(DEFAULT_START_TIME);
+  const [endTime, setEndTime] = useState(DEFAULT_END_TIME);
   const [guestsCount, setGuestsCount] = useState(1);
 
   const getCurrencySymbol = () => {
@@ -49,6 +83,24 @@ const SpaceDetail = () => {
   const { data: isFavorite } = useIsFavorite(id || '');
   const createBooking = useCreateBooking();
   const { createPayment, isCreatingPayment } = useMarketplacePayment();
+
+  useEffect(() => {
+    if (!space || !selectedDate) return;
+
+    const availability = (space.availability_hours ?? {}) as AvailabilitySchedule;
+    const dayKey = getDayKeyFromDate(selectedDate);
+    const dayAvailability = availability?.[dayKey];
+
+    const nextStartTime =
+      (typeof dayAvailability?.start === 'string' && dayAvailability.start.trim()) ||
+      resolveAvailabilityTime(availability, 'start');
+    const nextEndTime =
+      (typeof dayAvailability?.end === 'string' && dayAvailability.end.trim()) ||
+      resolveAvailabilityTime(availability, 'end');
+
+    setStartTime(nextStartTime);
+    setEndTime(nextEndTime);
+  }, [space, selectedDate]);
 
   const handleBooking = async () => {
     if (!user) {

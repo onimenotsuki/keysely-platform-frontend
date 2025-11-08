@@ -137,6 +137,7 @@
     }
   },
   "common": {
+    "edit": "Editar",
     "perHour": "/hora",
     "perHourShort": "/h",
     "perDay": "/día",
@@ -846,6 +847,7 @@
     "reviews": "evaluaciones",
     "yearsOnPlatform": "años en Keysely",
     "editProfile": "Editar Perfil",
+    "keepProfileUpdated": "Mantén tu perfil actualizado para generar confianza",
     "verifiedIdentity": "Identidad Verificada",
     "verifiedIdentityDesc": "Este usuario ha confirmado su identidad e información de contacto",
     "aboutMe": "Acerca de mí",

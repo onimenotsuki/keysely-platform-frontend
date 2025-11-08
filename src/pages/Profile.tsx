@@ -1,11 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +15,7 @@ import { useProfile, useUpdateProfile, type AddressData } from '@/hooks/useProfi
 import { useTranslation } from '@/hooks/useTranslation';
 import { ExternalLink, X } from 'lucide-react';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
 
@@ -31,7 +30,6 @@ const Profile = () => {
   const favorites = favoritesQuery.data || [];
   const updateProfile = useUpdateProfile();
 
-  const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     full_name: '',
     phone: '',
@@ -49,6 +47,24 @@ const Profile = () => {
   });
 
   const [newLanguage, setNewLanguage] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isEditing = searchParams.get('edit') === 'true';
+
+  const enterEditMode = () => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set('edit', 'true');
+      return params;
+    });
+  };
+
+  const exitEditMode = () => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.delete('edit');
+      return params;
+    });
+  };
 
   React.useEffect(() => {
     if (profile) {
@@ -73,7 +89,7 @@ const Profile = () => {
   const handleSaveProfile = async () => {
     try {
       await updateProfile.mutateAsync(profileData);
-      setIsEditing(false);
+      exitEditMode();
       toast({ title: t('profile.profileUpdated') || 'Profile updated successfully!' });
     } catch (error: unknown) {
       console.error('Profile update error:', error);
@@ -205,7 +221,7 @@ const Profile = () => {
                     <Button
                       variant="outline"
                       className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold"
-                      onClick={() => setIsEditing(true)}
+                      onClick={enterEditMode}
                     >
                       <i className="fas fa-edit mr-2"></i>
                       {t('profile.editProfile')}
@@ -433,35 +449,84 @@ const Profile = () => {
             </div>
           </div>
         ) : (
-          // Vista de edición de perfil
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-6">
-              <Button variant="ghost" onClick={() => setIsEditing(false)} className="mb-4">
-                <i className="fas fa-arrow-left mr-2"></i>
+          // Vista de edición de perfil renovada
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col gap-6 mb-10">
+              <Button variant="ghost" onClick={exitEditMode} className="w-fit gap-2 px-0">
+                <i className="fas fa-arrow-left text-sm" />
                 {t('common.back')}
               </Button>
               <h1 className="text-3xl font-bold text-foreground">{t('profile.editProfile')}</h1>
             </div>
 
-            {/* Profile Tabs para edición */}
-            <Tabs defaultValue="personal" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="personal">{t('profile.personalInfo')}</TabsTrigger>
-                <TabsTrigger value="address">{t('profile.address')}</TabsTrigger>
-                <TabsTrigger value="host">{t('profile.hostInfo')}</TabsTrigger>
-              </TabsList>
+            <div className="grid gap-10 lg:grid-cols-[340px_1fr]">
+              <Card className="border-0 shadow-lg ring-1 ring-border/50">
+                <CardContent className="p-8 space-y-8 text-center">
+                  <div className="flex flex-col items-center space-y-6">
+                    <div className="relative">
+                      <Avatar className="w-40 h-40 border-4 border-background shadow-lg">
+                        <AvatarImage
+                          src={profile?.avatar_url}
+                          alt={profile?.full_name || user.email || 'Avatar'}
+                        />
+                        <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
+                          {(profile?.full_name || user.email || 'U')[0].toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="absolute bottom-2 right-2 shadow-md"
+                        type="button"
+                      >
+                        <i className="fas fa-camera mr-2" />
+                        {t('common.edit') || 'Editar'}
+                      </Button>
+                    </div>
 
-              {/* Personal Information Tab */}
-              <TabsContent value="personal" className="space-y-6">
-                <Card className="border-0 shadow-sm">
+                    <div>
+                      <h2 className="text-2xl font-semibold text-foreground">
+                        {profileData.full_name || user.email?.split('@')[0]}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {profileData.company || t('profile.member')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 text-left">
+                    <div className="flex items-center justify-between rounded-lg bg-muted/60 p-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                          {t('profile.bookings')}
+                        </p>
+                        <p className="text-xl font-semibold text-foreground">
+                          {bookings?.length || 0}
+                        </p>
+                      </div>
+                      <i className="fas fa-calendar-check text-muted-foreground" />
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg bg-muted/60 p-4">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                          {t('profile.yearsOnPlatform')}
+                        </p>
+                        <p className="text-xl font-semibold text-foreground">{yearsOnPlatform()}</p>
+                      </div>
+                      <i className="fas fa-clock text-muted-foreground" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-8">
+                <Card className="border-0 shadow-md ring-1 ring-border/40">
                   <CardHeader>
                     <CardTitle>{t('profile.personalInfo')}</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="fullName" className="text-sm font-medium">
-                        {t('profile.fullName')}
-                      </Label>
+                  <CardContent className="grid gap-6 md:grid-cols-2">
+                    <div className="md:col-span-2 space-y-2">
+                      <Label htmlFor="fullName">{t('profile.fullName')}</Label>
                       <Input
                         id="fullName"
                         value={profileData.full_name}
@@ -472,53 +537,43 @@ const Profile = () => {
                       />
                     </div>
 
-                    <div>
-                      <Label htmlFor="email" className="text-sm font-medium">
-                        {t('profile.email')}
-                      </Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">{t('profile.email')}</Label>
                       <Input
                         id="email"
                         type="email"
                         value={user.email}
                         disabled
-                        className="h-12 px-4 bg-muted"
+                        className="h-12 px-4 bg-muted text-muted-foreground"
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="phone" className="text-sm font-medium">
-                          {t('profile.phone')}
-                        </Label>
-                        <Input
-                          id="phone"
-                          value={profileData.phone}
-                          onChange={(e) =>
-                            setProfileData((prev) => ({ ...prev, phone: e.target.value }))
-                          }
-                          className="h-12 px-4"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="company" className="text-sm font-medium">
-                          {t('profile.company')}
-                        </Label>
-                        <Input
-                          id="company"
-                          value={profileData.company}
-                          onChange={(e) =>
-                            setProfileData((prev) => ({ ...prev, company: e.target.value }))
-                          }
-                          className="h-12 px-4"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">{t('profile.phone')}</Label>
+                      <Input
+                        id="phone"
+                        value={profileData.phone}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({ ...prev, phone: e.target.value }))
+                        }
+                        className="h-12 px-4"
+                      />
                     </div>
 
-                    <div>
-                      <Label htmlFor="bio" className="text-sm font-medium">
-                        {t('profile.bio')}
-                      </Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="company">{t('profile.company')}</Label>
+                      <Input
+                        id="company"
+                        value={profileData.company}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({ ...prev, company: e.target.value }))
+                        }
+                        className="h-12 px-4"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2 space-y-2">
+                      <Label htmlFor="bio">{t('profile.bio')}</Label>
                       <Textarea
                         id="bio"
                         value={profileData.bio}
@@ -529,38 +584,16 @@ const Profile = () => {
                         placeholder={t('profile.bioPlaceholder')}
                       />
                     </div>
-
-                    <div className="flex space-x-2 pt-4">
-                      <Button
-                        className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
-                        onClick={handleSaveProfile}
-                        disabled={updateProfile.isPending}
-                      >
-                        {updateProfile.isPending ? t('common.saving') : t('common.saveChanges')}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditing(false)}
-                        className="h-12"
-                      >
-                        {t('common.cancel')}
-                      </Button>
-                    </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              {/* Address Tab */}
-              <TabsContent value="address" className="space-y-6">
-                <Card className="border-0 shadow-sm">
+                <Card className="border-0 shadow-md ring-1 ring-border/40">
                   <CardHeader>
                     <CardTitle>{t('profile.addressInformation')}</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="streetAddress" className="text-sm font-medium">
-                        {t('profile.streetAddress')}
-                      </Label>
+                  <CardContent className="grid gap-6 md:grid-cols-2">
+                    <div className="md:col-span-2 space-y-2">
+                      <Label htmlFor="streetAddress">{t('profile.streetAddress')}</Label>
                       <Input
                         id="streetAddress"
                         value={profileData.address.streetAddress}
@@ -575,121 +608,85 @@ const Profile = () => {
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="city" className="text-sm font-medium">
-                          {t('profile.city')}
-                        </Label>
-                        <Input
-                          id="city"
-                          value={profileData.address.city}
-                          onChange={(e) =>
-                            setProfileData((prev) => ({
-                              ...prev,
-                              address: { ...prev.address, city: e.target.value },
-                            }))
-                          }
-                          placeholder={t('profile.cityPlaceholder')}
-                          className="h-12 px-4"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="state" className="text-sm font-medium">
-                          {t('profile.state')}
-                        </Label>
-                        <Input
-                          id="state"
-                          value={profileData.address.state}
-                          onChange={(e) =>
-                            setProfileData((prev) => ({
-                              ...prev,
-                              address: { ...prev.address, state: e.target.value },
-                            }))
-                          }
-                          placeholder={t('profile.statePlaceholder')}
-                          className="h-12 px-4"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="city">{t('profile.city')}</Label>
+                      <Input
+                        id="city"
+                        value={profileData.address.city}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            address: { ...prev.address, city: e.target.value },
+                          }))
+                        }
+                        placeholder={t('profile.cityPlaceholder')}
+                        className="h-12 px-4"
+                      />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="postalCode" className="text-sm font-medium">
-                          {t('profile.postalCode')}
-                        </Label>
-                        <Input
-                          id="postalCode"
-                          value={profileData.address.postalCode}
-                          onChange={(e) =>
-                            setProfileData((prev) => ({
-                              ...prev,
-                              address: { ...prev.address, postalCode: e.target.value },
-                            }))
-                          }
-                          placeholder="12345"
-                          className="h-12 px-4"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="country" className="text-sm font-medium">
-                          {t('profile.country')}
-                        </Label>
-                        <Input
-                          id="country"
-                          value={profileData.address.country}
-                          onChange={(e) =>
-                            setProfileData((prev) => ({
-                              ...prev,
-                              address: { ...prev.address, country: e.target.value },
-                            }))
-                          }
-                          placeholder="México"
-                          className="h-12 px-4"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="state">{t('profile.state')}</Label>
+                      <Input
+                        id="state"
+                        value={profileData.address.state}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            address: { ...prev.address, state: e.target.value },
+                          }))
+                        }
+                        placeholder={t('profile.statePlaceholder')}
+                        className="h-12 px-4"
+                      />
                     </div>
 
-                    <div className="flex space-x-2 pt-4">
-                      <Button
-                        className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
-                        onClick={handleSaveProfile}
-                        disabled={updateProfile.isPending}
-                      >
-                        {updateProfile.isPending ? t('common.saving') : t('common.saveChanges')}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditing(false)}
-                        className="h-12"
-                      >
-                        {t('common.cancel')}
-                      </Button>
+                    <div className="space-y-2">
+                      <Label htmlFor="postalCode">{t('profile.postalCode')}</Label>
+                      <Input
+                        id="postalCode"
+                        value={profileData.address.postalCode}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            address: { ...prev.address, postalCode: e.target.value },
+                          }))
+                        }
+                        placeholder="12345"
+                        className="h-12 px-4"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="country">{t('profile.country')}</Label>
+                      <Input
+                        id="country"
+                        value={profileData.address.country}
+                        onChange={(e) =>
+                          setProfileData((prev) => ({
+                            ...prev,
+                            address: { ...prev.address, country: e.target.value },
+                          }))
+                        }
+                        placeholder="México"
+                        className="h-12 px-4"
+                      />
                     </div>
                   </CardContent>
                 </Card>
-              </TabsContent>
 
-              {/* Host Information Tab */}
-              <TabsContent value="host" className="space-y-6">
-                <Card className="border-0 shadow-sm">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>{t('hostProfile.hostInformation')}</CardTitle>
-                      <Button asChild variant="outline" size="sm" className="gap-2">
-                        <Link to={createLocalizedPath(`/host/${user.id}`)}>
-                          <ExternalLink className="h-4 w-4" />
-                          {t('hostProfile.viewPublicProfile')}
-                        </Link>
-                      </Button>
-                    </div>
+                <Card className="border-0 shadow-md ring-1 ring-border/40">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>{t('hostProfile.hostInformation')}</CardTitle>
+                    <Button asChild variant="outline" size="sm" className="gap-2">
+                      <Link to={createLocalizedPath(`/host/${user.id}`)}>
+                        <ExternalLink className="h-4 w-4" />
+                        {t('hostProfile.viewPublicProfile')}
+                      </Link>
+                    </Button>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="workDescription" className="text-sm font-medium">
-                        {t('hostProfile.workDescription')}
-                      </Label>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="workDescription">{t('hostProfile.workDescription')}</Label>
                       <Textarea
                         id="workDescription"
                         value={profileData.work_description}
@@ -697,94 +694,96 @@ const Profile = () => {
                           setProfileData((prev) => ({ ...prev, work_description: e.target.value }))
                         }
                         placeholder={t('hostProfile.workDescription')}
-                        rows={3}
                         className="min-h-32 px-4"
                       />
                     </div>
 
-                    <div>
-                      <Label className="text-sm font-medium">{t('hostProfile.languages')}</Label>
-                      <div className="space-y-2 mt-2">
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {profileData.languages.map((lang, index) => (
-                            <Badge
-                              key={`edit-lang-${lang}-${index}`}
-                              variant="secondary"
-                              className="px-3 py-1"
-                            >
-                              {lang}
-                              <button
-                                onClick={() =>
-                                  setProfileData((prev) => ({
-                                    ...prev,
-                                    languages: prev.languages.filter((_, i) => i !== index),
-                                  }))
-                                }
-                                className="ml-2 hover:text-destructive"
-                                aria-label={`Remove ${lang}`}
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex gap-2">
-                          <Input
-                            value={newLanguage}
-                            onChange={(e) => setNewLanguage(e.target.value)}
-                            placeholder={t('hostProfile.addLanguage')}
-                            className="h-12 px-4"
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && newLanguage.trim()) {
-                                e.preventDefault();
-                                setProfileData((prev) => ({
-                                  ...prev,
-                                  languages: [...prev.languages, newLanguage.trim()],
-                                }));
-                                setNewLanguage('');
-                              }
-                            }}
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-12"
-                            onClick={() => {
-                              if (newLanguage.trim()) {
-                                setProfileData((prev) => ({
-                                  ...prev,
-                                  languages: [...prev.languages, newLanguage.trim()],
-                                }));
-                                setNewLanguage('');
-                              }
-                            }}
+                    <div className="space-y-3">
+                      <Label>{t('hostProfile.languages')}</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {profileData.languages.map((lang, index) => (
+                          <Badge
+                            key={`edit-lang-${lang}-${index}`}
+                            variant="secondary"
+                            className="px-3 py-1 flex items-center"
                           >
-                            {t('common.add')}
-                          </Button>
-                        </div>
+                            {lang}
+                            <button
+                              onClick={() =>
+                                setProfileData((prev) => ({
+                                  ...prev,
+                                  languages: prev.languages.filter((_, i) => i !== index),
+                                }))
+                              }
+                              className="ml-2 text-muted-foreground hover:text-destructive"
+                              aria-label={`Remove ${lang}`}
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        ))}
+                        {profileData.languages.length === 0 && (
+                          <span className="text-sm text-muted-foreground">
+                            {t('hostProfile.addLanguage')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-3 sm:flex-row">
+                        <Input
+                          value={newLanguage}
+                          onChange={(e) => setNewLanguage(e.target.value)}
+                          placeholder={t('hostProfile.addLanguage')}
+                          className="h-12 px-4"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && newLanguage.trim()) {
+                              e.preventDefault();
+                              setProfileData((prev) => ({
+                                ...prev,
+                                languages: [...prev.languages, newLanguage.trim()],
+                              }));
+                              setNewLanguage('');
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-12"
+                          onClick={() => {
+                            if (newLanguage.trim()) {
+                              setProfileData((prev) => ({
+                                ...prev,
+                                languages: [...prev.languages, newLanguage.trim()],
+                              }));
+                              setNewLanguage('');
+                            }
+                          }}
+                        >
+                          {t('common.add')}
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="flex space-x-2 pt-4">
-                      <Button
-                        className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all"
-                        onClick={handleSaveProfile}
-                        disabled={updateProfile.isPending}
-                      >
-                        {updateProfile.isPending ? t('common.saving') : t('common.saveChanges')}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setIsEditing(false)}
-                        className="h-12"
-                      >
-                        {t('common.cancel')}
-                      </Button>
-                    </div>
                   </CardContent>
+                  <CardFooter className="border-t border-border/60 pt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                    <Button
+                      variant="outline"
+                      className="h-12 sm:w-auto"
+                      onClick={exitEditMode}
+                      disabled={updateProfile.isPending}
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                    <Button
+                      className="h-12 bg-primary hover:bg-[#3B82F6] shadow-md hover:shadow-lg transition-all sm:w-auto"
+                      onClick={handleSaveProfile}
+                      disabled={updateProfile.isPending}
+                    >
+                      {updateProfile.isPending ? t('common.saving') : t('common.saveChanges')}
+                    </Button>
+                  </CardFooter>
                 </Card>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </div>
           </div>
         )}
       </div>
