@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
+import { useProfile } from '@/hooks/useProfile';
 import { useTranslation } from '@/hooks/useTranslation';
 import { Heart, LayoutDashboard, LogOut, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -18,6 +19,7 @@ interface UserMenuProps {
 
 export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
   const { user, signOut } = useAuth();
+  const { data: profile } = useProfile();
   const { t } = useTranslation();
   const { createLocalizedPath } = useLanguageRouting();
   const navigate = useNavigate();
@@ -77,12 +79,17 @@ export const UserMenu = ({ isScrolled = false }: UserMenuProps) => {
             <span>{t('header.userMenu.profile')}</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to={createLocalizedPath(`/dashboard`)} className="cursor-pointer flex items-center">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>{t('header.userMenu.dashboard')}</span>
-          </Link>
-        </DropdownMenuItem>
+        {profile?.is_host && (
+          <DropdownMenuItem asChild>
+            <Link
+              to={createLocalizedPath(`/owner-dashboard`)}
+              className="cursor-pointer flex items-center"
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <span>{t('header.userMenu.hostDashboard')}</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link to={createLocalizedPath(`/favorites`)} className="cursor-pointer flex items-center">
             <Heart className="mr-2 h-4 w-4" />

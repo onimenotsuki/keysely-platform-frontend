@@ -10,9 +10,11 @@
       "signInOrRegister": "Inicia sesión o regístrate",
       "profile": "Perfil",
       "dashboard": "Dashboard de usuario",
+      "hostDashboard": "Dashboard de anfitrión",
       "favorites": "Lista de favoritos",
       "signOut": "Cerrar sesión"
-    }
+    },
+    "hostDashboard": "Dashboard de anfitrión"
   },
   "hero": {
     "title": "Encuentra el espacio de trabajo perfecto",
@@ -650,6 +652,10 @@
     "occupancyRate": "Tasa de Ocupación",
     "paymentSetup": "Configuración de Pagos",
     "myListings": "Mis Listados",
+    "publishedListings": "Listados publicados",
+    "unpublishedListings": "Listados no publicados",
+    "noPublishedListings": "Aún no has publicado ningún espacio.",
+    "noUnpublishedListings": "No tienes espacios sin publicar en este momento.",
     "recentBookings": "Reservas Recientes",
     "analytics": "Analíticas",
     "calendar": "Calendario",

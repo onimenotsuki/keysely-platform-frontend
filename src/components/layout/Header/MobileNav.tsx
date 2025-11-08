@@ -7,6 +7,7 @@ import NotificationBell from '../../NotificationBell';
 import { User, LayoutDashboard, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useProfile } from '@/hooks/useProfile';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export const MobileNav = ({ isOpen, isScrolled = false }: MobileNavProps) => {
   const { user, signOut } = useAuth();
   const { language } = useLanguageContext();
   const navigate = useNavigate();
+  const { data: profile } = useProfile();
 
   const handleSignOut = async () => {
     await signOut();
@@ -84,16 +86,18 @@ export const MobileNav = ({ isOpen, isScrolled = false }: MobileNavProps) => {
                 </Link>
               </Button>
 
-              <Button
-                asChild
-                variant="ghost"
-                className="w-full justify-start text-left font-normal"
-              >
-                <Link to={`/${language}/dashboard`} className="flex items-center">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  <span>{t('header.userMenu.dashboard')}</span>
-                </Link>
-              </Button>
+              {profile?.is_host && (
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="w-full justify-start text-left font-normal"
+                >
+                  <Link to={`/${language}/owner-dashboard`} className="flex items-center">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>{t('header.userMenu.hostDashboard')}</span>
+                  </Link>
+                </Button>
+              )}
 
               <Separator className="my-3" />
 

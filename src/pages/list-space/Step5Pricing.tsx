@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/hooks/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { Check } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -62,6 +64,7 @@ const Step5Pricing = () => {
   const navigate = useNavigate();
   const { lang } = useParams<{ lang: string }>();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const {
     draft,
     setCurrentStepIndex,
@@ -176,6 +179,11 @@ const Step5Pricing = () => {
       const amenitySlugs = amenitySelectedSlugs;
 
       try {
+        const addressObjectJson = (address.addressObject ?? null) as unknown as Json;
+        const serviceHoursJson = (serviceHours ?? null) as unknown as Json;
+        const discountsJson =
+          Object.keys(appliedDiscounts).length > 0 ? (appliedDiscounts as unknown as Json) : null;
+
         const spacePayload = {
           title: basicInfo.title,
           description: basicInfo.description,
@@ -184,7 +192,7 @@ const Step5Pricing = () => {
           area_sqm: basicInfo.areaSqm,
           address: address.text,
           city: address.addressObject.city,
-          address_object: address.addressObject,
+          address_object: addressObjectJson,
           latitude: address.addressObject.latitude,
           longitude: address.addressObject.longitude,
           images: mediaImages,
@@ -192,9 +200,9 @@ const Step5Pricing = () => {
             .map((slug) => amenityDefinitions.get(slug)?.name ?? slug)
             .filter(Boolean),
           features: amenityCharacteristics.map((item) => item.title),
-          service_hours: serviceHours,
+          service_hours: serviceHoursJson,
           price_per_hour: pricePerHour,
-          discounts: appliedDiscounts,
+          discounts: discountsJson,
           is_active: false,
         } as const;
 
@@ -312,6 +320,17 @@ const Step5Pricing = () => {
           }
         }
 
+        const { error: hostFlagError } = await supabase
+          .from('profiles')
+          .update({ is_host: true })
+          .eq('user_id', user.id);
+
+        if (hostFlagError) {
+          throw hostFlagError;
+        }
+
+        queryClient.invalidateQueries({ queryKey: ['profile'] });
+
         markStepCompleted(4);
 
         toast({
@@ -365,6 +384,7 @@ const Step5Pricing = () => {
     lang,
     markStepCompleted,
     resetDraft,
+    queryClient,
   ]);
 
   return (

@@ -9,9 +9,11 @@
       "signInOrRegister": "Sign in or register",
       "profile": "Profile",
       "dashboard": "User dashboard",
+      "hostDashboard": "Host dashboard",
       "favorites": "Favorites list",
       "signOut": "Sign out"
-    }
+    },
+    "hostDashboard": "Host dashboard"
   },
   "hero": {
     "title": "Find the perfect workspace",
@@ -648,6 +650,10 @@
     "occupancyRate": "Occupancy Rate",
     "paymentSetup": "Payment Setup",
     "myListings": "My Listings",
+    "publishedListings": "Published listings",
+    "unpublishedListings": "Unpublished listings",
+    "noPublishedListings": "You haven't published any spaces yet.",
+    "noUnpublishedListings": "No unpublished spaces at the moment.",
     "recentBookings": "Recent Bookings",
     "analytics": "Analytics",
     "calendar": "Calendar",

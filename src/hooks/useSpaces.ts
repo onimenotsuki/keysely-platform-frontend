@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database, Json } from '@/integrations/supabase/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface Space {
@@ -123,20 +124,45 @@ export const useCreateSpace = () => {
     ) => {
       if (!user) throw new Error('User not authenticated');
 
-      const { data, error } = await supabase
-        .from('spaces')
-        .insert({
-          ...spaceData,
-          owner_id: user.id,
-        })
-        .select()
-        .single();
+      const {
+        address_object,
+        availability_hours,
+        discounts,
+        images,
+        features,
+        amenities,
+        ...rest
+      } = spaceData;
+
+      const payload: Database['public']['Tables']['spaces']['Insert'] = {
+        ...rest,
+        owner_id: user.id,
+        address_object: address_object ? (address_object as unknown as Json) : null,
+        availability_hours: availability_hours ? (availability_hours as unknown as Json) : null,
+        discounts: discounts ? (discounts as unknown as Json) : null,
+        images: images ?? null,
+        features: features ?? null,
+        amenities: amenities ?? null,
+      };
+
+      const { data, error } = await supabase.from('spaces').insert(payload).select().single();
 
       if (error) throw error;
+
+      const { error: hostFlagError } = await supabase
+        .from('profiles')
+        .update({ is_host: true })
+        .eq('user_id', user.id);
+
+      if (hostFlagError) {
+        console.error('Failed to mark user as host', hostFlagError);
+      }
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['spaces'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     },
   });
 };
@@ -146,9 +172,49 @@ export const useUpdateSpace = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Space> & { id: string }) => {
+      const {
+        address_object,
+        availability_hours,
+        discounts,
+        images,
+        features,
+        amenities,
+        ...rest
+      } = updates;
+
+      const payload: Database['public']['Tables']['spaces']['Update'] = {
+        ...rest,
+      };
+
+      if (address_object !== undefined) {
+        payload.address_object = address_object ? (address_object as unknown as Json) : null;
+      }
+
+      if (availability_hours !== undefined) {
+        payload.availability_hours = availability_hours
+          ? (availability_hours as unknown as Json)
+          : null;
+      }
+
+      if (discounts !== undefined) {
+        payload.discounts = discounts ? (discounts as unknown as Json) : null;
+      }
+
+      if (images !== undefined) {
+        payload.images = images ?? null;
+      }
+
+      if (features !== undefined) {
+        payload.features = features ?? null;
+      }
+
+      if (amenities !== undefined) {
+        payload.amenities = amenities ?? null;
+      }
+
       const { data, error } = await supabase
         .from('spaces')
-        .update(updates)
+        .update(payload)
         .eq('id', id)
         .select()
         .single();
