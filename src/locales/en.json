@@ -687,6 +687,8 @@
     "edit": "Edit",
     "view": "View",
     "manageAvailability": "Manage availability",
+    "activeStatus": "Active",
+    "inactiveStatus": "Inactive",
     "addNewListingCard": "Add New Listing",
     "addNewListingDesc": "Create a new workspace listing and start earning",
     "getStarted": "Get Started",

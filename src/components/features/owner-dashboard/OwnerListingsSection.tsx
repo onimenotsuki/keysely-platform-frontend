@@ -1,4 +1,5 @@
 import { OwnerAvailabilityManager } from '@/components/features/owner-dashboard/OwnerAvailabilityManager';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -8,12 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useOwnerSpaces, type OwnerSpace } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
+import { cn } from '@/lib/utils';
 import { createListSpaceStepPath } from '@/pages/list-space/paths';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CircleIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -172,7 +174,7 @@ export const OwnerListingsSection = ({ title }: OwnerListingsSectionProps) => {
   const { t } = useTranslation();
   const { createLocalizedPath, currentLanguage } = useLanguageRouting();
   const { data: ownerSpaces = [], isLoading } = useOwnerSpaces();
-  const [isAvailabilityDialogOpen, setAvailabilityDialogOpen] = useState<boolean>(false);
+  const [isAvailabilityDialogOpen, setAvailabilityDialogOpen] = useState(false);
   const [selectedSpace, setSelectedSpace] = useState<OwnerSpace | null>(null);
 
   const publishedSpaces = ownerSpaces.filter((space) => space.is_active);
