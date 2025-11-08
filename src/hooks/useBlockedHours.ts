@@ -6,7 +6,7 @@ import {
   type CreateBlockedHourPayload,
 } from '@/integrations/supabase/blockedHours';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { addMonths, endOfMonth, format, startOfMonth } from 'date-fns';
+import { addMonths, endOfDay, endOfMonth, format, startOfDay, startOfMonth } from 'date-fns';
 import { useMemo } from 'react';
 
 const formatMonthKey = (date: Date) => format(date, 'yyyy-MM');
@@ -40,6 +40,40 @@ export const useBlockedHours = (spaceId: string | null, month: Date) => {
   });
 };
 
+export const useBlockedHoursRange = (spaceId: string | null, start: Date, end: Date) => {
+  const range = useMemo(() => {
+    const rangeStart = startOfDay(start);
+    const rangeEnd = endOfDay(end);
+
+    return {
+      rangeStart,
+      rangeEnd,
+      startDate: format(rangeStart, 'yyyy-MM-dd'),
+      endDate: format(rangeEnd, 'yyyy-MM-dd'),
+    };
+  }, [start, end]);
+
+  return useQuery({
+    queryKey: [
+      'blocked-hours-range',
+      spaceId,
+      format(range.rangeStart, 'yyyy-MM-dd'),
+      format(range.rangeEnd, 'yyyy-MM-dd'),
+    ],
+    queryFn: async () => {
+      if (!spaceId) return [] as BlockedHour[];
+
+      return fetchBlockedHoursByRange(spaceId, range.startDate, range.endDate);
+    },
+    enabled: Boolean(spaceId),
+    staleTime: 1000 * 60 * 5,
+    meta: {
+      rangeStart: range.rangeStart,
+      rangeEnd: range.rangeEnd,
+    },
+  });
+};
+
 const invalidateBlockedHours = (
   queryClient: ReturnType<typeof useQueryClient>,
   spaceId: string,
@@ -59,6 +93,10 @@ const invalidateBlockedHours = (
   queryClient.invalidateQueries({
     queryKey: ['blocked-hours', spaceId, nextMonthKey],
     exact: true,
+  });
+  queryClient.invalidateQueries({
+    queryKey: ['blocked-hours-range', spaceId],
+    exact: false,
   });
 };
 

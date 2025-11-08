@@ -715,6 +715,8 @@
       },
       "prevMonth": "Previous month",
       "nextMonth": "Next month",
+      "prevYear": "Previous year",
+      "nextYear": "Next year",
       "loading": "Updating availability…",
       "slotsTitle": "Hourly availability",
       "selectDatePrompt": "Select a day to manage hourly availability.",
@@ -733,7 +735,16 @@
       "rangeSelectPlaceholder": "Pick an available hour",
       "unblockAction": "Unblock",
       "manageAvailabilityDialogTitle": "Manage availability",
-      "manageAvailabilityDialogDescription": "Review and adjust blocked hours for {{space}}."
+      "manageAvailabilityDialogDescription": "Review and adjust blocked hours for {{space}}.",
+      "weekdayLabels": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      }
     },
     "unknownGuest": "Unknown Guest",
     "confirmed": "confirmed",
@@ -745,7 +756,9 @@
     "mySpacesSubtitle": "Organize and update the spaces you offer.",
     "bookingsTitle": "Bookings",
     "bookingsSubtitle": "Track, review, and manage your reservations.",
-    "backToDashboard": "Back to dashboard"
+    "backToDashboard": "Back to dashboard",
+    "manageAvailabilityDialogTitle": "Manage availability",
+    "manageAvailabilityDialogDescription": "Review and adjust blocked hours for {{space}}."
   },
   "map": {
     "viewDetails": "View details",

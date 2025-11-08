@@ -1,7 +1,6 @@
 import { OwnerAvailabilityManager } from '@/components/features/owner-dashboard/OwnerAvailabilityManager';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +13,8 @@ import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useOwnerSpaces, type OwnerSpace } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
 import { createListSpaceStepPath } from '@/pages/list-space/paths';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { CircleIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,15 +48,34 @@ const renderSpaceGrid = (
                 target.src = '/placeholder.svg';
               }}
             />
-            <Badge
-              className={`absolute top-2 right-2 z-10 ${
-                space.is_active
-                  ? 'bg-success text-success-foreground'
-                  : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              {space.is_active ? t('ownerDashboard.active') : t('ownerDashboard.inactive')}
-            </Badge>
+            <div className="absolute top-3 right-3 z-10">
+              <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      aria-label={
+                        space.is_active
+                          ? t('ownerDashboard.activeStatus')
+                          : t('ownerDashboard.inactiveStatus')
+                      }
+                    >
+                      <CircleIcon
+                        className={cn(
+                          'h-5 w-5 drop-shadow-sm transition-transform hover:scale-110',
+                          space.is_active ? 'text-success' : 'text-destructive'
+                        )}
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" className="text-sm font-medium">
+                    {space.is_active
+                      ? t('ownerDashboard.activeStatus')
+                      : t('ownerDashboard.inactiveStatus')}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
 
           <CardContent className="p-6">
@@ -152,7 +172,7 @@ export const OwnerListingsSection = ({ title }: OwnerListingsSectionProps) => {
   const { t } = useTranslation();
   const { createLocalizedPath, currentLanguage } = useLanguageRouting();
   const { data: ownerSpaces = [], isLoading } = useOwnerSpaces();
-  const [isAvailabilityDialogOpen, setAvailabilityDialogOpen] = useState(false);
+  const [isAvailabilityDialogOpen, setAvailabilityDialogOpen] = useState<boolean>(false);
   const [selectedSpace, setSelectedSpace] = useState<OwnerSpace | null>(null);
 
   const publishedSpaces = ownerSpaces.filter((space) => space.is_active);
@@ -260,20 +280,29 @@ export const OwnerListingsSection = ({ title }: OwnerListingsSectionProps) => {
           }
         }}
       >
-        <DialogContent className="w-full max-w-5xl">
-          <DialogHeader>
-            <DialogTitle>{t('ownerDashboard.manageAvailabilityDialogTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('ownerDashboard.manageAvailabilityDialogDescription', {
-                space: selectedSpace?.title ?? '',
-              })}
-            </DialogDescription>
-          </DialogHeader>
-          {selectedSpace && (
-            <div className="mt-2">
-              <OwnerAvailabilityManager key={selectedSpace.id} spaces={availabilityManagerSpaces} />
+        <DialogContent className="h-screen w-screen max-w-none overflow-hidden rounded-none border-0 bg-background p-0 sm:h-screen sm:w-screen">
+          <div className="flex h-full flex-col">
+            <div className="border-b p-6">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">
+                  {t('ownerDashboard.manageAvailabilityDialogTitle')}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {t('ownerDashboard.manageAvailabilityDialogDescription', {
+                    space: selectedSpace?.title ?? '',
+                  })}
+                </DialogDescription>
+              </DialogHeader>
             </div>
-          )}
+            <div className="flex-1 overflow-y-auto p-6">
+              {selectedSpace && (
+                <OwnerAvailabilityManager
+                  key={selectedSpace.id}
+                  spaces={availabilityManagerSpaces}
+                />
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -717,6 +717,8 @@
       },
       "prevMonth": "Mes anterior",
       "nextMonth": "Mes siguiente",
+      "prevYear": "Año anterior",
+      "nextYear": "Año siguiente",
       "loading": "Actualizando disponibilidad…",
       "slotsTitle": "Disponibilidad por hora",
       "selectDatePrompt": "Selecciona un día para gestionar la disponibilidad por hora.",
@@ -735,7 +737,16 @@
       "rangeSelectPlaceholder": "Elige una hora disponible",
       "unblockAction": "Desbloquear",
       "manageAvailabilityDialogTitle": "Gestionar horarios",
-      "manageAvailabilityDialogDescription": "Revisa y ajusta las horas bloqueadas para {{space}}."
+      "manageAvailabilityDialogDescription": "Revisa y ajusta las horas bloqueadas para {{space}}.",
+      "weekdayLabels": {
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mié",
+        "thu": "Jue",
+        "fri": "Vie",
+        "sat": "Sáb",
+        "sun": "Dom"
+      }
     },
     "unknownGuest": "Huésped Desconocido",
     "confirmed": "confirmado",
@@ -747,7 +758,9 @@
     "mySpacesSubtitle": "Organiza y actualiza los espacios que ofreces.",
     "bookingsTitle": "Reservas",
     "bookingsSubtitle": "Controla, revisa y administra tus reservas.",
-    "backToDashboard": "Volver al panel"
+    "backToDashboard": "Volver al panel",
+    "manageAvailabilityDialogTitle": "Gestionar disponibilidad",
+    "manageAvailabilityDialogDescription": "Revisa y ajusta las horas bloqueadas para {{space}}."
   },
   "map": {
     "viewDetails": "Ver detalles",
