@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { GoogleMapProvider, isGoogleMapsConfigured } from '@/components/map/GoogleMapView';
+import { MapboxProvider, isMapboxConfigured } from '@/components/map/MapboxProvider';
 import { LocationPicker } from '@/components/map/LocationPicker';
 import { useTranslation } from '@/hooks/useTranslation';
 
@@ -385,15 +385,15 @@ const Step2Address = () => {
                   </p>
                 </div>
 
-                {isGoogleMapsConfigured() ? (
-                  <GoogleMapProvider>
+                {isMapboxConfigured() ? (
+                  <MapboxProvider>
                     <LocationPicker
                       address={mapAddress}
                       latitude={watchLatitude ?? undefined}
                       longitude={watchLongitude ?? undefined}
                       onLocationChange={handleLocationChange}
                     />
-                  </GoogleMapProvider>
+                  </MapboxProvider>
                 ) : (
                   <Alert variant="destructive">
                     <AlertTitle>{t('listSpaceWizard.step2.mapsMissingTitle')}</AlertTitle>

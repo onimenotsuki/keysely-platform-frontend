@@ -32,8 +32,8 @@ import { useForm, type FieldPath } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import logoImage from '../assets/logo.png';
-import { GoogleMapProvider, isGoogleMapsConfigured } from '../components/map/GoogleMapView';
 import { LocationPicker } from '../components/map/LocationPicker';
+import { MapboxProvider, isMapboxConfigured } from '../components/map/MapboxProvider';
 
 const createListSpaceSchema = (t: (key: string, options?: Record<string, unknown>) => string) =>
   z.object({
@@ -540,10 +540,10 @@ const ListSpace = () => {
                           )}
                         />
 
-                        {isGoogleMapsConfigured() && (
+                        {isMapboxConfigured() && (
                           <div className="space-y-2">
                             <Label>{t('listSpaceOnboarding.sections.basics.mapLabel')}</Label>
-                            <GoogleMapProvider>
+                            <MapboxProvider>
                               <LocationPicker
                                 address={`${form.watch('address')}, ${form.watch('city')}`}
                                 latitude={form.watch('latitude')}
@@ -553,7 +553,7 @@ const ListSpace = () => {
                                   form.setValue('longitude', lng);
                                 }}
                               />
-                            </GoogleMapProvider>
+                            </MapboxProvider>
                           </div>
                         )}
                       </CardContent>

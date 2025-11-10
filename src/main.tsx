@@ -17,19 +17,6 @@ import './utils/debugSpaces.ts';
 import './utils/fixSpaces.ts';
 import './utils/fullDiagnostic.ts';
 
-// Suppress Google Maps Marker deprecation warning
-// The @react-google-maps/api library still uses the old Marker internally
-// This is a temporary measure until the library is updated
-// See: https://github.com/visgl/react-google-maps/issues/614
-const originalWarn = console.warn;
-console.warn = (...args: unknown[]) => {
-  const message = args[0];
-  if (typeof message === 'string' && message.includes('google.maps.Marker is deprecated')) {
-    return; // Suppress this specific warning
-  }
-  originalWarn.apply(console, args);
-};
-
 // Initialize seed data system
 initializeSeedData();
 

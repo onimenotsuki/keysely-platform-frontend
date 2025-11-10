@@ -220,7 +220,7 @@
     "showAllPhotos": "Ver todas las {{count}} fotos",
     "whereYoullBe": "Dónde vas a estar",
     "mapNotAvailable": "Mapa no disponible",
-    "mapNotConfigured": "Google Maps no está configurado",
+    "mapNotConfigured": "Mapbox no está configurado",
     "shareDialog": {
       "title": "Comparte este espacio",
       "copyLink": "Copiar enlace",
@@ -521,8 +521,8 @@
       "mapHelper": "Arrastra el marcador para ajustar la entrada exacta.",
       "completeStep1Title": "Completa los pasos anteriores",
       "completeStep1Description": "Finaliza la información básica antes de agregar la dirección.",
-      "mapsMissingTitle": "Google Maps no está configurado",
-      "mapsMissingDescription": "Agrega tu clave de Google Maps para habilitar el selector.",
+      "mapsMissingTitle": "Mapbox no está configurado",
+      "mapsMissingDescription": "Agrega tu token de acceso de Mapbox para habilitar el selector.",
       "savedTitle": "Ubicación guardada",
       "savedDescription": "La dirección y coordenadas se guardaron en el borrador.",
       "missingSpace": "Termina los pasos anteriores antes de guardar la dirección.",
@@ -766,7 +766,9 @@
   },
   "map": {
     "viewDetails": "Ver detalles",
-    "searchThisArea": "Buscar en esta área"
+    "searchThisArea": "Buscar en esta área",
+    "notAvailable": "Mapa no disponible",
+    "notConfigured": "Mapbox no está configurado"
   },
   "hostProfile": {
     "title": "Perfil de Anfitrión",

@@ -2,7 +2,7 @@ import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import ContactOwnerButton from '@/components/ContactOwnerButton';
 import ReviewsSection from '@/components/ReviewsSection';
 import { AmenityBadge } from '@/components/features/spaces/AmenityBadge';
-import { GoogleMapProvider, isGoogleMapsConfigured } from '@/components/map/GoogleMapView';
+import { MapboxProvider, isMapboxConfigured } from '@/components/map/MapboxProvider';
 import { SpaceLocationMap } from '@/components/map/SpaceLocationMap';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -750,15 +750,15 @@ const SpaceDetail = () => {
             <p className="text-muted-foreground mb-6">
               {space.address}, {space.city}
             </p>
-            {isGoogleMapsConfigured() ? (
+            {isMapboxConfigured() ? (
               <div className="h-[480px] w-full rounded-xl overflow-hidden border">
-                <GoogleMapProvider>
+                <MapboxProvider>
                   <SpaceLocationMap
                     latitude={space.latitude}
                     longitude={space.longitude}
                     zoom={15}
                   />
-                </GoogleMapProvider>
+                </MapboxProvider>
               </div>
             ) : (
               <div className="h-[480px] w-full rounded-xl overflow-hidden border bg-muted flex items-center justify-center">

@@ -219,7 +219,7 @@
     "showAllPhotos": "Show all {{count}} photos",
     "whereYoullBe": "Where you'll be",
     "mapNotAvailable": "Map not available",
-    "mapNotConfigured": "Google Maps is not configured",
+    "mapNotConfigured": "Mapbox is not configured",
     "shareDialog": {
       "title": "Share this space",
       "copyLink": "Copy link",
@@ -519,8 +519,8 @@
       "mapHelper": "Drag the marker to fine-tune the entrance of your space.",
       "completeStep1Title": "Complete previous steps",
       "completeStep1Description": "Finish the basic information step before adding the address.",
-      "mapsMissingTitle": "Google Maps is not configured",
-      "mapsMissingDescription": "Add your Google Maps API key to enable the location picker.",
+      "mapsMissingTitle": "Mapbox is not configured",
+      "mapsMissingDescription": "Add your Mapbox access token to enable the location picker.",
       "savedTitle": "Location saved",
       "savedDescription": "Your address and coordinates were stored in the draft.",
       "missingSpace": "Finish earlier steps before saving the address.",
@@ -764,7 +764,9 @@
   },
   "map": {
     "viewDetails": "View details",
-    "searchThisArea": "Search this area"
+    "searchThisArea": "Search this area",
+    "notAvailable": "Map not available",
+    "notConfigured": "Mapbox is not configured"
   },
   "hostProfile": {
     "title": "Host Profile",

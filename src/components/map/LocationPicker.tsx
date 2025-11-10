@@ -1,70 +1,36 @@
-import { GoogleMap, MarkerF } from '@react-google-maps/api';
-import { useCallback, useEffect, useState } from 'react';
+import { MAPBOX_STYLE } from '@/utils/mapboxConfig';
+import { geocodeAddress } from '@/utils/mapboxGeocoding';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Map, {
+  Marker,
+  type MapLayerMouseEvent,
+  type MarkerDragEvent,
+  type ViewState,
+  type ViewStateChangeEvent,
+} from 'react-map-gl';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '400px',
-};
+interface ControlledViewState {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+  bearing: number;
+  pitch: number;
+  padding: ViewState['padding'];
+  width: number;
+  height: number;
+}
 
-const mapStyles: google.maps.MapTypeStyle[] = [
-  {
-    featureType: 'all',
-    elementType: 'geometry',
-    stylers: [{ color: '#EEF2FF' }],
-  },
-  {
-    featureType: 'water',
-    elementType: 'geometry.fill',
-    stylers: [{ color: '#C7D7FE' }],
-  },
-  {
-    featureType: 'road',
-    elementType: 'geometry',
-    stylers: [{ color: '#E0E7FF' }],
-  },
-  {
-    featureType: 'road',
-    elementType: 'geometry.stroke',
-    stylers: [{ color: '#94A3B8' }, { weight: 0.3 }],
-  },
-  {
-    featureType: 'poi',
-    elementType: 'geometry.fill',
-    stylers: [{ color: '#DBEAFE' }],
-  },
-  {
-    featureType: 'poi.business',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#1A2B42' }],
-  },
-  {
-    featureType: 'landscape.man_made',
-    elementType: 'geometry',
-    stylers: [{ color: '#E2E8F0' }],
-  },
-  {
-    featureType: 'administrative',
-    elementType: 'labels.text.fill',
-    stylers: [{ color: '#1A2B42' }],
-  },
-];
-
-const defaultCenter = {
-  lat: 19.4326,
-  lng: -99.1332,
-};
-
-const mapOptions: google.maps.MapOptions = {
-  disableDefaultUI: false,
-  zoomControl: true,
-  streetViewControl: false,
-  mapTypeControl: false,
-  fullscreenControl: true,
-  backgroundColor: '#EEF2FF',
-  styles: mapStyles,
-  // mapId: 'keysely-map', // Commented out - causes issues with @react-google-maps/api v2.20.7
+const fallbackViewState: ControlledViewState = {
+  latitude: 19.4326,
+  longitude: -99.1332,
+  zoom: 12,
+  bearing: 0,
+  pitch: 0,
+  padding: { top: 0, bottom: 0, left: 0, right: 0 },
+  width: 0,
+  height: 0,
 };
 
 interface LocationPickerProps {
@@ -80,114 +46,169 @@ export const LocationPicker = ({
   longitude,
   onLocationChange,
 }: LocationPickerProps) => {
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [marker, setMarker] = useState<google.maps.LatLng | null>(
-    latitude && longitude ? new google.maps.LatLng(latitude, longitude) : null
+  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+
+  const [viewState, setViewState] = useState<ControlledViewState>(fallbackViewState);
+  useEffect(() => {
+    if (latitude || longitude) return;
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setViewState((prev) => ({
+          ...prev,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        }));
+      },
+      () => undefined,
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [latitude, longitude]);
+
+  const [markerPosition, setMarkerPosition] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(
+    latitude && longitude
+      ? {
+          latitude,
+          longitude,
+        }
+      : null
   );
   const [geocoding, setGeocoding] = useState(false);
+  const lastGeocodedAddressRef = useRef<string | null>(null);
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    setMap(map);
-  }, []);
-
-  const onUnmount = useCallback(() => {
-    setMap(null);
-  }, []);
-
-  // Geocode address when it changes
   useEffect(() => {
-    if (!map || !address || geocoding) return;
+    if (latitude && longitude) {
+      setMarkerPosition({ latitude, longitude });
+      setViewState((prev) => ({
+        ...prev,
+        latitude,
+        longitude,
+        zoom: Math.max(prev.zoom, 15),
+      }));
+    }
+  }, [latitude, longitude]);
 
-    const geocoder = new google.maps.Geocoder();
+  useEffect(() => {
+    if (!address || address.trim().length === 0) return;
+    if (lastGeocodedAddressRef.current === address.trim()) return;
+
+    let cancelled = false;
     setGeocoding(true);
 
-    geocoder.geocode({ address }, (results, status) => {
-      setGeocoding(false);
+    geocodeAddress(address)
+      .then((result) => {
+        if (!result || cancelled) return;
 
-      if (status === 'OK' && results && results[0]) {
-        const location = results[0].geometry.location;
-        const newMarker = new google.maps.LatLng(location.lat(), location.lng());
+        lastGeocodedAddressRef.current = address.trim();
+        setMarkerPosition({ latitude: result.lat, longitude: result.lng });
+        setViewState((prev) => ({
+          ...prev,
+          latitude: result.lat,
+          longitude: result.lng,
+          zoom: 15,
+        }));
+        onLocationChange(result.lat, result.lng);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setGeocoding(false);
+        }
+      });
 
-        setMarker(newMarker);
-        map.panTo(location);
-        map.setZoom(15);
+    return () => {
+      cancelled = true;
+    };
+  }, [address, onLocationChange]);
 
-        onLocationChange(location.lat(), location.lng());
-      }
-    });
-  }, [address, map, geocoding, onLocationChange]);
-
-  // Handle marker drag
-  const handleMarkerDragEnd = useCallback(
-    (e: google.maps.MapMouseEvent) => {
-      if (e.latLng) {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        setMarker(new google.maps.LatLng(lat, lng));
-        onLocationChange(lat, lng);
-      }
+  const updateLocation = useCallback(
+    (lat: number, lng: number) => {
+      setMarkerPosition({ latitude: lat, longitude: lng });
+      setViewState((prev) => ({
+        ...prev,
+        latitude: lat,
+        longitude: lng,
+      }));
+      onLocationChange(lat, lng);
     },
     [onLocationChange]
   );
 
-  // Handle map click to place marker
-  const handleMapClick = useCallback(
-    (e: google.maps.MapMouseEvent) => {
-      if (e.latLng) {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        setMarker(new google.maps.LatLng(lat, lng));
-        onLocationChange(lat, lng);
-      }
+  const handleMarkerDragEnd = useCallback(
+    (event: MarkerDragEvent) => {
+      const { lat, lng } = event.lngLat;
+      updateLocation(lat, lng);
     },
-    [onLocationChange]
+    [updateLocation]
+  );
+
+  const handleMapClick = useCallback(
+    (event: MapLayerMouseEvent) => {
+      const { lat, lng } = event.lngLat;
+      updateLocation(lat, lng);
+    },
+    [updateLocation]
   );
 
   return (
     <div className="space-y-4">
       <div className="text-sm text-muted-foreground">
-        {marker
+        {markerPosition
           ? 'Arrastra el marcador para ajustar la ubicación exacta de tu espacio'
           : 'Haz clic en el mapa para establecer la ubicación de tu espacio'}
       </div>
 
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={marker ? { lat: marker.lat(), lng: marker.lng() } : defaultCenter}
-        zoom={marker ? 15 : 12}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
+      <Map
+        mapboxAccessToken={accessToken}
+        mapStyle={MAPBOX_STYLE}
+        style={{ width: '100%', height: '400px' }}
+        viewState={viewState as unknown as ViewState & { width: number; height: number }}
+        onMove={(event: ViewStateChangeEvent) =>
+          setViewState((prev) => ({
+            ...prev,
+            latitude: event.viewState.latitude,
+            longitude: event.viewState.longitude,
+            zoom: event.viewState.zoom,
+            bearing: event.viewState.bearing ?? prev.bearing,
+            pitch: event.viewState.pitch ?? prev.pitch,
+            padding: event.viewState.padding ?? prev.padding,
+            width: (event.viewState as ControlledViewState).width ?? prev.width,
+            height: (event.viewState as ControlledViewState).height ?? prev.height,
+          }))
+        }
         onClick={handleMapClick}
-        options={mapOptions}
       >
-        {marker && (
-          <MarkerF
-            position={{ lat: marker.lat(), lng: marker.lng() }}
-            draggable={true}
+        {markerPosition && (
+          <Marker
+            latitude={markerPosition.latitude}
+            longitude={markerPosition.longitude}
+            draggable
             onDragEnd={handleMarkerDragEnd}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 9,
-              fillColor: '#1A2B42',
-              fillOpacity: 1,
-              strokeColor: '#60A5FA',
-              strokeWeight: 2,
-            }}
-          />
+            anchor="bottom"
+          >
+            <span className="block h-4 w-4 rounded-full bg-primary border-2 border-white shadow-lg"></span>
+          </Marker>
         )}
-      </GoogleMap>
+      </Map>
 
-      {marker && (
+      {markerPosition && (
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-sm text-muted-foreground">Latitud</Label>
-            <Input value={marker.lat().toFixed(6)} readOnly className="bg-muted" />
+            <Input value={markerPosition.latitude.toFixed(6)} readOnly className="bg-muted" />
           </div>
           <div>
             <Label className="text-sm text-muted-foreground">Longitud</Label>
-            <Input value={marker.lng().toFixed(6)} readOnly className="bg-muted" />
+            <Input value={markerPosition.longitude.toFixed(6)} readOnly className="bg-muted" />
           </div>
         </div>
+      )}
+
+      {geocoding && (
+        <div className="text-xs text-muted-foreground">Buscando dirección en Mapbox…</div>
       )}
     </div>
   );

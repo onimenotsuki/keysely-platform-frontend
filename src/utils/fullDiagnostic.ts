@@ -8,30 +8,31 @@ import { supabase } from '@/integrations/supabase/client';
 declare global {
   interface Window {
     fullDiagnostic: () => Promise<void>;
+    mapboxgl?: typeof import('mapbox-gl');
   }
 }
 
 window.fullDiagnostic = async () => {
   console.log('🔍 Starting Full Diagnostic...\n');
 
-  // 1. Check Google Maps API Key
-  console.log('1️⃣ Checking Google Maps Configuration:');
-  const googleMapsKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  if (!googleMapsKey || googleMapsKey === '') {
-    console.error('❌ VITE_GOOGLE_MAPS_API_KEY is not set!');
-    console.log('   → Add it to your .env file');
+  // 1. Check Mapbox Access Token
+  console.log('1️⃣ Checking Mapbox Configuration:');
+  const mapboxToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+  if (!mapboxToken || mapboxToken === '') {
+    console.error('❌ VITE_MAPBOX_ACCESS_TOKEN is not set!');
+    console.log('   → Agrega tu token público de Mapbox a tu archivo .env');
   } else {
-    console.log('✅ Google Maps API Key is configured');
-    console.log(`   Key: ${googleMapsKey.substring(0, 10)}...`);
+    console.log('✅ Mapbox access token configurado correctamente');
+    console.log(`   Token: ${mapboxToken.substring(0, 12)}...`);
   }
 
-  // 2. Check if Google Maps loaded
-  console.log('\n2️⃣ Checking Google Maps Script:');
-  if (typeof window.google !== 'undefined' && window.google.maps) {
-    console.log('✅ Google Maps script loaded successfully');
+  // 2. Check if Mapbox GL is available
+  console.log('\n2️⃣ Checking Mapbox GL availability:');
+  if (typeof window.mapboxgl !== 'undefined') {
+    console.log('✅ Mapbox GL library loaded correctamente');
   } else {
-    console.error('❌ Google Maps script NOT loaded!');
-    console.log('   → Check your API key and network connection');
+    console.error('❌ Mapbox GL no está disponible en window');
+    console.log('   → Verifica la instalación de mapbox-gl y que el bundle se haya cargado');
   }
 
   // 3. Check Spaces in Database
@@ -140,20 +141,20 @@ window.fullDiagnostic = async () => {
   console.log('\n7️⃣ Check Browser Console:');
   console.log('   → Look for red errors above');
   console.log('   → Common issues:');
-  console.log('      - "RefererNotAllowedMapError" → API key restriction');
-  console.log('      - "InvalidKeyMapError" → Wrong API key');
+  console.log('      - Errores de Mapbox GL o estilos personalizados');
+  console.log('      - Mensajes sobre token inválido o dominios no autorizados');
   console.log('      - "Network error" → Check internet connection');
 
   console.log('\n✅ Diagnostic Complete!');
   console.log('\n📝 Summary of Issues Found:');
 
   let issuesFound = 0;
-  if (!googleMapsKey || googleMapsKey === '') {
-    console.log('   ❌ Google Maps API Key not configured');
+  if (!mapboxToken || mapboxToken === '') {
+    console.log('   ❌ Mapbox access token no configurado');
     issuesFound++;
   }
-  if (typeof window.google === 'undefined' || !window.google.maps) {
-    console.log('   ❌ Google Maps script not loaded');
+  if (typeof window.mapboxgl === 'undefined') {
+    console.log('   ❌ Mapbox GL no se cargó correctamente');
     issuesFound++;
   }
 

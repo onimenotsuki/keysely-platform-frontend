@@ -1,13 +1,6 @@
-import mapOptions from '@/utils/mapOptions';
-import { GoogleMap, MarkerF } from '@react-google-maps/api';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-
-const mapContainerStyle = {
-  width: '100%',
-  height: '100%',
-};
-
-// Map options matching InteractiveMap for consistency
+import { MAPBOX_STYLE } from '@/utils/mapboxConfig';
+import { useEffect, useMemo, useState } from 'react';
+import Map, { Marker, type ViewState } from 'react-map-gl';
 
 interface SpaceLocationMapProps {
   latitude: number;
@@ -21,66 +14,43 @@ interface SpaceLocationMapProps {
  * Follows the same styling as InteractiveMap for consistency
  */
 export const SpaceLocationMap = ({ latitude, longitude, zoom = 14 }: SpaceLocationMapProps) => {
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+  const [viewState, setViewState] = useState<ViewState>({
+    latitude,
+    longitude,
+    zoom,
+  });
 
-  const center = useMemo(
-    () => ({
-      lat: latitude,
-      lng: longitude,
-    }),
-    [latitude, longitude]
-  );
+  const center = useMemo(() => ({ latitude, longitude }), [latitude, longitude]);
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    setMap(map);
-  }, []);
-
-  const onUnmount = useCallback(() => {
-    setMap(null);
-  }, []);
-
-  // Center map on the location when coordinates change
   useEffect(() => {
-    if (map) {
-      map.panTo(center);
-    }
-  }, [map, center]);
-
-  // Custom marker icon for the space location
-  const markerIcon: google.maps.Icon = {
-    url:
-      'data:image/svg+xml;charset=UTF-8,' +
-      encodeURIComponent(`
-        <svg width="48" height="60" xmlns="http://www.w3.org/2000/svg">
-          <!-- Outer circle (shadow) -->
-          <circle cx="24" cy="24" r="22" fill="#1A2B42" opacity="0.2"/>
-          
-          <!-- Main pin circle -->
-          <circle cx="24" cy="24" r="18" fill="#1A2B42" stroke="#FFFFFF" stroke-width="3"/>
-          
-          <!-- Inner white dot -->
-          <circle cx="24" cy="24" r="6" fill="#FFFFFF"/>
-          
-          <!-- Pin pointer -->
-          <path d="M 24 42 L 18 54 L 24 50 L 30 54 Z" fill="#1A2B42"/>
-        </svg>
-      `),
-    scaledSize: new google.maps.Size(48, 60),
-    anchor: new google.maps.Point(24, 60),
-  };
+    setViewState((prev) => ({
+      ...prev,
+      latitude,
+      longitude,
+      zoom,
+    }));
+  }, [latitude, longitude, zoom]);
 
   return (
     <div className="w-full h-full rounded-xl overflow-hidden">
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={center}
-        zoom={zoom}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        options={mapOptions}
+      <Map
+        mapboxAccessToken={accessToken}
+        mapStyle={MAPBOX_STYLE}
+        style={{ width: '100%', height: '100%' }}
+        viewState={viewState}
+        onMove={(event) => setViewState(event.viewState)}
       >
-        <MarkerF position={center} icon={markerIcon} />
-      </GoogleMap>
+        <Marker latitude={center.latitude} longitude={center.longitude} anchor="bottom">
+          <span className="relative flex h-10 w-10 items-center justify-center">
+            <span className="absolute h-10 w-10 rounded-full bg-primary opacity-20"></span>
+            <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground border-2 border-white shadow-lg">
+              <span className="h-2 w-2 rounded-full bg-white"></span>
+            </span>
+            <span className="absolute bottom-[-6px] h-3 w-3 rotate-45 bg-primary"></span>
+          </span>
+        </Marker>
+      </Map>
     </div>
   );
 };

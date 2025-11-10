@@ -5,20 +5,22 @@ import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import type { Space } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatCurrency } from '@/utils/formatCurrency';
-import mapOptions from '@/utils/mapOptions';
-import { GoogleMap, InfoWindow, MarkerF } from '@react-google-maps/api';
+import { MAPBOX_FIT_PADDING, MAPBOX_STYLE } from '@/utils/mapboxConfig';
 import { MapPin } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import mapboxgl from 'mapbox-gl';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Map, {
+  MapRef,
+  Marker,
+  Popup,
+  type ViewState,
+  type ViewStateChangeEvent,
+} from 'react-map-gl';
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '100%',
-};
-
-// Default center (Mexico City)
 const defaultCenter = {
-  lat: 19.4326,
-  lng: -99.1332,
+  latitude: 19.4326,
+  longitude: -99.1332,
+  zoom: 12,
 };
 
 interface InteractiveMapProps {
@@ -29,6 +31,33 @@ interface InteractiveMapProps {
   showSearchButton?: boolean;
 }
 
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%',
+};
+
+const createBoundsFromSpaces = (spaces: Space[]) => {
+  const bounds = new mapboxgl.LngLatBounds();
+
+  spaces.forEach((space) => {
+    if (space.latitude && space.longitude) {
+      bounds.extend([space.longitude, space.latitude]);
+    }
+  });
+
+  return bounds;
+};
+
+const areViewStatesEqual = (a: ViewState, b: ViewState) => {
+  return (
+    a.latitude === b.latitude &&
+    a.longitude === b.longitude &&
+    a.zoom === b.zoom &&
+    (a.pitch ?? 0) === (b.pitch ?? 0) &&
+    (a.bearing ?? 0) === (b.bearing ?? 0)
+  );
+};
+
 export const InteractiveMap = ({
   spaces,
   onBoundsChange,
@@ -38,185 +67,207 @@ export const InteractiveMap = ({
 }: InteractiveMapProps) => {
   const { navigateWithLang } = useLanguageRouting();
   const { t } = useTranslation();
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
-  const [showSearchThisArea, setShowSearchThisArea] = useState(false);
+  const mapRef = useRef<MapRef | null>(null);
   const boundsChangedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialBoundsSet = useRef(false);
+  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    setMap(map);
+  const [viewState, setViewState] = useState<ViewState>(defaultCenter);
+  const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
+  const [showSearchThisArea, setShowSearchThisArea] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+
+  const disableMapRotation = useCallback(() => {
+    const mapInstance = mapRef.current?.getMap();
+    if (!mapInstance) return;
+
+    mapInstance.dragRotate?.disable();
+    mapInstance.touchZoomRotate?.disableRotation();
   }, []);
 
-  const onUnmount = useCallback(() => {
-    setMap(null);
-  }, []);
+  const activeSpaces = useMemo(
+    () => spaces.filter((space) => space.latitude && space.longitude),
+    [spaces]
+  );
+
+  useEffect(() => {
+    if (!selectedSpaceId) {
+      setSelectedSpace(null);
+      return;
+    }
+
+    const match = spaces.find((space) => space.id === selectedSpaceId);
+    if (match) {
+      setSelectedSpace(match);
+    }
+  }, [selectedSpaceId, spaces]);
 
   // Fit bounds to show all spaces on initial load
   useEffect(() => {
-    if (map && spaces.length > 0 && !initialBoundsSet.current) {
-      const bounds = new google.maps.LatLngBounds();
-      spaces.forEach((space) => {
-        if (space.latitude && space.longitude) {
-          bounds.extend({ lat: space.latitude, lng: space.longitude });
+    if (!mapRef.current || initialBoundsSet.current) return;
+    if (activeSpaces.length === 0) return;
+
+    const bounds = createBoundsFromSpaces(activeSpaces);
+    if (!bounds.isEmpty()) {
+      const mapInstance = mapRef.current.getMap();
+      mapInstance.fitBounds(bounds, { padding: MAPBOX_FIT_PADDING, duration: 0 });
+      initialBoundsSet.current = true;
+    }
+  }, [activeSpaces]);
+
+  useEffect(() => {
+    return () => {
+      if (boundsChangedTimeoutRef.current) {
+        clearTimeout(boundsChangedTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const emitBounds = useCallback(() => {
+    if (!mapRef.current || !onBoundsChange) return;
+
+    const map = mapRef.current.getMap();
+    const bounds = map.getBounds();
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+
+    onBoundsChange({
+      ne: { lat: ne.lat, lng: ne.lng },
+      sw: { lat: sw.lat, lng: sw.lng },
+    });
+    setShowSearchThisArea(false);
+  }, [onBoundsChange]);
+
+  const handleMove = useCallback(
+    (evt: ViewStateChangeEvent) => {
+      const nextViewState = evt.viewState;
+
+      setViewState((prev) => {
+        if (areViewStatesEqual(prev, nextViewState)) {
+          return prev;
         }
+
+        return nextViewState;
       });
 
-      if (!bounds.isEmpty()) {
-        map.fitBounds(bounds);
-        initialBoundsSet.current = true;
+      if (!onBoundsChange) return;
+
+      setShowSearchThisArea(true);
+
+      if (boundsChangedTimeoutRef.current) {
+        clearTimeout(boundsChangedTimeoutRef.current);
       }
-    }
-  }, [map, spaces]);
 
-  // Handle map bounds change with debounce
-  const handleBoundsChanged = useCallback(() => {
-    if (!map || !onBoundsChange) return;
+      boundsChangedTimeoutRef.current = setTimeout(() => {
+        emitBounds();
+      }, 500);
+    },
+    [emitBounds, onBoundsChange]
+  );
 
-    // Show "Search this area" button when user moves map
-    setShowSearchThisArea(true);
+  const handleSearchThisArea = useCallback(() => {
+    emitBounds();
+  }, [emitBounds]);
 
-    // Clear previous timeout
-    if (boundsChangedTimeoutRef.current) {
-      clearTimeout(boundsChangedTimeoutRef.current);
-    }
+  const handleMarkerClick = useCallback(
+    (space: Space) => {
+      setSelectedSpace(space);
+      onSpaceSelect?.(space.id);
+    },
+    [onSpaceSelect]
+  );
 
-    // Debounce the bounds change event
-    boundsChangedTimeoutRef.current = setTimeout(() => {
-      const bounds = map.getBounds();
-      if (bounds) {
-        const ne = bounds.getNorthEast();
-        const sw = bounds.getSouthWest();
-
-        const mapBounds: MapBounds = {
-          ne: { lat: ne.lat(), lng: ne.lng() },
-          sw: { lat: sw.lat(), lng: sw.lng() },
-        };
-
-        onBoundsChange(mapBounds);
-        setShowSearchThisArea(false);
-      }
-    }, 500);
-  }, [map, onBoundsChange]);
-
-  const handleSearchThisArea = () => {
-    if (!map || !onBoundsChange) return;
-
-    const bounds = map.getBounds();
-    if (bounds) {
-      const ne = bounds.getNorthEast();
-      const sw = bounds.getSouthWest();
-
-      const mapBounds: MapBounds = {
-        ne: { lat: ne.lat(), lng: ne.lng() },
-        sw: { lat: sw.lat(), lng: sw.lng() },
-      };
-
-      onBoundsChange(mapBounds);
-      setShowSearchThisArea(false);
-    }
-  };
-
-  const handleMarkerClick = (space: Space) => {
-    setSelectedSpace(space);
-    if (onSpaceSelect) {
-      onSpaceSelect(space.id);
-    }
-  };
-
-  const handleInfoWindowClose = () => {
+  const handlePopupClose = useCallback(() => {
     setSelectedSpace(null);
-    if (onSpaceSelect) {
-      onSpaceSelect(null);
-    }
-  };
+    onSpaceSelect?.(null);
+  }, [onSpaceSelect]);
 
-  const handleViewDetails = (spaceId: string) => {
-    navigateWithLang(`/space/${spaceId}`);
-  };
+  const handleViewDetails = useCallback(
+    (spaceId: string) => {
+      navigateWithLang(`/space/${spaceId}`);
+    },
+    [navigateWithLang]
+  );
 
-  // Get marker icon for price display
-  const getMarkerIcon = (space: Space): google.maps.Icon | undefined => {
-    const priceText = formatCurrency(space.price_per_hour, space.currency);
-
-    // Keysely brand colors from design system
-    const primaryColor = '#1A2B42'; // Navy Blue - Primary brand color
-    const whiteColor = '#FFFFFF'; // White for text
-
-    const bgColor = primaryColor;
-    const textColor = whiteColor;
-
-    // Calculate text width based on price length (approximation)
-    const textLength = priceText.length;
-    const baseWidth = 50;
-    const charWidth = 9;
-    const badgeWidth = Math.max(baseWidth, textLength * charWidth + 20);
-    const badgeHeight = 36;
-
-    return {
-      url:
-        'data:image/svg+xml;charset=UTF-8,' +
-        encodeURIComponent(`
-          <svg width="${badgeWidth}" height="${badgeHeight + 8}" xmlns="http://www.w3.org/2000/svg">
-            <!-- Badge background with rounded corners -->
-            <rect x="0" y="0" width="${badgeWidth}" height="${badgeHeight}" rx="18" ry="18" 
-                  fill="${bgColor}"/>
-            
-            <!-- Price text -->
-            <text x="${badgeWidth / 2}" y="${badgeHeight / 2 + 1}" 
-                  font-family="Inter, system-ui, -apple-system, sans-serif" 
-                  font-size="16" 
-                  font-weight="700" 
-                  fill="${textColor}" 
-                  text-anchor="middle" 
-                  dominant-baseline="central">
-              ${priceText}
-            </text>
-            
-            <!-- Small triangle pointer at bottom -->
-            <polygon points="${badgeWidth / 2 - 6},${badgeHeight} ${badgeWidth / 2},${badgeHeight + 6} ${badgeWidth / 2 + 6},${badgeHeight}" 
-                     fill="${bgColor}"/>
-          </svg>
-        `),
-      scaledSize: new google.maps.Size(badgeWidth, badgeHeight + 8),
-      anchor: new google.maps.Point(badgeWidth / 2, badgeHeight + 8),
-    };
-  };
+  useEffect(() => {
+    disableMapRotation();
+  }, [disableMapRotation]);
 
   return (
     <div className="relative w-full h-full">
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={defaultCenter}
-        zoom={12}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        onBoundsChanged={handleBoundsChanged}
-        options={mapOptions}
+      <Map
+        ref={mapRef}
+        mapboxAccessToken={accessToken}
+        mapLib={mapboxgl as unknown as typeof import('mapbox-gl')}
+        mapStyle={MAPBOX_STYLE}
+        style={mapContainerStyle}
+        initialViewState={defaultCenter}
+        viewState={viewState}
+        onMove={handleMove}
+        onError={(event) => {
+          const message = event?.error?.message ?? 'Mapbox failed to load.';
+          console.error('[Mapbox] error:', message, event?.error);
+          setMapError(message);
+        }}
+        onClick={() => {
+          if (selectedSpace) {
+            handlePopupClose();
+          }
+        }}
+        onLoad={() => {
+          if (!initialBoundsSet.current && activeSpaces.length === 0) {
+            setViewState(defaultCenter);
+          }
+          disableMapRotation();
+        }}
       >
-        {/* Render markers for each space */}
-        {spaces.map((space) => {
+        {activeSpaces.map((space) => {
           if (!space.latitude || !space.longitude) return null;
 
-          // Hide marker if this space is selected (InfoWindow will be shown instead)
           const isSelected = selectedSpace?.id === space.id;
-          if (isSelected) return null;
 
           return (
-            <MarkerF
+            <Marker
               key={space.id}
-              position={{ lat: space.latitude, lng: space.longitude }}
-              onClick={() => handleMarkerClick(space)}
-              icon={getMarkerIcon(space)}
-            />
+              latitude={space.latitude}
+              longitude={space.longitude}
+              anchor="bottom"
+              onClick={(e) => {
+                e.originalEvent.stopPropagation();
+                handleMarkerClick(space);
+              }}
+            >
+              <button
+                type="button"
+                className="group relative focus:outline-none"
+                aria-label={t('map.viewDetails')}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleMarkerClick(space);
+                }}
+              >
+                <span
+                  className={`bg-primary text-primary-foreground font-semibold text-sm px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap transition-transform ${
+                    isSelected ? 'scale-105 ring-2 ring-primary/60' : ''
+                  }`}
+                >
+                  {formatCurrency(space.price_per_hour, space.currency)}
+                </span>
+                <span className="absolute left-1/2 -translate-x-1/2 top-full mt-[-2px] h-0 w-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-primary"></span>
+              </button>
+            </Marker>
           );
         })}
 
-        {/* Info Window for selected space */}
         {selectedSpace && selectedSpace.latitude && selectedSpace.longitude && (
-          <InfoWindow
-            position={{ lat: selectedSpace.latitude, lng: selectedSpace.longitude }}
-            onCloseClick={handleInfoWindowClose}
+          <Popup
+            latitude={selectedSpace.latitude}
+            longitude={selectedSpace.longitude}
+            anchor="bottom"
+            onClose={handlePopupClose}
+            closeButton
+            closeOnClick={false}
+            offset={30}
           >
             <div className="p-2 max-w-xs">
               {selectedSpace.images && selectedSpace.images.length > 0 && (
@@ -256,12 +307,22 @@ export const InteractiveMap = ({
                 {t('map.viewDetails')}
               </Button>
             </div>
-          </InfoWindow>
+          </Popup>
         )}
-      </GoogleMap>
+      </Map>
 
-      {/* Search this area button */}
-      {showSearchButton && showSearchThisArea && (
+      {mapError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-20 px-6 text-center">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('map.notAvailable')}</h3>
+            <p className="text-sm text-muted-foreground">
+              {mapError} · {t('map.notConfigured')}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {showSearchButton && showSearchThisArea && !mapError && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
           <Button
             onClick={handleSearchThisArea}
