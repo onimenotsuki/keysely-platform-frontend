@@ -17,12 +17,6 @@ import Map, {
   type ViewStateChangeEvent,
 } from 'react-map-gl';
 
-const defaultCenter = {
-  latitude: 19.4326,
-  longitude: -99.1332,
-  zoom: 12,
-};
-
 interface InteractiveMapProps {
   spaces: Space[];
   onBoundsChange?: (bounds: MapBounds) => void;
@@ -58,6 +52,12 @@ const areViewStatesEqual = (a: ViewState, b: ViewState) => {
   );
 };
 
+const defaultCenter = {
+  latitude: 19.4326,
+  longitude: -99.1332,
+  zoom: 12,
+};
+
 export const InteractiveMap = ({
   spaces,
   onBoundsChange,
@@ -76,6 +76,30 @@ export const InteractiveMap = ({
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const [showSearchThisArea, setShowSearchThisArea] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  useEffect(() => {
+    if (!('geolocation' in navigator)) {
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (err) => {
+        globalThis.alert(`[Mapbox] Geolocation error: ${err.message}`);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      }
+    );
+  }, []);
 
   const disableMapRotation = useCallback(() => {
     const mapInstance = mapRef.current?.getMap();
@@ -114,6 +138,26 @@ export const InteractiveMap = ({
       initialBoundsSet.current = true;
     }
   }, [activeSpaces]);
+
+  useEffect(() => {
+    if (!location) return;
+
+    setViewState((prev) => {
+      const next = {
+        ...prev,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      };
+
+      if (areViewStatesEqual(prev, next)) {
+        return prev;
+      }
+
+      return next;
+    });
+
+    initialBoundsSet.current = true;
+  }, [location]);
 
   useEffect(() => {
     return () => {
