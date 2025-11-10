@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import type { Space } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatCurrency } from '@/utils/formatCurrency';
 import mapOptions from '@/utils/mapOptions';
 import { GoogleMap, InfoWindow, MarkerF } from '@react-google-maps/api';
 import { MapPin } from 'lucide-react';
@@ -135,9 +136,8 @@ export const InteractiveMap = ({
   };
 
   // Get marker icon for price display
-  const getMarkerIcon = (space: Space, currencySymbol: string): google.maps.Icon | undefined => {
-    const price = Math.round(space.price_per_hour);
-    const priceText = `${currencySymbol}${price}`;
+  const getMarkerIcon = (space: Space): google.maps.Icon | undefined => {
+    const priceText = formatCurrency(space.price_per_hour, space.currency);
 
     // Keysely brand colors from design system
     const primaryColor = '#1A2B42'; // Navy Blue - Primary brand color
@@ -207,7 +207,7 @@ export const InteractiveMap = ({
               key={space.id}
               position={{ lat: space.latitude, lng: space.longitude }}
               onClick={() => handleMarkerClick(space)}
-              icon={getMarkerIcon(space, t('common.currency'))}
+              icon={getMarkerIcon(space)}
             />
           );
         })}
@@ -241,8 +241,7 @@ export const InteractiveMap = ({
               </p>
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-sm bg-primary text-primary-foreground">
-                  {t('common.currency')}
-                  {selectedSpace.price_per_hour}
+                  {formatCurrency(selectedSpace.price_per_hour, selectedSpace.currency)}{' '}
                   {t('common.perHourShort')}
                 </Badge>
                 <span className="text-sm text-muted-foreground">

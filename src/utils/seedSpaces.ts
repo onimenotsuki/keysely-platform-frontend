@@ -208,6 +208,7 @@ export const generateSeedSpaces = async (hostIds: string[]) => {
           address: `${addresses[Math.floor(Math.random() * addresses.length)]} ${randomInRange(100, 999)}, ${city.name}`,
           city: city.name,
           price_per_hour: randomInRange(15, 200),
+          currency: 'MXN',
           capacity: randomInRange(2, 50),
           area_sqm: randomInRange(20, 300),
           latitude: city.lat + latVariation,

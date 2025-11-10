@@ -11,6 +11,7 @@ export interface SpaceBooking {
   user_id: string;
   guests_count: number;
   total_amount: number;
+  currency: string;
   profiles?: {
     full_name: string;
   };
@@ -22,16 +23,18 @@ export const useBookingsBySpace = (spaceId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('bookings')
-        .select(`
+        .select(
+          `
           *,
           profiles(full_name)
-        `)
+        `
+        )
         .eq('space_id', spaceId)
         .order('start_date', { ascending: true });
 
       if (error) throw error;
       return data as SpaceBooking[];
     },
-    enabled: !!spaceId
+    enabled: !!spaceId,
   });
 };

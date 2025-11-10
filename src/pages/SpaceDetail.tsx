@@ -30,6 +30,7 @@ import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useMarketplacePayment } from '@/hooks/useMarketplacePayment';
 import { useSpace } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { addHours, differenceInMinutes, format, isBefore, isSameDay, parse } from 'date-fns';
 import { Clock, Heart, MapPin, Maximize2, Share2, Star, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -83,10 +84,6 @@ const SpaceDetail = () => {
   const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [guestsCount, setGuestsCount] = useState(1);
 
-  const getCurrencySymbol = () => {
-    return t('common.currency');
-  };
-
   const { data: space, isLoading } = useSpace(id || '');
   const { data: spaceBookings } = useBookingsBySpace(id || '');
   const {
@@ -98,6 +95,8 @@ const SpaceDetail = () => {
   const { data: isFavorite } = useIsFavorite(id || '');
   const createBooking = useCreateBooking();
   const { createPayment, isCreatingPayment } = useMarketplacePayment();
+
+  const currency = space?.currency ?? 'MXN';
 
   const selectedDateKey = useMemo(
     () => (selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null),
@@ -296,6 +295,7 @@ const SpaceDetail = () => {
         end_time: endTime,
         total_hours: Math.round(totalHoursSelected),
         total_amount: totalAmount,
+        currency,
         guests_count: guestsCount,
       });
 
@@ -572,8 +572,7 @@ const SpaceDetail = () => {
                   <div className="flex items-baseline justify-between">
                     <div>
                       <span className="text-2xl font-semibold text-foreground">
-                        {getCurrencySymbol()}
-                        {space.price_per_hour}
+                        {formatCurrency(space.price_per_hour, currency)}
                       </span>
                       <span className="text-base text-muted-foreground ml-1">
                         {t('common.perHour')}
@@ -670,30 +669,23 @@ const SpaceDetail = () => {
                       <div className="space-y-3">
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground underline">
-                            {getCurrencySymbol()}
-                            {space.price_per_hour} x {computedTotalHours} {t('common.hours')}
+                            {formatCurrency(space.price_per_hour, currency)} x {computedTotalHours}{' '}
+                            {t('common.hours')}
                           </span>
-                          <span className="font-medium">
-                            {getCurrencySymbol()}
-                            {subtotal}
-                          </span>
+                          <span className="font-medium">{formatCurrency(subtotal, currency)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground underline">
                             {t('spaceDetail.serviceFee')}
                           </span>
                           <span className="font-medium">
-                            {getCurrencySymbol()}
-                            {serviceFee}
+                            {formatCurrency(serviceFee, currency)}
                           </span>
                         </div>
                         <Separator />
                         <div className="flex justify-between font-semibold text-base pt-2">
                           <span>{t('spaceDetail.total')}</span>
-                          <span>
-                            {getCurrencySymbol()}
-                            {totalDue}
-                          </span>
+                          <span>{formatCurrency(totalDue, currency)}</span>
                         </div>
                       </div>
                     </>

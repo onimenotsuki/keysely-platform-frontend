@@ -6,6 +6,7 @@ import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useOwnerBookings, useOwnerSpaces, useOwnerStats } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
 import { createListSpaceStepPath } from '@/pages/list-space/paths';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { Calendar, CreditCard, ExternalLink, ListChecks } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
@@ -19,6 +20,7 @@ const OwnerDashboard = () => {
   const { data: ownerSpaces = [] } = useOwnerSpaces();
   const { data: ownerStats, isLoading: statsLoading } = useOwnerStats();
   const { data: ownerBookings = [] } = useOwnerBookings();
+  const primaryCurrency = ownerSpaces[0]?.currency ?? ownerBookings[0]?.currency ?? 'MXN';
 
   return (
     <div className="min-h-screen bg-background">
@@ -101,7 +103,7 @@ const OwnerDashboard = () => {
                         {t('ownerDashboard.totalEarnings')}
                       </p>
                       <p className="text-2xl font-bold text-foreground">
-                        ${ownerStats?.total_earnings || 0}
+                        {formatCurrency(ownerStats?.total_earnings ?? 0, primaryCurrency)}
                       </p>
                     </div>
                     <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
@@ -119,7 +121,7 @@ const OwnerDashboard = () => {
                         {t('ownerDashboard.thisMonth')}
                       </p>
                       <p className="text-2xl font-bold text-foreground">
-                        ${ownerStats?.this_month_earnings || 0}
+                        {formatCurrency(ownerStats?.this_month_earnings ?? 0, primaryCurrency)}
                       </p>
                     </div>
                     <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">

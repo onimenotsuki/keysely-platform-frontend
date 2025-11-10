@@ -58,6 +58,7 @@ export const createSeedData = async (hostIds?: string[]) => {
         latitude: 19.4326,
         longitude: -99.1932,
         price_per_hour: 350,
+        currency: 'MXN',
         capacity: 6,
         area_sqm: 40,
         images: [
@@ -101,6 +102,7 @@ export const createSeedData = async (hostIds?: string[]) => {
         latitude: 19.3595,
         longitude: -99.2632,
         price_per_hour: 480,
+        currency: 'MXN',
         capacity: 10,
         area_sqm: 25,
         images: [
@@ -146,6 +148,7 @@ export const createSeedData = async (hostIds?: string[]) => {
         latitude: 19.4284,
         longitude: -99.1677,
         price_per_hour: 180,
+        currency: 'MXN',
         capacity: 20,
         area_sqm: 120,
         images: [

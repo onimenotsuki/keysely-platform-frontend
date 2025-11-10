@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useOwnerBookings } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { format } from 'date-fns';
 
 interface OwnerBookingsSectionProps {
@@ -94,7 +95,9 @@ export const OwnerBookingsSection = ({ title, limit }: OwnerBookingsSectionProps
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-foreground">${booking.total_amount}</p>
+                  <p className="font-semibold text-foreground">
+                    {formatCurrency(booking.total_amount, booking.currency)}
+                  </p>
                   <Badge
                     variant="secondary"
                     className={`capitalize ${getStatusClasses(booking.status)}`}

@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookings } from '@/hooks/useBookings';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
@@ -15,6 +16,9 @@ const Bookings = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
   const { data: bookings, isLoading } = useBookings();
+  const defaultCurrency = bookings?.[0]?.currency ?? 'MXN';
+  const totalSpent =
+    bookings?.reduce((total, booking) => total + Number(booking.total_amount), 0) ?? 0;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -209,7 +213,7 @@ const Bookings = () => {
                             <div>
                               <p className="text-muted-foreground">Total</p>
                               <p className="font-semibold text-foreground">
-                                €{booking.total_amount}
+                                {formatCurrency(booking.total_amount, booking.currency)}
                               </p>
                             </div>
                           </div>
@@ -320,7 +324,7 @@ const Bookings = () => {
                             <div>
                               <p className="text-muted-foreground">Total</p>
                               <p className="font-semibold text-foreground">
-                                €{booking.total_amount}
+                                {formatCurrency(booking.total_amount, booking.currency)}
                               </p>
                             </div>
                           </div>
@@ -378,15 +382,13 @@ const Bookings = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-center">
-                  <i className="fas fa-euro-sign text-2xl text-success mb-2"></i>
+                  <i className="fas fa-coins text-2xl text-success mb-2"></i>
                   <div>Total Spent</div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center">
                 <p className="text-3xl font-bold text-foreground">
-                  €
-                  {bookings?.reduce((total, booking) => total + Number(booking.total_amount), 0) ||
-                    0}
+                  {formatCurrency(totalSpent, defaultCurrency)}
                 </p>
               </CardContent>
             </Card>

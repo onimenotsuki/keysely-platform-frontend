@@ -12,6 +12,7 @@ export interface Booking {
   end_time: string;
   total_hours: number;
   total_amount: number;
+  currency: string;
   guests_count: number;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   notes?: string;
@@ -22,6 +23,7 @@ export interface Booking {
     city: string;
     address: string;
     images: string[];
+    currency: string;
     profiles: {
       full_name: string;
     };
@@ -46,6 +48,7 @@ export const useBookings = () => {
             city, 
             address,
             images,
+            currency,
             profiles(full_name)
           )
         `
@@ -73,6 +76,7 @@ export const useCreateBooking = () => {
       end_time: string;
       total_hours: number;
       total_amount: number;
+      currency: string;
       guests_count: number;
       notes?: string;
     }) => {

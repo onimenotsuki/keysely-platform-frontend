@@ -12,6 +12,7 @@ interface AlgoliaSpace {
   address: string;
   city: string;
   price_per_hour: number;
+  currency: string;
   capacity: number;
   area_sqm?: number;
   images: string[];
@@ -37,6 +38,7 @@ interface SupabaseSpace {
   address: string;
   city: string;
   price_per_hour: number;
+  currency: string;
   capacity: number;
   area_sqm?: number;
   images?: string[];
@@ -60,6 +62,7 @@ async function indexSpace(space: SupabaseSpace) {
     address: space.address,
     city: space.city,
     price_per_hour: space.price_per_hour,
+    currency: space.currency || 'MXN',
     capacity: space.capacity,
     area_sqm: space.area_sqm,
     images: space.images || [],

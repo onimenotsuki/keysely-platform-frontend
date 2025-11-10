@@ -1,14 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useSpaces } from '../hooks/useSpaces';
 import { useTranslation } from '../hooks/useTranslation';
+import { formatCurrency } from '../utils/formatCurrency';
 
 const FeaturedSpaces = () => {
   const { t, language } = useTranslation();
   const { data: spaces, isLoading } = useSpaces();
-
-  const getCurrencySymbol = () => {
-    return language === 'es' ? '$' : 'USD ';
-  };
 
   // Take first 3 spaces as featured
   const featuredSpaces = spaces?.slice(0, 3) || [];
@@ -63,10 +60,9 @@ const FeaturedSpaces = () => {
                   />
                   <div className="absolute top-4 right-4 bg-white rounded-lg px-3 py-2 shadow-lg">
                     <span className="text-[#1A2B42] font-bold text-lg">
-                      {getCurrencySymbol()}
-                      {space.price_per_hour}
+                      {formatCurrency(space.price_per_hour, space.currency)}
                     </span>
-                    <span className="text-gray-500 text-sm ml-1">/hr</span>
+                    <span className="text-gray-500 text-sm ml-1">{t('common.perHour')}</span>
                   </div>
                 </div>
 

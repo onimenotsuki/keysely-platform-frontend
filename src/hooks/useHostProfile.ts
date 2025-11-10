@@ -9,6 +9,7 @@ export interface HostSpace {
   city: string;
   address: string;
   price_per_hour: number;
+  currency: string;
   is_active: boolean;
   rating: number;
   total_reviews: number;

@@ -78,6 +78,7 @@ const Step5Pricing = () => {
   const mediaImages = media.images;
   const amenitySelectedSlugs = amenities.selectedSlugs;
   const amenityCharacteristics = amenities.characteristics;
+  const currency = draft.pricing.currency ?? 'MXN';
 
   const [pricePerHour, setPricePerHour] = useState<number>(draft.pricing.pricePerHour ?? 0);
   const [discounts, setDiscounts] = useState<DiscountSelection>(draft.pricing.discounts);
@@ -202,6 +203,7 @@ const Step5Pricing = () => {
           features: amenityCharacteristics.map((item) => item.title),
           service_hours: serviceHoursJson,
           price_per_hour: pricePerHour,
+          currency,
           discounts: discountsJson,
           is_active: false,
         } as const;
@@ -385,6 +387,7 @@ const Step5Pricing = () => {
     markStepCompleted,
     resetDraft,
     queryClient,
+    currency,
   ]);
 
   return (

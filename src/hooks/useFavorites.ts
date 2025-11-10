@@ -12,6 +12,7 @@ export interface Favorite {
     title: string;
     city: string;
     price_per_hour: number;
+    currency: string;
     images: string[];
     rating: number;
   };
@@ -30,7 +31,7 @@ export const useFavorites = () => {
         .select(
           `
           *,
-          spaces(id, title, city, price_per_hour, images, rating)
+          spaces(id, title, city, price_per_hour, currency, images, rating)
         `
         )
         .eq('user_id', user.id)

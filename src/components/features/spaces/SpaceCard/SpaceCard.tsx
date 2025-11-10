@@ -86,6 +86,7 @@ export const SpaceCard = ({
         imageUrl={space.images?.[0] || ''}
         title={space.title}
         pricePerHour={space.price_per_hour}
+        currency={space.currency}
         isFavorite={!!isFavorite}
         onToggleFavorite={handleToggleFavorite}
       />

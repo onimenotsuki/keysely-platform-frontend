@@ -82,6 +82,7 @@ export interface ListSpaceDraft {
   pricing: {
     pricePerHour: number | null;
     discounts: DiscountSelection;
+    currency: string;
   };
 }
 
@@ -194,6 +195,7 @@ const defaultDraft: ListSpaceDraft = {
       weekly: false,
       monthly: false,
     },
+    currency: 'MXN',
   },
 };
 

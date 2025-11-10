@@ -78,6 +78,7 @@ const createListSpaceSchema = (t: (key: string, options?: Record<string, unknown
         invalid_type_error: t('listSpaceOnboarding.errors.priceInvalid'),
       })
       .min(1, t('listSpaceOnboarding.errors.priceRequired')),
+    currency: z.string().min(1).default('MXN'),
     amenities: z.array(z.string()).default([]),
     features: z.array(z.string()).default([]),
     availability_hours: z.record(z.boolean()).default({}),
@@ -134,6 +135,7 @@ const ListSpace = () => {
         end_time: '18:00',
       },
       images: [],
+      currency: 'MXN',
     },
     mode: 'onChange',
   });
@@ -152,6 +154,7 @@ const ListSpace = () => {
         latitude: data.latitude,
         longitude: data.longitude,
         price_per_hour: data.price_per_hour,
+        currency: data.currency,
         capacity: data.capacity,
         area_sqm: data.area_sqm,
         category_id: data.category_id,

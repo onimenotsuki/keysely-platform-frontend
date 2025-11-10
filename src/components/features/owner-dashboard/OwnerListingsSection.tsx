@@ -16,6 +16,7 @@ import { useOwnerSpaces, type OwnerSpace } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
 import { cn } from '@/lib/utils';
 import { createListSpaceStepPath } from '@/pages/list-space/paths';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { CircleIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -89,7 +90,7 @@ const renderSpaceGrid = (
 
             <div className="flex justify-between items-center mb-4">
               <span className="font-semibold text-foreground">
-                ${space.price_per_hour}/{t('ownerDashboard.hour')}
+                {formatCurrency(space.price_per_hour, space.currency)}/{t('ownerDashboard.hour')}
               </span>
               <div className="flex items-center space-x-1 text-yellow-500 text-sm">
                 <i className="fas fa-star"></i>
@@ -107,7 +108,9 @@ const renderSpaceGrid = (
               </div>
               <div>
                 <p className="text-muted-foreground">{t('ownerDashboard.earnings')}</p>
-                <p className="font-medium">${space.earnings_this_month}</p>
+                <p className="font-medium">
+                  {formatCurrency(space.earnings_this_month, space.currency)}
+                </p>
               </div>
             </div>
 

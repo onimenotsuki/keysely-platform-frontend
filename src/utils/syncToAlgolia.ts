@@ -12,6 +12,7 @@ interface AlgoliaSpace {
   address: string;
   city: string;
   price_per_hour: number;
+  currency: string;
   capacity: number;
   area_sqm?: number;
   images: string[];
@@ -66,6 +67,7 @@ export async function syncExistingSpacesToAlgolia() {
       address?: string;
       city?: string;
       price_per_hour?: number;
+      currency?: string;
       capacity?: number;
       area_sqm?: number;
       images?: string[];
@@ -89,6 +91,7 @@ export async function syncExistingSpacesToAlgolia() {
         address: space.address || '',
         city: space.city || '',
         price_per_hour: space.price_per_hour || 0,
+        currency: space.currency || 'MXN',
         capacity: space.capacity || 1,
         area_sqm: space.area_sqm,
         images: space.images || [],

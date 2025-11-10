@@ -52,6 +52,7 @@ export type Database = {
       bookings: {
         Row: {
           created_at: string;
+          currency: string;
           end_date: string;
           end_time: string;
           guests_count: number;
@@ -71,6 +72,7 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
+          currency?: string;
           end_date: string;
           end_time: string;
           guests_count?: number;
@@ -90,6 +92,7 @@ export type Database = {
         };
         Update: {
           created_at?: string;
+          currency?: string;
           end_date?: string;
           end_time?: string;
           guests_count?: number;
@@ -425,6 +428,7 @@ export type Database = {
           category_id: string | null;
           city: string;
           created_at: string;
+          currency: string;
           description: string | null;
           features: string[] | null;
           discounts: Json | null;
@@ -450,6 +454,7 @@ export type Database = {
           category_id?: string | null;
           city: string;
           created_at?: string;
+          currency?: string;
           description?: string | null;
           features?: string[] | null;
           discounts?: Json | null;
@@ -475,6 +480,7 @@ export type Database = {
           category_id?: string | null;
           city?: string;
           created_at?: string;
+          currency?: string;
           description?: string | null;
           features?: string[] | null;
           discounts?: Json | null;

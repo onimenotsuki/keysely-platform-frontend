@@ -11,6 +11,7 @@ export interface Space {
   address_object?: Record<string, unknown> | null;
   city: string;
   price_per_hour: number;
+  currency: string;
   discounts?: Record<string, number> | null;
   capacity: number;
   area_sqm?: number;

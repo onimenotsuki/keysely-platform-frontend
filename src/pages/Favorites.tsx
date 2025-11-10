@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useFavorites, useToggleFavorite } from '@/hooks/useFavorites';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useTranslation } from '@/hooks/useTranslation';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { Heart, MapPin, Star, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -83,9 +84,12 @@ const Favorites = () => {
                   <Heart className="h-4 w-4 fill-red-500 text-red-500" />
                 </Button>
                 <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-                  {t('common.currency')}
-                  {favorite.spaces?.price_per_hour}
-                  {t('favorites.perHour')}
+                  {favorite.spaces
+                    ? `${formatCurrency(
+                        favorite.spaces.price_per_hour,
+                        favorite.spaces.currency
+                      )} ${t('favorites.perHour')}`
+                    : null}
                 </Badge>
               </div>
 

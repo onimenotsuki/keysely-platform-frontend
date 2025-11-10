@@ -44,6 +44,7 @@ import {
 } from '@/hooks/useProfile';
 import { useTranslation } from '@/hooks/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
+import { formatCurrency } from '@/utils/formatCurrency';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
 
@@ -591,7 +592,7 @@ const Profile = () => {
                                     {booking.start_time} - {booking.end_time}
                                   </span>
                                   <span className="font-semibold text-foreground ml-auto">
-                                    €{booking.total_amount}
+                                    {formatCurrency(booking.total_amount, booking.currency)}
                                   </span>
                                 </div>
                               </div>
@@ -658,7 +659,12 @@ const Profile = () => {
                             </p>
                             <div className="flex justify-between items-center">
                               <span className="font-semibold text-foreground">
-                                €{favorite.spaces?.price_per_hour}/hr
+                                {favorite.spaces
+                                  ? `${formatCurrency(
+                                      favorite.spaces.price_per_hour,
+                                      favorite.spaces.currency
+                                    )}/hr`
+                                  : null}
                               </span>
                               <div className="flex items-center space-x-1 text-yellow-500 text-sm">
                                 <i className="fas fa-star"></i>
