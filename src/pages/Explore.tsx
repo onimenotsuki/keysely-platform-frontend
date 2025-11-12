@@ -139,6 +139,7 @@ const Explore = () => {
             filters={filters}
             onFiltersChange={handleFiltersChange}
             onReset={handleReset}
+            resultsCount={spaces.length}
           />
         </div>
       </section>

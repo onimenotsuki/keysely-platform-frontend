@@ -3,6 +3,7 @@ import type { Space } from '@/hooks/useSpaces';
 // Algolia-specific space type with geolocation
 export interface AlgoliaSpace extends Omit<Space, 'id'> {
   objectID: string;
+  state?: string;
   _geoloc?: {
     lat: number;
     lng: number;
@@ -30,6 +31,7 @@ export interface MapBounds {
     lat: number;
     lng: number;
   };
+  insideBoundingBox: [number, number, number, number];
 }
 
 // Search filters compatible with both Algolia and Supabase
@@ -37,6 +39,7 @@ export interface SearchFilters {
   searchTerm?: string;
   categoryId?: string;
   city?: string;
+  state?: string;
   minPrice?: number;
   maxPrice?: number;
   minCapacity?: number;

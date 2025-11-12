@@ -4,6 +4,7 @@ import {
   isAlgoliaAdminConfigured,
 } from '@/integrations/algolia/client';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 
 interface AlgoliaSpace {
   objectID: string;
@@ -11,6 +12,7 @@ interface AlgoliaSpace {
   description: string;
   address: string;
   city: string;
+  state?: string;
   price_per_hour: number;
   currency: string;
   capacity: number;
@@ -60,57 +62,64 @@ export async function syncExistingSpacesToAlgolia() {
 
     console.log(`📦 Found ${spaces.length} spaces to sync`);
 
-    interface SupabaseSpace {
-      id: string;
-      title?: string;
-      description?: string;
-      address?: string;
-      city?: string;
-      price_per_hour?: number;
-      currency?: string;
-      capacity?: number;
-      area_sqm?: number;
-      images?: string[];
-      features?: string[];
-      amenities?: string[];
-      is_active?: boolean;
-      rating?: number;
-      total_reviews?: number;
-      category_id?: string;
-      owner_id: string;
-      latitude?: number;
-      longitude?: number;
-    }
+    // Helper function to safely extract state from address_object
+    const extractState = (addressObject: Json | null): string | undefined => {
+      if (!addressObject || typeof addressObject !== 'object' || Array.isArray(addressObject)) {
+        return undefined;
+      }
+      const state = (addressObject as Record<string, unknown>).state;
+      return typeof state === 'string' && state.length > 0 ? state : undefined;
+    };
 
     // Transform spaces to Algolia format
-    const algoliaRecords: AlgoliaSpace[] = spaces.map((space: SupabaseSpace) => {
+    const algoliaRecords: AlgoliaSpace[] = spaces.map((space) => {
+      // Extract state from address_object if available
+      const state = extractState(space.address_object);
+
+      // Extract latitude and longitude - they might be in address_object or as direct fields
+      const latitude =
+        (space as unknown as { latitude?: number | null }).latitude ??
+        (typeof space.address_object === 'object' &&
+        space.address_object !== null &&
+        !Array.isArray(space.address_object)
+          ? ((space.address_object as Record<string, unknown>).latitude as number | undefined)
+          : undefined);
+      const longitude =
+        (space as unknown as { longitude?: number | null }).longitude ??
+        (typeof space.address_object === 'object' &&
+        space.address_object !== null &&
+        !Array.isArray(space.address_object)
+          ? ((space.address_object as Record<string, unknown>).longitude as number | undefined)
+          : undefined);
+
       const record: AlgoliaSpace = {
         objectID: space.id,
         title: space.title || '',
         description: space.description || '',
         address: space.address || '',
         city: space.city || '',
+        state: state,
         price_per_hour: space.price_per_hour || 0,
         currency: space.currency || 'MXN',
         capacity: space.capacity || 1,
-        area_sqm: space.area_sqm,
+        area_sqm: space.area_sqm ?? undefined,
         images: space.images || [],
         features: space.features || [],
         amenities: space.amenities || [],
         is_active: space.is_active ?? true,
-        rating: space.rating || 0,
-        total_reviews: space.total_reviews || 0,
-        category_id: space.category_id,
+        rating: space.rating ?? 0,
+        total_reviews: space.total_reviews ?? 0,
+        category_id: space.category_id ?? undefined,
         owner_id: space.owner_id,
-        latitude: space.latitude,
-        longitude: space.longitude,
+        latitude: typeof latitude === 'number' ? latitude : undefined,
+        longitude: typeof longitude === 'number' ? longitude : undefined,
       };
 
       // Add geolocation if coordinates are available
-      if (space.latitude && space.longitude) {
+      if (typeof latitude === 'number' && typeof longitude === 'number') {
         record._geoloc = {
-          lat: space.latitude,
-          lng: space.longitude,
+          lat: latitude,
+          lng: longitude,
         };
       }
 
@@ -122,7 +131,7 @@ export async function syncExistingSpacesToAlgolia() {
     // Use Algolia v5 API with Admin API key to save objects
     const response = await algoliaAdminClient.saveObjects({
       indexName: SPACES_INDEX_NAME,
-      objects: algoliaRecords,
+      objects: algoliaRecords as unknown as Record<string, unknown>[],
     });
 
     console.log('✅ Successfully synced to Algolia!');

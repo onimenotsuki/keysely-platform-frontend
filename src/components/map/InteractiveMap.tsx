@@ -33,22 +33,28 @@ const mapContainerStyle = {
 const createBoundsFromSpaces = (spaces: Space[]) => {
   const bounds = new mapboxgl.LngLatBounds();
 
-  spaces.forEach((space) => {
+  for (const space of spaces) {
     if (space.latitude && space.longitude) {
       bounds.extend([space.longitude, space.latitude]);
     }
-  });
+  }
 
   return bounds;
 };
 
 const areViewStatesEqual = (a: ViewState, b: ViewState) => {
+  const nearlyEqual = (x: number | undefined, y: number | undefined, tolerance = 1e-5) => {
+    if (x === undefined && y === undefined) return true;
+    if (x === undefined || y === undefined) return false;
+    return Math.abs(x - y) <= tolerance;
+  };
+
   return (
-    a.latitude === b.latitude &&
-    a.longitude === b.longitude &&
-    a.zoom === b.zoom &&
-    (a.pitch ?? 0) === (b.pitch ?? 0) &&
-    (a.bearing ?? 0) === (b.bearing ?? 0)
+    nearlyEqual(a.latitude, b.latitude) &&
+    nearlyEqual(a.longitude, b.longitude) &&
+    nearlyEqual(a.zoom, b.zoom) &&
+    nearlyEqual(a.pitch ?? 0, b.pitch ?? 0) &&
+    nearlyEqual(a.bearing ?? 0, b.bearing ?? 0)
   );
 };
 
@@ -56,6 +62,14 @@ const defaultCenter = {
   latitude: 19.4326,
   longitude: -99.1332,
   zoom: 12,
+};
+
+const areBoundsEqual = (
+  a: [number, number, number, number] | null,
+  b: [number, number, number, number]
+) => {
+  if (!a) return false;
+  return a.every((value, index) => Math.abs(value - b[index]) < 1e-4);
 };
 
 export const InteractiveMap = ({
@@ -68,15 +82,15 @@ export const InteractiveMap = ({
   const { navigateWithLang } = useLanguageRouting();
   const { t } = useTranslation();
   const mapRef = useRef<MapRef | null>(null);
-  const boundsChangedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initialBoundsSet = useRef(false);
   const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-  const [viewState, setViewState] = useState<ViewState>(defaultCenter);
+  const viewStateRef = useRef<ViewState>(defaultCenter);
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const [showSearchThisArea, setShowSearchThisArea] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const lastEmittedBounds = useRef<[number, number, number, number] | null>(null);
 
   useEffect(() => {
     if (!('geolocation' in navigator)) {
@@ -132,6 +146,7 @@ export const InteractiveMap = ({
     if (activeSpaces.length === 0) return;
 
     const bounds = createBoundsFromSpaces(activeSpaces);
+
     if (!bounds.isEmpty()) {
       const mapInstance = mapRef.current.getMap();
       mapInstance.fitBounds(bounds, { padding: MAPBOX_FIT_PADDING, duration: 0 });
@@ -142,30 +157,20 @@ export const InteractiveMap = ({
   useEffect(() => {
     if (!location) return;
 
-    setViewState((prev) => {
-      const next = {
-        ...prev,
+    const mapInstance = mapRef.current?.getMap() as mapboxgl.Map | undefined;
+    if (mapInstance?.easeTo) {
+      mapInstance.easeTo({
+        center: [location.longitude, location.latitude],
+        duration: 1000,
+      });
+      viewStateRef.current = {
+        ...viewStateRef.current,
         latitude: location.latitude,
         longitude: location.longitude,
       };
-
-      if (areViewStatesEqual(prev, next)) {
-        return prev;
-      }
-
-      return next;
-    });
-
+    }
     initialBoundsSet.current = true;
   }, [location]);
-
-  useEffect(() => {
-    return () => {
-      if (boundsChangedTimeoutRef.current) {
-        clearTimeout(boundsChangedTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const emitBounds = useCallback(() => {
     if (!mapRef.current || !onBoundsChange) return;
@@ -174,39 +179,48 @@ export const InteractiveMap = ({
     const bounds = map.getBounds();
     const ne = bounds.getNorthEast();
     const sw = bounds.getSouthWest();
+    const boundingBox: [number, number, number, number] = [ne.lat, ne.lng, sw.lat, sw.lng];
+
+    if (areBoundsEqual(lastEmittedBounds.current, boundingBox)) {
+      setShowSearchThisArea(false);
+      return;
+    }
+
+    lastEmittedBounds.current = boundingBox;
 
     onBoundsChange({
       ne: { lat: ne.lat, lng: ne.lng },
       sw: { lat: sw.lat, lng: sw.lng },
+      insideBoundingBox: boundingBox,
     });
+
     setShowSearchThisArea(false);
   }, [onBoundsChange]);
 
   const handleMove = useCallback(
     (evt: ViewStateChangeEvent) => {
       const nextViewState = evt.viewState;
+      const hasChanged = !areViewStatesEqual(viewStateRef.current, nextViewState);
 
-      setViewState((prev) => {
-        if (areViewStatesEqual(prev, nextViewState)) {
-          return prev;
-        }
-
-        return nextViewState;
-      });
-
-      if (!onBoundsChange) return;
-
-      setShowSearchThisArea(true);
-
-      if (boundsChangedTimeoutRef.current) {
-        clearTimeout(boundsChangedTimeoutRef.current);
+      if (hasChanged) {
+        viewStateRef.current = {
+          latitude: nextViewState.latitude,
+          longitude: nextViewState.longitude,
+          zoom: nextViewState.zoom,
+          bearing: nextViewState.bearing ?? 0,
+          pitch: nextViewState.pitch ?? 0,
+        };
       }
 
-      boundsChangedTimeoutRef.current = setTimeout(() => {
+      if (!onBoundsChange || !hasChanged) return;
+
+      if (showSearchButton) {
+        setShowSearchThisArea(true);
+      } else {
         emitBounds();
-      }, 500);
+      }
     },
-    [emitBounds, onBoundsChange]
+    [emitBounds, onBoundsChange, showSearchButton]
   );
 
   const handleSearchThisArea = useCallback(() => {
@@ -246,7 +260,6 @@ export const InteractiveMap = ({
         mapStyle={MAPBOX_STYLE}
         style={mapContainerStyle}
         initialViewState={defaultCenter}
-        viewState={viewState}
         onMove={handleMove}
         onError={(event) => {
           const message = event?.error?.message ?? 'Mapbox failed to load.';
@@ -259,9 +272,6 @@ export const InteractiveMap = ({
           }
         }}
         onLoad={() => {
-          if (!initialBoundsSet.current && activeSpaces.length === 0) {
-            setViewState(defaultCenter);
-          }
           disableMapRotation();
         }}
       >
@@ -276,10 +286,6 @@ export const InteractiveMap = ({
               latitude={space.latitude}
               longitude={space.longitude}
               anchor="bottom"
-              onClick={(e) => {
-                e.originalEvent.stopPropagation();
-                handleMarkerClick(space);
-              }}
             >
               <button
                 type="button"
@@ -303,7 +309,7 @@ export const InteractiveMap = ({
           );
         })}
 
-        {selectedSpace && selectedSpace.latitude && selectedSpace.longitude && (
+        {selectedSpace?.latitude != null && selectedSpace?.longitude != null && (
           <Popup
             latitude={selectedSpace.latitude}
             longitude={selectedSpace.longitude}

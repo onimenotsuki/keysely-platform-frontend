@@ -18,9 +18,15 @@ interface SearchFiltersProps {
   filters: SearchFiltersType;
   onFiltersChange: (filters: SearchFiltersType) => void;
   onReset: () => void;
+  resultsCount?: number;
 }
 
-export const SearchFilters = ({ filters, onFiltersChange, onReset }: SearchFiltersProps) => {
+export const SearchFilters = ({
+  filters,
+  onFiltersChange,
+  onReset,
+  resultsCount = 0,
+}: SearchFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -31,17 +37,16 @@ export const SearchFilters = ({ filters, onFiltersChange, onReset }: SearchFilte
       filters.minPrice > 0 ||
       filters.maxPrice < 1000 ||
       filters.minCapacity > 1 ||
-      filters.checkInDate ||
-      filters.checkOutDate ||
+      !!filters.checkInDate ||
+      !!filters.checkOutDate ||
       (filters.amenities && filters.amenities.length > 0) ||
-      filters.availableFrom ||
-      filters.availableTo
+      !!filters.availableFrom ||
+      !!filters.availableTo
     );
   };
 
   const clearAllFilters = () => {
     onReset();
-    setIsOpen(false);
   };
 
   return (
@@ -100,56 +105,75 @@ export const SearchFilters = ({ filters, onFiltersChange, onReset }: SearchFilte
                     )}
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[350px] sm:w-[400px]">
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center justify-between">
-                      {t('explore.searchBar.advancedFilters')}
-                      {hasActiveFilters() && (
-                        <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-                          <X className="w-4 h-4 mr-1" />
-                          {t('explore.searchBar.clear')}
+                <SheetContent
+                  side="bottom"
+                  className="h-[100vh] w-screen max-w-none rounded-none bg-background p-0 sm:h-screen"
+                >
+                  <div className="flex h-full flex-col">
+                    <SheetHeader className="border-b px-6 py-4">
+                      <SheetTitle className="flex items-center justify-between text-lg">
+                        {t('explore.searchBar.advancedFilters')}
+                      </SheetTitle>
+                    </SheetHeader>
+
+                    {hasActiveFilters() && (
+                      <div className="border-b px-6 py-4">
+                        <p className="text-sm font-medium text-muted-foreground">
+                          {t('explore.searchBar.selectedFilters')}
+                        </p>
+                        <div className="mt-3">
+                          <ActiveFilters
+                            filters={filters}
+                            onFiltersChange={onFiltersChange}
+                            hasActiveFilters={true}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                      <CategoryFilter
+                        value={filters.categoryId}
+                        onFiltersChange={onFiltersChange}
+                        filters={filters}
+                      />
+
+                      <PriceRangeFilter
+                        minPrice={filters.minPrice}
+                        maxPrice={filters.maxPrice}
+                        onFiltersChange={onFiltersChange}
+                        filters={filters}
+                      />
+
+                      <CapacityFilter
+                        minCapacity={filters.minCapacity}
+                        onFiltersChange={onFiltersChange}
+                        filters={filters}
+                      />
+
+                      <AmenitiesFilter
+                        selectedAmenities={filters.amenities || []}
+                        onFiltersChange={onFiltersChange}
+                        filters={filters}
+                      />
+
+                      <EnhancedAvailabilityCalendar
+                        availableFrom={filters.availableFrom}
+                        availableTo={filters.availableTo}
+                        onFiltersChange={onFiltersChange}
+                        filters={filters}
+                      />
+                    </div>
+
+                    <div className="border-t px-6 py-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <Button variant="ghost" onClick={clearAllFilters}>
+                          {t('explore.searchBar.clearFiltersButton')}
                         </Button>
-                      )}
-                    </SheetTitle>
-                  </SheetHeader>
-
-                  <div className="mt-6 space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
-                    <CategoryFilter
-                      value={filters.categoryId}
-                      onFiltersChange={onFiltersChange}
-                      filters={filters}
-                    />
-
-                    <PriceRangeFilter
-                      minPrice={filters.minPrice}
-                      maxPrice={filters.maxPrice}
-                      onFiltersChange={onFiltersChange}
-                      filters={filters}
-                    />
-
-                    <CapacityFilter
-                      minCapacity={filters.minCapacity}
-                      onFiltersChange={onFiltersChange}
-                      filters={filters}
-                    />
-
-                    <AmenitiesFilter
-                      selectedAmenities={filters.amenities || []}
-                      onFiltersChange={onFiltersChange}
-                      filters={filters}
-                    />
-
-                    <EnhancedAvailabilityCalendar
-                      availableFrom={filters.availableFrom}
-                      availableTo={filters.availableTo}
-                      onFiltersChange={onFiltersChange}
-                      filters={filters}
-                    />
-
-                    <div className="pt-4 sticky bottom-0 bg-background">
-                      <Button className="w-full" onClick={() => setIsOpen(false)}>
-                        {t('explore.searchBar.applyFilters')}
-                      </Button>
+                        <Button className="flex-1 sm:flex-none" onClick={() => setIsOpen(false)}>
+                          {t('explore.searchBar.showResults', { count: resultsCount })}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </SheetContent>

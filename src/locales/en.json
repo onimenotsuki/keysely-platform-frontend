@@ -122,7 +122,15 @@
       "noSpacesFound": "No spaces found",
       "adjustFilters": "Try adjusting your search filters or explore different criteria.",
       "clearFilters": "Clear filters",
-      "removeFilter": "Remove filter"
+      "removeFilter": "Remove filter",
+      "categoryLabel": "Category",
+      "allCategories": "All categories",
+      "priceLabel": "Price per hour",
+      "priceMin": "Minimum price",
+      "priceMax": "Maximum price",
+      "selectedFilters": "Selected",
+      "clearFiltersButton": "Remove filters",
+      "showResults": "Show {{count}} spaces"
     },
     "features": {
       "wifi": "WiFi",
