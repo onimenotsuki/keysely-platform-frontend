@@ -31,6 +31,7 @@ import { useMarketplacePayment } from '@/hooks/useMarketplacePayment';
 import { useSpace } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
 import { formatCurrency } from '@/utils/formatCurrency';
+import generateGoogleMapsLink from '@/utils/generateGoogleMapsLink';
 import { addHours, differenceInMinutes, format, isBefore, isSameDay, parse } from 'date-fns';
 import { Clock, Heart, MapPin, Maximize2, Share2, Star, Users } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -748,7 +749,13 @@ const SpaceDetail = () => {
               {t('spaceDetail.whereYoullBe')}
             </h3>
             <p className="text-muted-foreground mb-6">
-              {space.address}, {space.city}
+              <a
+                href={generateGoogleMapsLink(space.latitude, space.longitude)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {space.address}, {space.city}
+              </a>
             </p>
             {isMapboxConfigured() ? (
               <div className="h-[480px] w-full rounded-xl overflow-hidden border">
