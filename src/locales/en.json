@@ -228,6 +228,7 @@
     "whereYoullBe": "Where you'll be",
     "mapNotAvailable": "Map not available",
     "mapNotConfigured": "Mapbox is not configured",
+    "relatedSpacesTitle": "Popular spaces near {{city}}",
     "shareDialog": {
       "title": "Share this space",
       "copyLink": "Copy link",

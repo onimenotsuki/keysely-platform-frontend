@@ -2,6 +2,7 @@ import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import ContactOwnerButton from '@/components/ContactOwnerButton';
 import ReviewsSection from '@/components/ReviewsSection';
 import { AmenityBadge } from '@/components/features/spaces/AmenityBadge';
+import { RelatedSpaces } from '@/components/features/spaces/RelatedSpaces';
 import { MapboxProvider, isMapboxConfigured } from '@/components/map/MapboxProvider';
 import { SpaceLocationMap } from '@/components/map/SpaceLocationMap';
 import { Badge } from '@/components/ui/badge';
@@ -778,6 +779,9 @@ const SpaceDetail = () => {
             )}
           </div>
         )}
+
+        {/* Related Spaces Section - Full Width */}
+        <RelatedSpaces currentSpace={space} excludeSpaceId={space.id} />
       </div>
 
       <Footer />

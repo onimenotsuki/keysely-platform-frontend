@@ -10,6 +10,13 @@ import type { Space } from './useSpaces';
 const DEFAULT_MAX_PRICE = 1000;
 const DEFAULT_HITS_PER_PAGE = 24;
 
+interface AlgoliaSearchParams {
+  filters?: string;
+  hitsPerPage?: number;
+  page?: number;
+  insideBoundingBox?: number[][];
+}
+
 // Convert Algolia space to regular Space type
 const convertAlgoliaToSpace = (algoliaSpace: AlgoliaSpace): Space => {
   const { objectID, _geoloc, ...rest } = algoliaSpace;
@@ -21,7 +28,7 @@ const convertAlgoliaToSpace = (algoliaSpace: AlgoliaSpace): Space => {
 
 // Build Algolia filter string from filters
 const buildAlgoliaFilters = (filters: SearchFilters): string => {
-  const filterParts: string[] = ['is_active:true'];
+  const filterParts: string[] = [];
 
   if (filters.categoryId) {
     filterParts.push(`category_id:"${filters.categoryId}"`);
@@ -81,13 +88,6 @@ export const useAlgoliaSearch = (options: UseAlgoliaSearchOptions = {}) => {
     queryFn: async () => {
       if (!algoliaEnabled || !algoliaClient) {
         throw new Error('Algolia is not configured');
-      }
-
-      interface AlgoliaSearchParams {
-        filters?: string;
-        hitsPerPage?: number;
-        page?: number;
-        insideBoundingBox?: number[][];
       }
 
       const filterString = buildAlgoliaFilters(filters);

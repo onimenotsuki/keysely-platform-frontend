@@ -229,6 +229,7 @@
     "whereYoullBe": "Dónde vas a estar",
     "mapNotAvailable": "Mapa no disponible",
     "mapNotConfigured": "Mapbox no está configurado",
+    "relatedSpacesTitle": "Espacios destacados cerca de {{city}}",
     "shareDialog": {
       "title": "Comparte este espacio",
       "copyLink": "Copiar enlace",
