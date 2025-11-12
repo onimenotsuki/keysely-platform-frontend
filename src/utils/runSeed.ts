@@ -22,6 +22,20 @@ import {
   fixAllHostData,
   getHostDataConsistency,
 } from './fixHostData';
+import {
+  seedReviewSystem,
+  clearReviewSystem,
+  getReviewSystemStats,
+  getReviewSystemDetails,
+} from './seedReviewsSystem';
+import {
+  createRegularUsers,
+  clearRegularUsers,
+  getRegularUserIds,
+  getRegularUserStats,
+} from './seedRegularUsers';
+import { createSeedBookings, getSeedBookings, clearSeedBookings } from './seedBookings';
+import { createSeedReviews, getSeedReviews, clearSeedReviews } from './seedReviews';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SeedOptions {
@@ -419,6 +433,28 @@ export const seedUtils = {
   markSpaceOwnersAsHosts,
   markNonOwnersAsNonHosts,
   getHostDataConsistency,
+
+  // Review system management
+  seedReviewSystem,
+  clearReviewSystem,
+  getReviewSystemStats,
+  getReviewSystemDetails,
+
+  // Regular user management
+  createRegularUsers,
+  clearRegularUsers,
+  getRegularUserIds,
+  getRegularUserStats,
+
+  // Booking management
+  createSeedBookings,
+  getSeedBookings,
+  clearSeedBookings,
+
+  // Review management
+  createSeedReviews,
+  getSeedReviews,
+  clearSeedReviews,
 };
 
 // Make it available in the browser console for development

@@ -19,7 +19,7 @@ type ReviewFormData = z.infer<typeof reviewSchema>;
 
 interface ReviewFormProps {
   spaceId: string;
-  bookingId?: string;
+  bookingId: string; // Now required
   existingReview?: Review;
   onSuccess?: () => void;
   onCancel?: () => void;
@@ -70,15 +70,17 @@ const ReviewForm = ({
           },
         });
       } else {
+        if (!bookingId) {
+          toast.error('ID de reserva es requerido');
+          return;
+        }
+
         const reviewData: CreateReviewData = {
           space_id: spaceId,
+          booking_id: bookingId,
           rating: data.rating,
           comment: data.comment,
         };
-
-        if (bookingId) {
-          reviewData.booking_id = bookingId;
-        }
 
         await createReview.mutateAsync(reviewData);
       }
