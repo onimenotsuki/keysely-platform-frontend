@@ -1,141 +1,249 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import Typesense from 'npm:typesense'
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import Typesense from 'npm:typesense';
 
-const TYPESENSE_HOST = Deno.env.get('TYPESENSE_HOST')
-const TYPESENSE_API_KEY = Deno.env.get('TYPESENSE_API_KEY')
-const TYPESENSE_COLLECTION_NAME = 'spaces'
+const TYPESENSE_COLLECTION_NAME = 'spaces';
+
+const schema = {
+  name: TYPESENSE_COLLECTION_NAME,
+  fields: [
+    { name: 'id', type: 'string' },
+    { name: 'title', type: 'string' },
+    { name: 'description', type: 'string', optional: true },
+    { name: 'address', type: 'string' },
+    { name: 'city', type: 'string' },
+    { name: 'state', type: 'string', optional: true },
+    { name: 'price_per_hour', type: 'float' },
+    { name: 'currency', type: 'string' },
+    { name: 'capacity', type: 'int32' },
+    { name: 'area_sqm', type: 'float', optional: true },
+    { name: 'images', type: 'string[]', optional: true },
+    { name: 'features', type: 'string[]', optional: true },
+    { name: 'amenities', type: 'string[]', optional: true },
+    { name: 'is_active', type: 'bool', default: false },
+    { name: 'rating', type: 'float', default: 0 },
+    { name: 'total_reviews', type: 'int32', default: 0 },
+    { name: 'category_id', type: 'string', optional: true },
+    { name: 'owner_id', type: 'string' },
+    { name: 'location', type: 'float[]', optional: true },
+  ],
+};
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface TypesenseSpace {
+  id: string;
+  title: string;
+  description: string;
+  address: string;
+  city: string;
+  state?: string;
+  price_per_hour: number;
+  currency: string;
+  capacity: number;
+  area_sqm?: number;
+  images: string[];
+  features: string[];
+  amenities: string[];
+  is_active: boolean;
+  rating: number;
+  total_reviews: number;
+  category_id?: string;
+  owner_id: string;
+  location?: number[];
+}
 
 interface SupabaseSpace {
-  id: string
-  title: string
-  description: string
-  address: string
-  city: string
+  id: string;
+  title: string;
+  description: string;
+  address: string;
+  city: string;
   address_object?: {
-    state?: string
-    [key: string]: unknown
-  } | null
-  price_per_hour: number
-  currency: string
-  capacity: number
-  area_sqm?: number
-  images?: string[]
-  features?: string[]
-  amenities?: string[]
-  is_active: boolean
-  rating?: number
-  total_reviews?: number
-  category_id?: string
-  owner_id: string
-  latitude?: number
-  longitude?: number
+    state?: string;
+    [key: string]: unknown;
+  } | null;
+  price_per_hour: number;
+  currency: string;
+  capacity: number;
+  area_sqm?: number;
+  images?: string[];
+  features?: string[];
+  amenities?: string[];
+  is_active: boolean;
+  rating?: number;
+  total_reviews?: number;
+  category_id?: string;
+  owner_id: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+async function createCollectionIfNotExists() {
+  console.log('Creating collection if not exists...');
+
+  const typesenseClient = getClient();
+  try {
+    console.log('Retrieving collection...');
+
+    await typesenseClient.collections(schema.name).retrieve();
+  } catch (_error: Typesense.HttpError) {
+    console.error('Collection not found, creating...');
+    console.log('Creating collection...');
+
+    return await typesenseClient.collections().create(schema);
+  }
+}
+
+function getClient() {
+  const TYPESENSE_HOST = Deno.env.get('TYPESENSE_HOST');
+  const TYPESENSE_API_KEY = Deno.env.get('TYPESENSE_API_KEY');
+
+  if (!TYPESENSE_HOST || !TYPESENSE_API_KEY) {
+    throw new Error('Typesense not configured');
+  }
+
+  console.log('Initializing Typesense client with:', {
+    host: TYPESENSE_HOST,
+    apiKeyPrefix: TYPESENSE_API_KEY.substring(0, 5) + '...',
+    apiKeyLength: TYPESENSE_API_KEY.length,
+  });
+
+  return new Typesense.Client({
+    nodes: [
+      {
+        host: TYPESENSE_HOST,
+        port: 80,
+        protocol: 'http',
+      },
+    ],
+    apiKey: TYPESENSE_API_KEY,
+    connectionTimeoutSeconds: 5,
+  });
+}
+
+// Helper function to add/update a record in Typesense
+async function indexSpace(space: SupabaseSpace) {
+  const typesenseClient = getClient();
+  const state = space.address_object?.state ?? undefined;
+
+  const document: TypesenseSpace = {
+    id: space.id,
+    title: space.title,
+    description: space.description,
+    address: space.address,
+    city: space.city,
+    state: state,
+    price_per_hour: space.price_per_hour,
+    currency: space.currency ?? 'MXN',
+    capacity: space.capacity,
+    area_sqm: space.area_sqm ?? undefined,
+    images: space.images ?? [],
+    features: space.features ?? [],
+    amenities: space.amenities ?? [],
+    is_active: space.is_active,
+    rating: space.rating ?? 0,
+    total_reviews: space.total_reviews ?? 0,
+    category_id: space.category_id ?? '',
+    owner_id: space.owner_id,
+    location: space.latitude && space.longitude ? [space.latitude, space.longitude] : undefined,
+  };
+
+  return await typesenseClient.collections(TYPESENSE_COLLECTION_NAME).documents().upsert(document);
+}
+
+// Helper function to delete a record from Typesense
+async function deleteSpace(spaceId: string) {
+  const typesenseClient = getClient();
+  try {
+    return await typesenseClient.collections(TYPESENSE_COLLECTION_NAME).documents(spaceId).delete();
+  } catch (error) {
+    // Ignore 404 errors when deleting
+    if ((error as { httpStatus: number }).httpStatus !== 404) {
+      throw error;
+    }
+    return { deleted: false };
+  }
 }
 
 serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  await createCollectionIfNotExists();
+
   try {
+    // Check if Typesense is configured
+    const TYPESENSE_HOST = Deno.env.get('TYPESENSE_HOST');
+    const TYPESENSE_API_KEY = Deno.env.get('TYPESENSE_API_KEY');
+
     if (!TYPESENSE_HOST || !TYPESENSE_API_KEY) {
-      console.error('Typesense not configured')
+      console.log('Typesense not configured, skipping sync');
       return new Response(JSON.stringify({ message: 'Typesense not configured' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 500,
-      })
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
     }
 
-    const client = new Typesense.Client({
-      nodes: [
-        {
-          host: TYPESENSE_HOST,
-          port: 8108,
-          protocol: 'http',
-        },
-      ],
-      apiKey: TYPESENSE_API_KEY,
-      connectionTimeoutSeconds: 2,
-    })
-
-    if (!req.body) {
-      return new Response(JSON.stringify({ message: 'No body provided' }), {
-        headers: { 'Content-Type': 'application/json' },
-        status: 400,
-      })
-    }
-
-    let payload
+    let payload;
     try {
-      payload = await req.json()
+      const bodyText = await req.text();
+      console.log('Raw request body:', bodyText);
+
+      if (!bodyText) {
+        console.warn('Received empty request body');
+        return new Response(JSON.stringify({ error: 'Empty request body' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        });
+      }
+
+      payload = JSON.parse(bodyText);
+      console.log('Parsed payload:', JSON.stringify(payload, null, 2));
     } catch (e) {
-      return new Response(JSON.stringify({ message: 'Invalid JSON body', error: e instanceof Error ? e.message : String(e) }), {
-        headers: { 'Content-Type': 'application/json' },
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      console.error('Error parsing JSON:', e);
+      return new Response(JSON.stringify({ error: 'Invalid JSON body', details: errorMessage }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
-      })
+      });
     }
-    const { type, table, record, old_record } = payload
+    const { type, table, record, old_record } = payload;
 
     // Only process spaces table
     if (table !== 'spaces') {
       return new Response(JSON.stringify({ message: 'Not a spaces record' }), {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
-      })
+      });
     }
 
-    console.log(`Processing ${type} event for space ${record?.id || old_record?.id}`)
+    console.log(`Processing ${type} event for space ${record?.id || old_record?.id}`);
 
+    // Handle different event types
     if (type === 'INSERT' || type === 'UPDATE') {
-      const space = record as SupabaseSpace
-      const state = space.address_object?.state || undefined
-
-      const document = {
-        id: space.id, // Typesense uses 'id' as the document identifier
-        title: space.title,
-        description: space.description,
-        address: space.address,
-        city: space.city,
-        state: state,
-        price_per_hour: space.price_per_hour,
-        currency: space.currency || 'MXN',
-        capacity: space.capacity,
-        area_sqm: space.area_sqm,
-        images: space.images || [],
-        features: space.features || [],
-        amenities: space.amenities || [],
-        is_active: space.is_active,
-        rating: space.rating || 0,
-        total_reviews: space.total_reviews || 0,
-        category_id: space.category_id,
-        owner_id: space.owner_id,
-        // Typesense geopoint format: [lat, lng]
-        location: (space.latitude && space.longitude) ? [space.latitude, space.longitude] : undefined,
-      }
-
-      // Use upsert to handle both insert and update
-      await client.collections(TYPESENSE_COLLECTION_NAME).documents().upsert(document)
-      console.log(`Successfully indexed space ${space.id}`)
-
+      await indexSpace(record as SupabaseSpace);
+      console.log(`Successfully indexed space ${record.id}`);
     } else if (type === 'DELETE') {
-      const id = old_record.id
-      try {
-        await client.collections(TYPESENSE_COLLECTION_NAME).documents(id).delete()
-        console.log(`Successfully deleted space ${id} from Typesense`)
-      } catch (error) {
-        // Ignore 404 errors when deleting
-        if ((error as { httpStatus: number }).httpStatus !== 404) {
-          throw error
-        }
-        console.log(`Space ${id} was already deleted or not found in Typesense`)
-      }
+      await deleteSpace(old_record.id);
+      console.log(`Successfully deleted space ${old_record.id} from Typesense`);
     }
 
     return new Response(JSON.stringify({ success: true }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
-    })
-
+    });
   } catch (error) {
-    console.error('Error syncing to Typesense:', error)
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
-      headers: { 'Content-Type': 'application/json' },
-      status: 500,
-    })
+    console.error('Error syncing to Typesense:', error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error) }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
+    );
   }
-})
+});
