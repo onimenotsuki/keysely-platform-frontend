@@ -11,6 +11,15 @@ export const createSeedData = async (hostIds?: string[]) => {
     // Determine owner IDs for the 3 sample spaces
     let ownerIds: string[];
     if (hostIds && hostIds.length > 0) {
+      // Validate host IDs are UUIDs
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const invalidIds = hostIds.filter((id) => !uuidRegex.test(id));
+      
+      if (invalidIds.length > 0) {
+        console.error('❌ Invalid UUIDs detected in hostIds:', invalidIds);
+        return;
+      }
+
       // Distribute among provided host IDs
       ownerIds = [
         hostIds[0 % hostIds.length],

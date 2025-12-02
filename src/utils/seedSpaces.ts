@@ -128,6 +128,15 @@ export const generateSeedSpaces = async (hostIds: string[]) => {
 
     console.log(`📊 Distributing spaces among ${hostIds.length} hosts`);
 
+    // Validate host IDs are UUIDs
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const invalidIds = hostIds.filter((id) => !uuidRegex.test(id));
+    
+    if (invalidIds.length > 0) {
+      console.error('❌ Invalid UUIDs detected in hostIds:', invalidIds);
+      throw new Error(`Invalid UUIDs provided: ${invalidIds.join(', ')}`);
+    }
+
     // Get all categories
     const { data: categories, error: categoriesError } = await supabase
       .from('categories')

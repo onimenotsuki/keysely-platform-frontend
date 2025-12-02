@@ -127,6 +127,23 @@ export async function createSeedReviews(
       `📊 Creating reviews for ${Math.floor(bookingIds.length * reviewPercentage)} bookings`
     );
 
+    // Validate booking IDs are UUIDs
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const invalidIds = bookingIds.filter((id) => !uuidRegex.test(id));
+    
+    if (invalidIds.length > 0) {
+      console.error('❌ Invalid UUIDs detected in bookingIds:', invalidIds);
+      return {
+        success: false,
+        reviewIds: [],
+        message: `Invalid UUIDs provided: ${invalidIds.join(', ')}`,
+        stats: {
+          created: 0,
+          failed: 0,
+        },
+      };
+    }
+
     // Get all bookings with their details
     const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')

@@ -80,7 +80,7 @@ export const runFullSeed = async (options: SeedOptions = {}) => {
     // Optional: Generate multiple spaces across different cities
     if (generateMultipleSpaces) {
       console.log('🏢 Generating multiple spaces across cities...');
-      const spaces = await generateSeedSpaces(user.id);
+      const spaces = await generateSeedSpaces([user.id]);
       console.log(`✅ Generated ${spaces?.length || 0} additional spaces`);
     }
 

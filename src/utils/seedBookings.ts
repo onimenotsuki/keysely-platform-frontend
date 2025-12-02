@@ -89,6 +89,23 @@ export async function createSeedBookings(
     console.log(`👥 Users: ${userIds.length}`);
     console.log(`📊 Bookings per user: ~${bookingsPerUser}`);
 
+    // Validate user IDs are UUIDs
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const invalidIds = userIds.filter((id) => !uuidRegex.test(id));
+    
+    if (invalidIds.length > 0) {
+      console.error('❌ Invalid UUIDs detected in userIds:', invalidIds);
+      return {
+        success: false,
+        bookingIds: [],
+        message: `Invalid UUIDs provided: ${invalidIds.join(', ')}`,
+        stats: {
+          created: 0,
+          failed: 0,
+        },
+      };
+    }
+
     // Get all active spaces
     const { data: spaces, error: spacesError } = await supabase
       .from('spaces')
