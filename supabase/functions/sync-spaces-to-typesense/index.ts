@@ -127,27 +127,27 @@ function getClient() {
 // Helper function to add/update a record in Typesense
 async function indexSpace(space: SupabaseSpace) {
   const typesenseClient = getClient();
-  const state = space.address_object?.state ?? undefined;
+  const state = space.address_object?.state ?? '';
 
   const document: TypesenseSpace = {
     id: space.id,
-    title: space.title,
-    description: space.description,
-    address: space.address,
-    city: space.city,
+    title: space.title ?? '',
+    description: space.description ?? '',
+    address: space.address ?? '',
+    city: space.city ?? '',
     state: state,
     price_per_hour: space.price_per_hour,
     currency: space.currency ?? 'MXN',
-    capacity: space.capacity,
+    capacity: space.capacity ?? 0,
     area_sqm: space.area_sqm ?? undefined,
     images: space.images ?? [],
     features: space.features ?? [],
     amenities: space.amenities ?? [],
-    is_active: space.is_active,
+    is_active: space.is_active ?? false,
     rating: space.rating ?? 0,
     total_reviews: space.total_reviews ?? 0,
     category_id: space.category_id ?? '',
-    owner_id: space.owner_id,
+    owner_id: space.owner_id ?? '',
     location: space.latitude && space.longitude ? [space.latitude, space.longitude] : undefined,
   };
 
