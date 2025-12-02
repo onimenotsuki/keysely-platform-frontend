@@ -31,7 +31,7 @@ interface SupabaseSpace {
   longitude?: number
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   try {
     if (!TYPESENSE_HOST || !TYPESENSE_API_KEY) {
       console.error('Typesense not configured')
@@ -53,7 +53,22 @@ serve(async (req) => {
       connectionTimeoutSeconds: 2,
     })
 
-    const payload = await req.json()
+    if (!req.body) {
+      return new Response(JSON.stringify({ message: 'No body provided' }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
+
+    let payload
+    try {
+      payload = await req.json()
+    } catch (e) {
+      return new Response(JSON.stringify({ message: 'Invalid JSON body', error: e instanceof Error ? e.message : String(e) }), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 400,
+      })
+    }
     const { type, table, record, old_record } = payload
 
     // Only process spaces table
@@ -104,7 +119,7 @@ serve(async (req) => {
         console.log(`Successfully deleted space ${id} from Typesense`)
       } catch (error) {
         // Ignore 404 errors when deleting
-        if (error.httpStatus !== 404) {
+        if ((error as { httpStatus: number }).httpStatus !== 404) {
           throw error
         }
         console.log(`Space ${id} was already deleted or not found in Typesense`)
@@ -118,7 +133,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error syncing to Typesense:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
       headers: { 'Content-Type': 'application/json' },
       status: 500,
     })
