@@ -11,8 +11,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
-import { shouldUseAlgolia, useAlgoliaSearch } from '../hooks/useAlgoliaSearch';
 import { useSpaces } from '../hooks/useSpaces';
+import { shouldUseTypesense, useTypesenseSearch } from '../hooks/useTypesenseSearch';
 
 const Explore = () => {
   const { t } = useTranslation();
@@ -58,8 +58,8 @@ const Explore = () => {
     }
   }, [urlSearchParams]);
 
-  // Decide whether to use Algolia or Supabase
-  const useAlgolia = shouldUseAlgolia(filters);
+  // Decide whether to use Typesense or Supabase
+  const useTypesense = shouldUseTypesense(filters);
 
   // Supabase search params
   const supabaseParams = useMemo(() => {
@@ -75,18 +75,18 @@ const Explore = () => {
     return params;
   }, [filters]);
 
-  // Algolia search
-  const { data: algoliaData, isLoading: algoliaLoading } = useAlgoliaSearch({
+  // Typesense search
+  const { data: typesenseData, isLoading: typesenseLoading } = useTypesenseSearch({
     ...filters,
-    enabled: useAlgolia,
+    enabled: useTypesense,
   });
 
   // Supabase search
   const { data: supabaseSpaces, isLoading: supabaseLoading } = useSpaces(supabaseParams);
 
   // Use the appropriate data source
-  const spaces = useAlgolia ? algoliaData?.spaces || [] : supabaseSpaces || [];
-  const isLoading = useAlgolia ? algoliaLoading : supabaseLoading;
+  const spaces = useTypesense ? typesenseData?.spaces || [] : supabaseSpaces || [];
+  const isLoading = useTypesense ? typesenseLoading : supabaseLoading;
 
   const handleFiltersChange = (newFilters: SearchFiltersType) => {
     setFilters(newFilters);

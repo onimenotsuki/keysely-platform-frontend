@@ -115,8 +115,8 @@ function getClient() {
     nodes: [
       {
         host: TYPESENSE_HOST,
-        port: 80,
-        protocol: 'http',
+        port: TYPESENSE_PORT,
+        protocol: TYPESENSE_PROTOCOL,
       },
     ],
     apiKey: TYPESENSE_API_KEY,

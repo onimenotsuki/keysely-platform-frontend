@@ -1,24 +1,10 @@
 import type { Space } from '@/hooks/useSpaces';
 
-// Algolia-specific space type with geolocation
-export interface AlgoliaSpace extends Omit<Space, 'id'> {
-  objectID: string;
+// Typesense-specific space type
+export interface TypesenseSpace extends Omit<Space, 'id'> {
+  id: string;
   state?: string;
-  _geoloc?: {
-    lat: number;
-    lng: number;
-  };
-}
-
-// Search parameters for Algolia
-export interface AlgoliaSearchParams {
-  query?: string;
-  filters?: string;
-  aroundLatLng?: string;
-  aroundRadius?: number;
-  insideBoundingBox?: number[][];
-  hitsPerPage?: number;
-  page?: number;
+  location?: [number, number]; // [lat, lng]
 }
 
 // Map bounds for geo search
@@ -34,7 +20,7 @@ export interface MapBounds {
   insideBoundingBox: [number, number, number, number];
 }
 
-// Search filters compatible with both Algolia and Supabase
+// Search filters compatible with Typesense
 export interface SearchFilters {
   searchTerm?: string;
   categoryId?: string;
