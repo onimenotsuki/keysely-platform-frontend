@@ -53,6 +53,18 @@ const Explore = () => {
     const amenities = urlSearchParams.get('amenities');
     if (amenities) newFilters.amenities = amenities.split(',');
 
+    const checkIn = urlSearchParams.get('checkIn');
+    if (checkIn) newFilters.checkInDate = new Date(checkIn);
+
+    const checkOut = urlSearchParams.get('checkOut');
+    if (checkOut) newFilters.checkOutDate = new Date(checkOut);
+
+    const availableFrom = urlSearchParams.get('availableFrom');
+    if (availableFrom) newFilters.availableFrom = new Date(availableFrom);
+
+    const availableTo = urlSearchParams.get('availableTo');
+    if (availableTo) newFilters.availableTo = new Date(availableTo);
+
     if (Object.keys(newFilters).length > 0) {
       setFilters((prev) => ({ ...prev, ...newFilters }));
     }
@@ -102,8 +114,13 @@ const Explore = () => {
     if (newFilters.amenities && newFilters.amenities.length > 0) {
       params.set('amenities', newFilters.amenities.join(','));
     }
+    if (newFilters.checkInDate) params.set('checkIn', newFilters.checkInDate.toISOString());
+    if (newFilters.checkOutDate) params.set('checkOut', newFilters.checkOutDate.toISOString());
+    if (newFilters.availableFrom)
+      params.set('availableFrom', newFilters.availableFrom.toISOString());
+    if (newFilters.availableTo) params.set('availableTo', newFilters.availableTo.toISOString());
 
-    setUrlSearchParams(params);
+    setUrlSearchParams(params, { replace: true });
   };
 
   const handleReset = () => {
