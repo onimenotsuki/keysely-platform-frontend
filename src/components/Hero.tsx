@@ -21,11 +21,12 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState(''); // Stores the display value (full name or typed text)
   const [date, setDate] = useState<Date>();
   const [openCombobox, setOpenCombobox] = useState(false);
   const [places, setPlaces] = useState<GeocodeResult[]>([]);
-  const [inputValue, setInputValue] = useState('');
+  // inputValue is now redundant if we use location for the input text,
+  // but let's keep location as the "value" and use it for driving the search.
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const { data: heroBannerData, isLoading: isLoadingHeroData } = useHeroBanner();
@@ -77,18 +78,18 @@ const Hero = () => {
 
   // Handle autocomplete search
   useEffect(() => {
-    if (!inputValue || inputValue.length < 3) {
+    if (!location || location.length < 3) {
       setPlaces([]);
       return;
     }
 
     const timer = setTimeout(async () => {
-      const results = await autocompletePlaces(inputValue);
+      const results = await autocompletePlaces(location);
       setPlaces(results);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [inputValue]);
+  }, [location]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,28 +214,28 @@ const Hero = () => {
                   <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
                   <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                     <PopoverTrigger asChild>
-                      <button
-                        type="button"
+                      <input
+                        type="text"
                         role="combobox"
                         aria-expanded={openCombobox}
-                        className={cn(
-                          'w-full text-left text-base border-none outline-none focus:ring-0 bg-transparent p-0 truncate',
-                          location ? 'text-gray-900' : 'text-gray-400'
-                        )}
-                      >
-                        {location || t('hero.locationPlaceholder')}
-                      </button>
+                        placeholder={t('hero.locationPlaceholder')}
+                        value={location}
+                        onChange={(e) => {
+                          setLocation(e.target.value);
+                          setOpenCombobox(true);
+                        }}
+                        className="w-full text-base text-gray-900 placeholder:text-gray-400 border-none outline-none focus:ring-0 bg-transparent p-0 truncate"
+                      />
                     </PopoverTrigger>
-                    <PopoverContent className="w-[300px] p-0" align="start">
+                    <PopoverContent
+                      className="w-[300px] p-0"
+                      align="start"
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
                       <Command shouldFilter={false}>
-                        <CommandInput
-                          placeholder={t('hero.locationPlaceholder')}
-                          value={inputValue}
-                          onValueChange={setInputValue}
-                        />
                         <CommandList>
                           <CommandEmpty>No se encontraron lugares.</CommandEmpty>
-                          {!inputValue && (
+                          {!location && (
                             <CommandGroup heading="Ciudades Populares">
                               {popularCities.map((city) => (
                                 <CommandItem
@@ -256,7 +257,7 @@ const Hero = () => {
                               ))}
                             </CommandGroup>
                           )}
-                          {inputValue && places.length > 0 && (
+                          {location && places.length > 0 && (
                             <CommandGroup heading="Resultados">
                               {places.map((place) => (
                                 <CommandItem
