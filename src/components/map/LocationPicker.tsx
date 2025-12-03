@@ -96,12 +96,12 @@ export const LocationPicker = ({
     if (!address || address.trim().length === 0) return;
     if (lastGeocodedAddressRef.current === address.trim()) return;
 
-    let cancelled = false;
+    const controller = new AbortController();
     setGeocoding(true);
 
-    geocodeAddress(address)
+    geocodeAddress(address, { signal: controller.signal })
       .then((result) => {
-        if (!result || cancelled) return;
+        if (!result || controller.signal.aborted) return;
 
         lastGeocodedAddressRef.current = address.trim();
         setMarkerPosition({ latitude: result.lat, longitude: result.lng });
@@ -114,13 +114,13 @@ export const LocationPicker = ({
         onLocationChange(result.lat, result.lng);
       })
       .finally(() => {
-        if (!cancelled) {
+        if (!controller.signal.aborted) {
           setGeocoding(false);
         }
       });
 
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, [address, onLocationChange]);
 
