@@ -182,7 +182,7 @@ export const SearchFilters = ({
               {/* Primary Search Button */}
               <Button
                 size="icon"
-                className="rounded-lg bg-accent hover:bg-accent/90 w-12 h-12 shadow-sm hover:shadow-md transition-all duration-200"
+                className="rounded-lg bg-secondary hover:bg-secondary/90 w-12 h-12 shadow-sm hover:shadow-md transition-all duration-200"
               >
                 <Search className="w-5 h-5" />
               </Button>

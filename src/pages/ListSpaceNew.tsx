@@ -133,7 +133,7 @@ const ListSpaceNew = () => {
           }}
         />
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/60 to-primary-light/70"></div>
+        <div className="absolute inset-0 bg-brand-navy/70"></div>
         <div className="relative z-10 container mx-auto px-4 py-20 text-center">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
             {t('listSpace.marketing.hero.title')}
@@ -215,8 +215,7 @@ const ListSpaceNew = () => {
                   alt={space.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white bg-brand-navy/90">
                   <h3 className="text-2xl font-bold mb-2">{space.title}</h3>
                   <p className="text-white/90">{space.description}</p>
                 </div>

@@ -50,8 +50,7 @@ const Categories = () => {
                   target.src = '/placeholder.svg';
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white bg-brand-navy/90">
                 <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
                 <p className="text-white/80 text-sm line-clamp-2">{category.description}</p>
               </div>

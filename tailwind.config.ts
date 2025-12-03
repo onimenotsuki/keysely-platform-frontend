@@ -22,6 +22,24 @@ export default {
         inter: ['Inter', 'sans-serif'],
       },
       colors: {
+        brand: {
+          navy: {
+            DEFAULT: 'hsl(215 42% 17%)',
+            light: 'hsl(215 42% 97%)',
+          },
+          blue: {
+            DEFAULT: 'hsl(217 91% 60%)',
+            light: 'hsl(217 91% 97%)',
+          },
+          beige: {
+            DEFAULT: 'hsl(27 21% 71%)',
+            light: 'hsl(27 21% 96%)',
+          },
+          lavender: {
+            DEFAULT: 'hsl(240 55% 71%)',
+            light: 'hsl(240 55% 97%)',
+          },
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
