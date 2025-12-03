@@ -87,7 +87,8 @@ export const InteractiveMap = ({
   const { navigateWithLang } = useLanguageRouting();
   const { t } = useTranslation();
   const mapRef = useRef<MapRef | null>(null);
-  const initialBoundsSet = useRef(false);
+  const hasFitToSpaces = useRef(false);
+  const hasMovedToGeo = useRef(false);
   const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
   const viewStateRef = useRef<ViewState>(defaultCenter);
@@ -110,9 +111,7 @@ export const InteractiveMap = ({
           longitude: position.coords.longitude,
         });
       },
-      (err) => {
-        globalThis.alert(`[Mapbox] Geolocation error: ${err.message}`);
-      },
+      (_err) => {},
       {
         enableHighAccuracy: true,
         timeout: 5000,
@@ -148,7 +147,7 @@ export const InteractiveMap = ({
 
   // Fit bounds to show all spaces on initial load
   useEffect(() => {
-    if (!mapRef.current || initialBoundsSet.current) return;
+    if (!mapRef.current || hasFitToSpaces.current) return;
     if (activeSpaces.length === 0) return;
 
     const bounds = createBoundsFromSpaces(activeSpaces);
@@ -156,12 +155,15 @@ export const InteractiveMap = ({
     if (!bounds.isEmpty()) {
       const mapInstance = mapRef.current.getMap();
       mapInstance.fitBounds(bounds, { padding: MAPBOX_FIT_PADDING, duration: 0 });
-      initialBoundsSet.current = true;
+      hasFitToSpaces.current = true;
     }
   }, [activeSpaces]);
 
   useEffect(() => {
-    if (!location) return;
+    if (!location || hasMovedToGeo.current) return;
+
+    // If we already fit to spaces, don't move to geolocation
+    if (hasFitToSpaces.current) return;
 
     const mapInstance = mapRef.current?.getMap() as mapboxgl.Map | undefined;
     if (mapInstance?.easeTo) {
@@ -174,8 +176,8 @@ export const InteractiveMap = ({
         latitude: location.latitude,
         longitude: location.longitude,
       };
+      hasMovedToGeo.current = true;
     }
-    initialBoundsSet.current = true;
   }, [location]);
 
   const emitBounds = useCallback(() => {

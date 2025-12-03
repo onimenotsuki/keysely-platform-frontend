@@ -30,7 +30,7 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
   return (
     <div className="flex h-[calc(100vh-150px)] w-full">
       {/* Map Section - Fixed 40vw */}
-      <div className="w-[40vw] h-full sticky top-0">
+      <div className="w-[40vw] h-full sticky top-0 shrink-0">
         {mapsConfigured ? (
           <MapboxProvider>
             <InteractiveMap
@@ -53,7 +53,7 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
       </div>
 
       {/* Results Section - Fixed 60vw with 3 columns */}
-      <div className="w-[60vw] h-full overflow-y-auto bg-background">
+      <div className="w-[60vw] h-full overflow-y-auto bg-background shrink-0">
         {isLoading ? (
           <div className="p-6">
             <div className="h-8 w-48 bg-muted animate-pulse rounded mb-6"></div>
@@ -66,7 +66,7 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
               ))}
             </div>
           </div>
-        ) : (
+        ) : spaces.length > 0 ? (
           <div className="p-6">
             {/* Results Counter */}
             <div className="mb-6">
@@ -106,6 +106,16 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
                 totalItems={totalItems}
               />
             )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+            <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
+              <MapPin className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-semibold mb-2">{t('noSpacesFound')}</h3>
+            <p className="text-muted-foreground max-w-md">
+              Intenta ajustar los filtros o buscar en una zona diferente del mapa.
+            </p>
           </div>
         )}
       </div>
