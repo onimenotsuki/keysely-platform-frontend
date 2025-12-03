@@ -142,6 +142,23 @@
       "whiteboard": "Pizarrón",
       "airConditioning": "Aire acondicionado",
       "kitchen": "Cocina"
+    },
+    "activeFilters": {
+      "removeCategory": "Remover filtro de categoría",
+      "removeLocation": "Remover filtro de ubicación",
+      "removePrice": "Remover filtro de precio",
+      "priceRange": "Rango de precio",
+      "people": "personas",
+      "removeCapacity": "Remover filtro de capacidad",
+      "checkIn": "Entrada",
+      "removeCheckIn": "Remover filtro de fecha de entrada",
+      "checkOut": "Salida",
+      "removeCheckOut": "Remover filtro de fecha de salida",
+      "from": "Desde",
+      "removeAvailableFrom": "Remover filtro de disponibilidad desde",
+      "to": "Hasta",
+      "removeAvailableTo": "Remover filtro de disponibilidad hasta",
+      "removeAmenity": "Remover filtro {{amenity}}"
     }
   },
   "common": {

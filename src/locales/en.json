@@ -141,6 +141,23 @@
       "whiteboard": "Whiteboard",
       "airConditioning": "Air conditioning",
       "kitchen": "Kitchen"
+    },
+    "activeFilters": {
+      "removeCategory": "Remove category filter",
+      "removeLocation": "Remove location filter",
+      "removePrice": "Remove price filter",
+      "priceRange": "Price range",
+      "people": "people",
+      "removeCapacity": "Remove capacity filter",
+      "checkIn": "Check-in",
+      "removeCheckIn": "Remove check-in date filter",
+      "checkOut": "Check-out",
+      "removeCheckOut": "Remove check-out date filter",
+      "from": "From",
+      "removeAvailableFrom": "Remove available from filter",
+      "to": "To",
+      "removeAvailableTo": "Remove available to filter",
+      "removeAmenity": "Remove {{amenity}} filter"
     }
   },
   "common": {
