@@ -65,6 +65,21 @@ const Explore = () => {
     const availableTo = urlSearchParams.get('availableTo');
     if (availableTo) newFilters.availableTo = new Date(availableTo);
 
+    const neLat = urlSearchParams.get('ne_lat');
+    const neLng = urlSearchParams.get('ne_lng');
+    const swLat = urlSearchParams.get('sw_lat');
+    const swLng = urlSearchParams.get('sw_lng');
+
+    if (neLat && neLng && swLat && swLng) {
+      const ne = { lat: Number(neLat), lng: Number(neLng) };
+      const sw = { lat: Number(swLat), lng: Number(swLng) };
+      newFilters.mapBounds = {
+        ne,
+        sw,
+        insideBoundingBox: [ne.lat, ne.lng, sw.lat, sw.lng],
+      };
+    }
+
     if (Object.keys(newFilters).length > 0) {
       setFilters((prev) => ({ ...prev, ...newFilters }));
     }
@@ -120,6 +135,13 @@ const Explore = () => {
       params.set('availableFrom', newFilters.availableFrom.toISOString());
     if (newFilters.availableTo) params.set('availableTo', newFilters.availableTo.toISOString());
 
+    if (newFilters.mapBounds) {
+      params.set('ne_lat', newFilters.mapBounds.ne.lat.toString());
+      params.set('ne_lng', newFilters.mapBounds.ne.lng.toString());
+      params.set('sw_lat', newFilters.mapBounds.sw.lat.toString());
+      params.set('sw_lng', newFilters.mapBounds.sw.lng.toString());
+    }
+
     setUrlSearchParams(params, { replace: true });
   };
 
@@ -139,10 +161,10 @@ const Explore = () => {
   };
 
   const handleMapBoundsChange = (bounds: MapBounds) => {
-    setFilters((prev) => ({
-      ...prev,
+    handleFiltersChange({
+      ...filters,
       mapBounds: bounds,
-    }));
+    });
   };
 
   return (
