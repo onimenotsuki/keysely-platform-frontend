@@ -33,10 +33,13 @@ bun dev  # Runs on http://localhost:8080
 
 ### Prerequisites
 
-- Node.js 18+ or Bun (recommended)
+- **Bun** (Required) - All project operations use Bun
 - Supabase account with configured project
 - Stripe account for payments
 - Contentful account (optional, for CMS)
+
+> [!IMPORTANT]
+> This project uses **Bun** as the default package manager and runtime for local development (for remote environments, use `npm` or `yarn`). Please do not use `npm` or `yarn`. Always use `bun install`, `bun run`, etc.
 
 ### Required Environment Variables
 
