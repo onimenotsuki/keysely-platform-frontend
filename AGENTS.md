@@ -149,7 +149,12 @@ If linting fails, the commit is blocked. Fix errors before committing.
 ### Design System Rules
 
 - **Never use CSS gradients** - Use solid colors from the Tailwind theme only
-- Use `bg-primary` and `hover:bg-[#3B82F6]` for primary buttons
+- Use `bg-primary` (Navy) and `hover:bg-brand-blue` (Blue) for primary buttons
+- **Brand Colors**:
+  - **Navy**: `hsl(215 42% 17%)` (Primary)
+  - **Blue**: `hsl(217 91% 60%)` (Accent/Highlight)
+  - **Beige**: `hsl(27 21% 71%)` (Secondary)
+  - **Lavender**: `hsl(240 55% 71%)` (Decorative)
 - Use theme colors defined in `tailwind.config.ts`
 - Avoid inline color values when possible, prefer theme variables
 - Keep designs clean and modern with flat colors
