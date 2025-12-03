@@ -775,7 +775,8 @@
     "viewDetails": "View details",
     "searchThisArea": "Search this area",
     "notAvailable": "Map not available",
-    "notConfigured": "Mapbox is not configured"
+    "notConfigured": "Mapbox is not configured",
+    "searchOnMove": "Search as I move"
   },
   "hostProfile": {
     "title": "Host Profile",

@@ -1,6 +1,8 @@
 import type { MapBounds } from '@/components/features/spaces/SearchFilters/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import type { Space } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -9,7 +11,8 @@ import { MAPBOX_FIT_PADDING, MAPBOX_STYLE } from '@/utils/mapboxConfig';
 import { MapPin } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Map, {
+import {
+  Map,
   MapRef,
   Marker,
   Popup,
@@ -23,6 +26,7 @@ interface InteractiveMapProps {
   selectedSpaceId?: string | null;
   onSpaceSelect?: (spaceId: string | null) => void;
   showSearchButton?: boolean;
+  isLoading?: boolean;
 }
 
 const mapContainerStyle = {
@@ -78,6 +82,7 @@ export const InteractiveMap = ({
   selectedSpaceId,
   onSpaceSelect,
   showSearchButton = true,
+  isLoading = false,
 }: InteractiveMapProps) => {
   const { navigateWithLang } = useLanguageRouting();
   const { t } = useTranslation();
@@ -88,6 +93,7 @@ export const InteractiveMap = ({
   const viewStateRef = useRef<ViewState>(defaultCenter);
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const [showSearchThisArea, setShowSearchThisArea] = useState(false);
+  const [searchOnMove, setSearchOnMove] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const lastEmittedBounds = useRef<[number, number, number, number] | null>(null);
@@ -197,31 +203,28 @@ export const InteractiveMap = ({
     setShowSearchThisArea(false);
   }, [onBoundsChange]);
 
-  const handleMove = useCallback(
-    (evt: ViewStateChangeEvent) => {
-      const nextViewState = evt.viewState;
-      const hasChanged = !areViewStatesEqual(viewStateRef.current, nextViewState);
+  const handleMove = useCallback((evt: ViewStateChangeEvent) => {
+    const nextViewState = evt.viewState;
+    const hasChanged = !areViewStatesEqual(viewStateRef.current, nextViewState);
 
-      if (hasChanged) {
-        viewStateRef.current = {
-          latitude: nextViewState.latitude,
-          longitude: nextViewState.longitude,
-          zoom: nextViewState.zoom,
-          bearing: nextViewState.bearing ?? 0,
-          pitch: nextViewState.pitch ?? 0,
-        };
-      }
+    if (hasChanged) {
+      viewStateRef.current = {
+        latitude: nextViewState.latitude,
+        longitude: nextViewState.longitude,
+        zoom: nextViewState.zoom,
+        bearing: nextViewState.bearing ?? 0,
+        pitch: nextViewState.pitch ?? 0,
+      };
+    }
+  }, []);
 
-      if (!onBoundsChange || !hasChanged) return;
-
-      if (showSearchButton) {
-        setShowSearchThisArea(true);
-      } else {
-        emitBounds();
-      }
-    },
-    [emitBounds, onBoundsChange, showSearchButton]
-  );
+  const handleMoveEnd = useCallback(() => {
+    if (searchOnMove) {
+      emitBounds();
+    } else {
+      setShowSearchThisArea(true);
+    }
+  }, [searchOnMove, emitBounds]);
 
   const handleSearchThisArea = useCallback(() => {
     emitBounds();
@@ -256,11 +259,13 @@ export const InteractiveMap = ({
       <Map
         ref={mapRef}
         mapboxAccessToken={accessToken}
-        mapLib={mapboxgl as unknown as typeof import('mapbox-gl')}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mapLib={mapboxgl as any}
         mapStyle={MAPBOX_STYLE}
         style={mapContainerStyle}
         initialViewState={defaultCenter}
         onMove={handleMove}
+        onMoveEnd={handleMoveEnd}
         onError={(event) => {
           const message = event?.error?.message ?? 'Mapbox failed to load.';
           console.error('[Mapbox] error:', message, event?.error);
@@ -372,8 +377,29 @@ export const InteractiveMap = ({
         </div>
       )}
 
-      {showSearchButton && showSearchThisArea && !mapError && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+      {/* Search on Move Toggle */}
+      <div className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur-sm p-2 rounded-lg shadow-sm border flex items-center gap-2">
+        <Switch
+          id="search-mode"
+          checked={searchOnMove}
+          onCheckedChange={(checked) => {
+            setSearchOnMove(checked);
+            if (checked) {
+              // Trigger search immediately if turned on
+              emitBounds();
+            } else {
+              // Show "Search This Area" button if turned off
+              setShowSearchThisArea(true);
+            }
+          }}
+        />
+        <Label htmlFor="search-mode" className="text-sm font-medium cursor-pointer min-w-[100px]">
+          {isLoading ? <span className="loader !m-0 !mx-auto"></span> : t('map.searchOnMove')}
+        </Label>
+      </div>
+
+      {showSearchButton && showSearchThisArea && !mapError && !isLoading && (
+        <div className="absolute top-4 left-4 z-10">
           <Button
             onClick={handleSearchThisArea}
             className="bg-primary hover:bg-primary-light text-primary-foreground shadow-lg"

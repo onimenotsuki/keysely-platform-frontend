@@ -24,7 +24,7 @@ const schema = {
     { name: 'total_reviews', type: 'int32', default: 0 },
     { name: 'category_id', type: 'string', optional: true },
     { name: 'owner_id', type: 'string' },
-    { name: 'location', type: 'float[]', optional: true },
+    { name: 'location', type: 'geopoint', optional: true },
   ],
 };
 
@@ -52,7 +52,7 @@ interface TypesenseSpace {
   total_reviews: number;
   category_id?: string;
   owner_id: string;
-  location?: number[];
+  location?: Typesense.GeoPoint;
 }
 
 interface SupabaseSpace {
@@ -100,6 +100,8 @@ async function createCollectionIfNotExists() {
 function getClient() {
   const TYPESENSE_HOST = Deno.env.get('TYPESENSE_HOST');
   const TYPESENSE_API_KEY = Deno.env.get('TYPESENSE_API_KEY');
+  const TYPESENSE_PORT = Deno.env.get('TYPESENSE_PORT');
+  const TYPESENSE_PROTOCOL = Deno.env.get('TYPESENSE_PROTOCOL');
 
   if (!TYPESENSE_HOST || !TYPESENSE_API_KEY) {
     throw new Error('Typesense not configured');

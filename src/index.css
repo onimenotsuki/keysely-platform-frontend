@@ -275,4 +275,42 @@
   .space-card:hover .space-image {
     transform: scale(1.05);
   }
+  /* Map Loader */
+  .loader {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: block;
+    margin: 15px auto;
+    position: relative;
+    background: hsl(var(--primary-foreground));
+    box-shadow:
+      -24px 0 hsl(var(--primary-foreground)),
+      24px 0 hsl(var(--primary-foreground));
+    box-sizing: border-box;
+    animation: shadowPulse 2s linear infinite;
+  }
+
+  @keyframes shadowPulse {
+    33% {
+      background: hsl(var(--primary-foreground));
+      box-shadow:
+        -24px 0 hsl(var(--primary-light)),
+        24px 0 hsl(var(--primary-foreground));
+    }
+
+    66% {
+      background: hsl(var(--primary-light));
+      box-shadow:
+        -24px 0 hsl(var(--primary-foreground)),
+        24px 0 hsl(var(--primary-foreground));
+    }
+
+    100% {
+      background: hsl(var(--primary-foreground));
+      box-shadow:
+        -24px 0 hsl(var(--primary-foreground)),
+        24px 0 hsl(var(--primary-light));
+    }
+  }
 }

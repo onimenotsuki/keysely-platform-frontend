@@ -85,7 +85,20 @@ const buildTypesenseFilters = (filters: SearchFilters): string => {
     // MapBounds type: insideBoundingBox: [number, number, number, number];
     // We'll assume the order matches what Typesense expects or adjust.
     // Typesense expects: location:(x1, y1, x2, y2) where (x1, y1) is top-left, (x2, y2) is bottom-right.
-    filterParts.push(`location:(${lat1}, ${lng1}, ${lat2}, ${lng2})`);
+    // Typesense expects a polygon for geo search if not using radius.
+    // We convert the bounding box [lat1, lng1, lat2, lng2] into a polygon.
+    // lat1, lng1 is Top-Left (North-West)
+    // lat2, lng2 is Bottom-Right (South-East)
+    // Polygon points: TL -> TR -> BR -> BL -> TL (closing loop)
+
+    // Top-Left: lat1, lng1
+    // Top-Right: lat1, lng2
+    // Bottom-Right: lat2, lng2
+    // Bottom-Left: lat2, lng1
+
+    filterParts.push(
+      `location:(${lat1}, ${lng1}, ${lat1}, ${lng2}, ${lat2}, ${lng2}, ${lat2}, ${lng1}, ${lat1}, ${lng1})`
+    );
   }
 
   return filterParts.join(' && ');
@@ -108,6 +121,9 @@ export const useTypesenseSearch = (options: UseTypesenseSearchOptions = {}) => {
       if (!typesenseEnabled || !typesenseClient) {
         throw new Error('Typesense is not configured');
       }
+
+      // Add artificial delay for better UX (1 second)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const filterString = buildTypesenseFilters(filters);
 
@@ -135,6 +151,7 @@ export const useTypesenseSearch = (options: UseTypesenseSearchOptions = {}) => {
     },
     enabled: enabled && typesenseEnabled,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    placeholderData: (previousData) => previousData,
   });
 };
 

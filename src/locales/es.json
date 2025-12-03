@@ -777,7 +777,8 @@
     "viewDetails": "Ver detalles",
     "searchThisArea": "Buscar en esta área",
     "notAvailable": "Mapa no disponible",
-    "notConfigured": "Mapbox no está configurado"
+    "notConfigured": "Mapbox no está configurado",
+    "searchOnMove": "Buscar al mover"
   },
   "hostProfile": {
     "title": "Perfil de Anfitrión",

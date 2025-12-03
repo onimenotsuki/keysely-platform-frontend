@@ -27,28 +27,6 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
       itemsPerPage: 12, // 12 items to show 4 rows of 3 columns
     });
 
-  if (isLoading) {
-    return (
-      <div className="flex h-[calc(100vh-150px)] w-full">
-        {/* Map Loading Skeleton - 40vw */}
-        <div className="w-[40vw] h-full bg-muted animate-pulse"></div>
-
-        {/* Results Loading Skeleton - 60vw */}
-        <div className="w-[60vw] h-full overflow-hidden p-6 bg-background">
-          <div className="h-8 w-48 bg-muted animate-pulse rounded mb-6"></div>
-          <div className="columns-3 gap-4 space-y-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="h-80 bg-muted animate-pulse rounded-lg break-inside-avoid mb-4"
-              ></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-[calc(100vh-150px)] w-full">
       {/* Map Section - Fixed 40vw */}
@@ -56,10 +34,11 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
         {mapsConfigured ? (
           <MapboxProvider>
             <InteractiveMap
-              spaces={spaces}
+              spaces={spaces || []}
               onBoundsChange={onMapBoundsChange}
               selectedSpaceId={selectedSpaceId}
               onSpaceSelect={setSelectedSpaceId}
+              isLoading={isLoading}
             />
           </MapboxProvider>
         ) : (
@@ -75,45 +54,60 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
 
       {/* Results Section - Fixed 60vw with 3 columns */}
       <div className="w-[60vw] h-full overflow-y-auto bg-background">
-        <div className="p-6">
-          {/* Results Counter */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-foreground">
-              {spaces.length} {spaces.length === 1 ? 'espacio encontrado' : 'espacios encontrados'}
-            </h3>
+        {isLoading ? (
+          <div className="p-6">
+            <div className="h-8 w-48 bg-muted animate-pulse rounded mb-6"></div>
+            <div className="columns-3 gap-4 space-y-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  className="h-80 bg-muted animate-pulse rounded-lg break-inside-avoid mb-4"
+                ></div>
+              ))}
+            </div>
           </div>
+        ) : (
+          <div className="p-6">
+            {/* Results Counter */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-foreground">
+                {spaces.length}{' '}
+                {spaces.length === 1 ? 'espacio encontrado' : 'espacios encontrados'}
+              </h3>
+            </div>
 
-          {/* Results Grid - Masonry Layout with 3 Columns */}
-          <div className="columns-3 gap-4 mb-6 space-y-4">
-            {paginatedItems.map((space) => (
-              <div
-                key={space.id}
-                className={`break-inside-avoid mb-4 transition-all ${
-                  selectedSpaceId === space.id ? 'ring-2 ring-primary rounded-lg' : ''
-                }`}
-              >
-                <SpaceCard
-                  space={space}
-                  variant="compact"
-                  onMouseEnter={() => setSelectedSpaceId(space.id)}
-                  onMouseLeave={() => setSelectedSpaceId(null)}
-                />
-              </div>
-            ))}
+            {/* Results Grid - Masonry Layout with 3 Columns */}
+            <div className="columns-3 gap-4 mb-6 space-y-4">
+              {paginatedItems.map((space) => (
+                <div
+                  key={space.id}
+                  className={`break-inside-avoid mb-4 transition-all ${
+                    selectedSpaceId === space.id ? 'ring-2 ring-primary rounded-lg' : ''
+                  }`}
+                >
+                  <SpaceCard
+                    space={space}
+                    variant="compact"
+                    onMouseEnter={() => setSelectedSpaceId(space.id)}
+                    onMouseLeave={() => setSelectedSpaceId(null)}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <PaginationControls
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                startIndex={startIndex}
+                endIndex={endIndex}
+                totalItems={totalItems}
+              />
+            )}
           </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={goToPage}
-              startIndex={startIndex}
-              endIndex={endIndex}
-              totalItems={totalItems}
-            />
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
