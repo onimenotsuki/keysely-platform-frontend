@@ -6,6 +6,7 @@ import type {
 } from '@/components/features/spaces/SearchFilters/types';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
+import { geocodeAddress } from '@/utils/mapboxGeocoding';
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -27,6 +28,8 @@ const Explore = () => {
     amenities: [],
     mapBounds: null,
   });
+
+  const [cityBounds, setCityBounds] = useState<[number, number, number, number] | null>(null);
 
   // Handle URL search parameters
   useEffect(() => {
@@ -84,6 +87,30 @@ const Explore = () => {
       setFilters((prev) => ({ ...prev, ...newFilters }));
     }
   }, [urlSearchParams]);
+
+  // Fetch city bounds when city changes
+  useEffect(() => {
+    const fetchCityBounds = async () => {
+      if (!filters.city) {
+        setCityBounds(null);
+        return;
+      }
+
+      try {
+        const result = await geocodeAddress(filters.city);
+        if (result && result.bbox) {
+          setCityBounds(result.bbox);
+        } else {
+          setCityBounds(null);
+        }
+      } catch (error) {
+        console.error('Error fetching city bounds:', error);
+        setCityBounds(null);
+      }
+    };
+
+    fetchCityBounds();
+  }, [filters.city]);
 
   // Decide whether to use Typesense or Supabase
   const useTypesense = shouldUseTypesense(filters);
@@ -161,10 +188,31 @@ const Explore = () => {
   };
 
   const handleMapBoundsChange = (bounds: MapBounds) => {
-    handleFiltersChange({
-      ...filters,
-      mapBounds: bounds,
-    });
+    const newFilters = { ...filters, mapBounds: bounds };
+
+    // Check if we moved out of city bounds
+    if (filters.city && cityBounds) {
+      const [minLng, minLat, maxLng, maxLat] = cityBounds;
+      const centerLat = (bounds.ne.lat + bounds.sw.lat) / 2;
+      const centerLng = (bounds.ne.lng + bounds.sw.lng) / 2;
+
+      // Check if center is outside city bounds
+      // Add a small buffer (e.g., 10% of width/height) to avoid accidental clearing
+      const latBuffer = (maxLat - minLat) * 0.1;
+      const lngBuffer = (maxLng - minLng) * 0.1;
+
+      const isOutside =
+        centerLat < minLat - latBuffer ||
+        centerLat > maxLat + latBuffer ||
+        centerLng < minLng - lngBuffer ||
+        centerLng > maxLng + lngBuffer;
+
+      if (isOutside) {
+        newFilters.city = '';
+      }
+    }
+
+    handleFiltersChange(newFilters);
   };
 
   return (

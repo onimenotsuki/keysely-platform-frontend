@@ -1,6 +1,7 @@
 interface MapboxFeature {
   center: [number, number];
   place_name: string;
+  bbox?: [number, number, number, number];
 }
 
 interface MapboxGeocodingResponse {
@@ -11,6 +12,7 @@ export interface GeocodeResult {
   lat: number;
   lng: number;
   placeName: string;
+  bbox?: [number, number, number, number];
 }
 
 const MAPBOX_GEOCODING_URL = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
@@ -85,6 +87,7 @@ export const geocodeAddress = async (
     lat,
     lng,
     placeName: feature.place_name,
+    bbox: feature.bbox,
   };
 };
 
@@ -112,5 +115,41 @@ export const reverseGeocode = async (
     lat: featureLat,
     lng: featureLng,
     placeName: feature.place_name,
+    bbox: feature.bbox,
   };
+};
+
+export const autocompletePlaces = async (
+  query: string,
+  options?: FetchMapboxOptions
+): Promise<GeocodeResult[]> => {
+  const trimmedQuery = query.trim();
+  if (trimmedQuery.length === 0) {
+    return [];
+  }
+
+  const data = await fetchFromMapbox(
+    encodeURIComponent(trimmedQuery),
+    {
+      limit: '5',
+      language: 'es,en',
+      types: 'place,locality',
+      autocomplete: 'true',
+      proximity: '-99.1332,19.4326', // Bias results toward Mexico City
+      country: 'mx', // Limit results to Mexico
+    },
+    options
+  );
+
+  if (!data) return [];
+
+  return data.features.map((feature) => {
+    const [lng, lat] = feature.center;
+    return {
+      lat,
+      lng,
+      placeName: feature.place_name,
+      bbox: feature.bbox,
+    };
+  });
 };

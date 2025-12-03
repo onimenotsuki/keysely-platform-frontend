@@ -1,14 +1,31 @@
 import { useHeroBanner } from '@/hooks/useContentful';
-import { Calendar, MapPin } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { autocompletePlaces, GeocodeResult } from '@/utils/mapboxGeocoding';
+import { format } from 'date-fns';
+import { enUS, es } from 'date-fns/locale';
+import { Calendar, Check, ChevronsUpDown, MapPin } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import heroImage from '../assets/hero-office.jpg';
 import { useTranslation } from '../hooks/useTranslation';
+import { Calendar as CalendarComponent } from './ui/calendar';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from './ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState<Date>();
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [places, setPlaces] = useState<GeocodeResult[]>([]);
+  const [inputValue, setInputValue] = useState('');
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const { data: heroBannerData, isLoading: isLoadingHeroData } = useHeroBanner();
@@ -41,12 +58,50 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, [contentfulImages.length]);
 
+  // Popular cities in Mexico
+  const popularCities = useMemo(
+    () => [
+      { placeName: 'Ciudad de México, México', lat: 19.4326, lng: -99.1332 },
+      { placeName: 'Guadalajara, Jalisco, México', lat: 20.6597, lng: -103.3496 },
+      { placeName: 'Monterrey, Nuevo León, México', lat: 25.6866, lng: -100.3161 },
+      { placeName: 'Querétaro, Querétaro, México', lat: 20.5888, lng: -100.3899 },
+      { placeName: 'Puebla, Puebla, México', lat: 19.0414, lng: -98.2063 },
+      { placeName: 'Cancún, Quintana Roo, México', lat: 21.1619, lng: -86.8515 },
+      { placeName: 'Mérida, Yucatán, México', lat: 20.9674, lng: -89.5926 },
+      { placeName: 'Tijuana, Baja California, México', lat: 32.5149, lng: -117.0382 },
+      { placeName: 'León, Guanajuato, México', lat: 21.1221, lng: -101.668 },
+      { placeName: 'Toluca, Estado de México, México', lat: 19.2826, lng: -99.6557 },
+    ],
+    []
+  );
+
+  // Handle autocomplete search
+  useEffect(() => {
+    if (!inputValue || inputValue.length < 3) {
+      setPlaces([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const results = await autocompletePlaces(inputValue);
+      setPlaces(results);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [inputValue]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.append('search', searchQuery.trim());
-    if (location.trim()) params.append('location', location.trim());
-    if (date) params.append('date', date);
+
+    // Extract city name from location (e.g. "Guadalajara, Jalisco, México" -> "Guadalajara")
+    if (location.trim()) {
+      const cityName = location.split(',')[0].trim();
+      params.append('city', cityName);
+    }
+
+    if (date) params.append('checkIn', date.toISOString());
 
     const queryString = params.toString();
     navigate(`/${language}/explore${queryString ? `?${queryString}` : ''}`);
@@ -156,13 +211,77 @@ const Hero = () => {
                 </label>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder={t('hero.locationPlaceholder')}
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full text-base text-gray-900 placeholder:text-gray-400 border-none outline-none focus:ring-0"
-                  />
+                  <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        role="combobox"
+                        aria-expanded={openCombobox}
+                        className={cn(
+                          'w-full text-left text-base border-none outline-none focus:ring-0 bg-transparent p-0 truncate',
+                          location ? 'text-gray-900' : 'text-gray-400'
+                        )}
+                      >
+                        {location || t('hero.locationPlaceholder')}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0" align="start">
+                      <Command shouldFilter={false}>
+                        <CommandInput
+                          placeholder={t('hero.locationPlaceholder')}
+                          value={inputValue}
+                          onValueChange={setInputValue}
+                        />
+                        <CommandList>
+                          <CommandEmpty>No se encontraron lugares.</CommandEmpty>
+                          {!inputValue && (
+                            <CommandGroup heading="Ciudades Populares">
+                              {popularCities.map((city) => (
+                                <CommandItem
+                                  key={city.placeName}
+                                  value={city.placeName}
+                                  onSelect={(currentValue) => {
+                                    setLocation(currentValue);
+                                    setOpenCombobox(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      location === city.placeName ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                  />
+                                  {city.placeName}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                          {inputValue && places.length > 0 && (
+                            <CommandGroup heading="Resultados">
+                              {places.map((place) => (
+                                <CommandItem
+                                  key={place.placeName}
+                                  value={place.placeName}
+                                  onSelect={(currentValue) => {
+                                    setLocation(currentValue);
+                                    setOpenCombobox(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      location === place.placeName ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                  />
+                                  {place.placeName}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
@@ -174,13 +293,32 @@ const Hero = () => {
                   </label>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <input
-                      type="text"
-                      placeholder={t('hero.datePlaceholder')}
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="w-full text-base text-gray-900 placeholder:text-gray-400 border-none outline-none focus:ring-0"
-                    />
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className={cn(
+                            'w-full text-left text-base border-none outline-none focus:ring-0 bg-transparent p-0',
+                            date ? 'text-gray-900' : 'text-gray-400'
+                          )}
+                        >
+                          {date
+                            ? format(date, 'd MMM yyyy', {
+                                locale: language === 'es' ? es : enUS,
+                              })
+                            : t('hero.datePlaceholder')}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          initialFocus
+                          disabled={(date) => date < new Date()}
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
 

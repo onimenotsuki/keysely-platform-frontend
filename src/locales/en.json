@@ -21,7 +21,7 @@
   "hero": {
     "title": "Find the perfect workspace",
     "subtitle": "Discover and book offices, meeting rooms and coworking spaces worldwide by the hour, day or month",
-    "searchPlaceholder": "Search by location, space type, or features...",
+    "searchPlaceholder": "Search by space type, or features...",
     "searchButton": "Search",
     "search": "Search",
     "whatLabel": "What are you planning?",
