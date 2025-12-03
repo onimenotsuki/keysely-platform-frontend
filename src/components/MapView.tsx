@@ -1,21 +1,23 @@
+import type { MapBounds } from '@/components/features/spaces/SearchFilters/types';
+import { SpaceCard } from '@/components/features/spaces/SpaceCard';
+import { InteractiveMap } from '@/components/map/InteractiveMap';
+import { MapboxProvider, isMapboxConfigured } from '@/components/map/MapboxProvider';
+import { Button } from '@/components/ui/button';
+import { PaginationControls } from '@/components/ui/pagination-controls';
 import { usePagination } from '@/hooks/usePagination';
 import type { Space } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
 import { MapPin } from 'lucide-react';
 import { useState } from 'react';
-import type { MapBounds } from './features/spaces/SearchFilters/types';
-import { SpaceCard } from './features/spaces/SpaceCard';
-import { InteractiveMap } from './map/InteractiveMap';
-import { MapboxProvider, isMapboxConfigured } from './map/MapboxProvider';
-import { PaginationControls } from './ui/pagination-controls';
 
 interface MapViewProps {
   spaces: Space[];
   isLoading: boolean;
   onMapBoundsChange?: (bounds: MapBounds) => void;
+  handleReset?: () => void;
 }
 
-export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) => {
+export const MapView = ({ spaces, isLoading, onMapBoundsChange, handleReset }: MapViewProps) => {
   const { t } = useTranslation();
   const [selectedSpaceId, setSelectedSpaceId] = useState<string | null>(null);
   const mapsConfigured = isMapboxConfigured();
@@ -72,7 +74,9 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-foreground">
                 {spaces.length}{' '}
-                {spaces.length === 1 ? 'espacio encontrado' : 'espacios encontrados'}
+                {spaces.length === 1
+                  ? t('explore.resultsCount.singular')
+                  : t('explore.resultsCount.plural')}
               </h3>
             </div>
 
@@ -112,10 +116,18 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
             <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mb-4">
               <MapPin className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">{t('noSpacesFound')}</h3>
+            <h3 className="text-xl font-semibold mb-2">{t('explore.searchBar.noSpacesFound')}</h3>
             <p className="text-muted-foreground max-w-md">
-              Intenta ajustar los filtros o buscar en una zona diferente del mapa.
+              {t('explore.searchBar.noSpacesFoundDescription')}
             </p>
+
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              className="mt-6 px-8 py-2 border-primary text-primary hover:bg-primary hover:text-white transition-colors"
+            >
+              {t('explore.searchBar.clearFilters')}
+            </Button>
           </div>
         )}
       </div>

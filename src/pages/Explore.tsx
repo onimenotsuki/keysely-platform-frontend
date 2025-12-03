@@ -4,16 +4,15 @@ import type {
   MapBounds,
   SearchFilters as SearchFiltersType,
 } from '@/components/features/spaces/SearchFilters/types';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
+import { useSpaces } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
+import { shouldUseTypesense, useTypesenseSearch } from '@/hooks/useTypesenseSearch';
 import { geocodeAddress } from '@/utils/mapboxGeocoding';
-import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Footer } from '../components/layout/Footer';
-import { Header } from '../components/layout/Header';
-import { useSpaces } from '../hooks/useSpaces';
-import { shouldUseTypesense, useTypesenseSearch } from '../hooks/useTypesenseSearch';
 
 const Explore = () => {
   const { t } = useTranslation();
@@ -233,30 +232,12 @@ const Explore = () => {
 
       {/* Results - Full Width - Fixed height for map view */}
       <section className="w-full">
-        {isLoading && (
-          <MapView spaces={[]} isLoading={true} onMapBoundsChange={handleMapBoundsChange} />
-        )}
-
-        {!isLoading && spaces && spaces.length > 0 && (
-          <MapView spaces={spaces} isLoading={false} onMapBoundsChange={handleMapBoundsChange} />
-        )}
-
-        {!isLoading && (!spaces || spaces.length === 0) && (
-          <div className="container mx-auto px-4 h-[calc(100vh-200px)] flex items-center justify-center">
-            <div className="text-center">
-              <div className="max-w-md mx-auto">
-                <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">
-                  {t('explore.searchBar.noSpacesFound')}
-                </h3>
-                <p className="text-muted-foreground mb-6">{t('explore.searchBar.adjustFilters')}</p>
-                <Button onClick={handleReset} variant="outline">
-                  {t('explore.searchBar.clearFilters')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <MapView
+          spaces={spaces}
+          isLoading={isLoading}
+          onMapBoundsChange={handleMapBoundsChange}
+          handleReset={handleReset}
+        />
       </section>
 
       <Footer />

@@ -104,6 +104,10 @@
     "priceRange": "Price range",
     "anyPrice": "Any price",
     "results": "{{count}} spaces found",
+    "resultsCount": {
+      "singular": "space found",
+      "plural": "spaces found"
+    },
     "viewDetails": "View details",
     "bookNow": "Book now",
     "loadMore": "Load more spaces",
@@ -120,6 +124,7 @@
       "applyFilters": "Apply Filters",
       "filters": "Filters",
       "noSpacesFound": "No spaces found",
+      "noSpacesFoundDescription": "Try adjusting the filters or searching in a different area of the map.",
       "adjustFilters": "Try adjusting your search filters or explore different criteria.",
       "clearFilters": "Clear filters",
       "removeFilter": "Remove filter",
