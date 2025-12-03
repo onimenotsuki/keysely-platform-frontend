@@ -757,3 +757,69 @@ keysely-platform-fe/
 **Last Updated:** November 2024  
 **Version:** 1.0.0  
 **Maintainer:** Keysely Development Team
+
+## Search & Filtering System
+
+### Overview
+
+The platform uses a hybrid search approach:
+
+- **Supabase**: Used for basic listing and simple filtering when no search term is present.
+- **Typesense**: Used for full-text search, typo tolerance, and complex filtering (geo-search, amenities).
+
+### Architecture
+
+1. **Orchestrator (`Explore.tsx`)**:
+   - Manages the state of the search page.
+   - Syncs state with URL parameters (`useSearchParams`).
+   - Decides which data source to use via `shouldUseTypesense`.
+   - Fetches data using `useSpaces` (Supabase) or `useTypesenseSearch` (Typesense).
+
+2. **UI Component (`SearchFilters.tsx`)**:
+   - Pure presentation component for filter inputs.
+   - Receives current filters and `onFiltersChange` callback.
+   - Contains sub-components for specific filters:
+     - `SearchInput`: Text search.
+     - `LocationInput`: City selection with autocomplete.
+     - `PriceRangeFilter`: Min/max price sliders.
+     - `CapacityFilter`: Guest count.
+     - `AmenitiesFilter`: Checkbox list for amenities.
+     - `DatePicker`: Date range selection.
+
+3. **Typesense Integration (`useTypesenseSearch.ts`)**:
+   - Converts app filters into Typesense filter strings.
+   - Handles pagination and hits-per-page.
+   - Maps Typesense results back to the application's `Space` interface.
+
+### State Management
+
+The URL is the source of truth for the search state. This allows users to share search results via links.
+
+- **URL Parameters**:
+  - `search`: Text query.
+  - `city`: Selected city.
+  - `category`: Space category ID.
+  - `minPrice`, `maxPrice`: Price range.
+  - `capacity`: Minimum capacity.
+  - `amenities`: Comma-separated list of amenity IDs.
+  - `checkIn`, `checkOut`: Date range.
+  - `ne_lat`, `ne_lng`, `sw_lat`, `sw_lng`: Map bounding box.
+  - `page`: Current page number (1-based).
+
+### Filter Logic
+
+The `shouldUseTypesense` utility determines the search engine:
+
+- **Returns `true` if**:
+  - A search term exists.
+  - Amenities are selected.
+  - Map bounds are active (geo-search).
+- **Returns `false` otherwise** (uses Supabase for simple filtering).
+
+### Geospatial Search
+
+- **Map Bounds**: When the user moves the map, `MapView` updates the bounds (`ne` and `sw` coordinates).
+- **City Selection**: Selecting a city fetches its bounding box via Mapbox Geocoding and updates the map view.
+- **Filtering**:
+  - **Typesense**: Uses `location` field with polygon filtering (approximated from bounding box).
+  - **Supabase**: (Currently limited or relies on client-side filtering for complex geo-queries, though simple city filtering is supported).
