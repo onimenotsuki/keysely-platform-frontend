@@ -1,5 +1,4 @@
-import { Search } from 'lucide-react';
-import { Input } from '../../../ui/input';
+import { useTranslation } from '@/hooks/useTranslation';
 import { SearchFilters } from './types';
 
 interface SearchInputProps {
@@ -9,15 +8,21 @@ interface SearchInputProps {
 }
 
 export const SearchInput = ({ value, onFiltersChange, filters }: SearchInputProps) => {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex-1">
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-        <Input
-          placeholder="Buscar espacios, ubicaciones..."
+    <div className="flex-1 group">
+      <div className="px-8 py-5 cursor-pointer hover:bg-gray-50 transition-colors">
+        <label htmlFor="search-input" className="block text-xs font-semibold text-gray-900 mb-1.5">
+          {t('explore.searchBar.whatLookingFor')}
+        </label>
+        <input
+          id="search-input"
+          type="text"
+          placeholder={t('explore.searchBar.searchSpaces')}
           value={value}
           onChange={(e) => onFiltersChange({ ...filters, searchTerm: e.target.value })}
-          className="pl-10"
+          className="w-full bg-transparent border-0 outline-none text-sm text-gray-700 placeholder:text-gray-400 focus:text-gray-900"
         />
       </div>
     </div>

@@ -1,11 +1,14 @@
-import { AmenityBadge } from '@/components/features/spaces/AmenityBadge';
 import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import ContactOwnerButton from '@/components/ContactOwnerButton';
 import ReviewsSection from '@/components/ReviewsSection';
+import { AmenityBadge } from '@/components/features/spaces/AmenityBadge';
+import { RelatedSpaces } from '@/components/features/spaces/RelatedSpaces';
+import { MapboxProvider, isMapboxConfigured } from '@/components/map/MapboxProvider';
+import { SpaceLocationMap } from '@/components/map/SpaceLocationMap';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -15,44 +18,224 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { ShareDialog } from '@/components/ui/share-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useBlockedHours } from '@/hooks/useBlockedHours';
 import { useCreateBooking } from '@/hooks/useBookings';
 import { useBookingsBySpace } from '@/hooks/useBookingsBySpace';
-import { useFavorites, useIsFavorite, useToggleFavorite } from '@/hooks/useFavorites';
+import { useIsFavorite, useToggleFavorite } from '@/hooks/useFavorites';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useMarketplacePayment } from '@/hooks/useMarketplacePayment';
 import { useSpace } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Heart } from 'lucide-react';
-import { useState } from 'react';
+import { formatCurrency } from '@/utils/formatCurrency';
+import generateGoogleMapsLink from '@/utils/generateGoogleMapsLink';
+import { addHours, differenceInMinutes, format, isBefore, isSameDay, parse } from 'date-fns';
+import { Clock, Heart, MapPin, Maximize2, Share2, Star, Users } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
+
+const DEFAULT_START_TIME = '09:00';
+const DEFAULT_END_TIME = '17:00';
+const DAY_KEYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+] as const satisfies readonly string[];
+
+type AvailabilitySchedule = Record<
+  string,
+  {
+    start?: string | null;
+    end?: string | null;
+  } | null
+>;
+
+const getDayKeyFromDate = (date: Date) =>
+  new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(date).toLowerCase();
+
+const resolveAvailabilityTime = (availability: AvailabilitySchedule, type: 'start' | 'end') => {
+  for (const key of DAY_KEYS) {
+    const value = availability?.[key]?.[type];
+    if (typeof value === 'string' && value.trim()) {
+      return value;
+    }
+  }
+
+  return type === 'start' ? DEFAULT_START_TIME : DEFAULT_END_TIME;
+};
 
 const SpaceDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [selectedImage, setSelectedImage] = useState(0);
+  const { createLocalizedPath } = useLanguageRouting();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('17:00');
+  const [startTime, setStartTime] = useState(DEFAULT_START_TIME);
+  const [endTime, setEndTime] = useState(DEFAULT_END_TIME);
+  const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [guestsCount, setGuestsCount] = useState(1);
 
-  const getCurrencySymbol = () => {
-    return t('common.currency');
-  };
-
-  const { data: space, isLoading } = useSpace(id!);
-  const { data: spaceBookings } = useBookingsBySpace(id!);
-  const favoritesQuery = useFavorites();
+  const { data: space, isLoading } = useSpace(id || '');
+  const { data: spaceBookings } = useBookingsBySpace(id || '');
+  const {
+    data: blockedHours = [],
+    isLoading: isBlockedHoursLoading,
+    isFetching: isBlockedHoursFetching,
+  } = useBlockedHours(space?.id ?? null, selectedDate ?? new Date());
   const toggleFavorite = useToggleFavorite();
-  const { data: isFavorite } = useIsFavorite(id!);
+  const { data: isFavorite } = useIsFavorite(id || '');
   const createBooking = useCreateBooking();
   const { createPayment, isCreatingPayment } = useMarketplacePayment();
+
+  const currency = space?.currency ?? 'MXN';
+
+  const selectedDateKey = useMemo(
+    () => (selectedDate ? format(selectedDate, 'yyyy-MM-dd') : null),
+    [selectedDate]
+  );
+
+  const availability = useMemo(
+    () => (space?.availability_hours ?? {}) as AvailabilitySchedule,
+    [space]
+  );
+
+  const dayAvailability = useMemo(() => {
+    if (!selectedDate) {
+      return { start: DEFAULT_START_TIME, end: DEFAULT_END_TIME };
+    }
+
+    const dayKey = getDayKeyFromDate(selectedDate);
+    const day = availability?.[dayKey];
+    const start =
+      (typeof day?.start === 'string' && day.start.trim()) ||
+      resolveAvailabilityTime(availability, 'start');
+    const end =
+      (typeof day?.end === 'string' && day.end.trim()) ||
+      resolveAvailabilityTime(availability, 'end');
+
+    return { start, end };
+  }, [availability, selectedDate]);
+
+  const bookingsForDay = useMemo(() => {
+    if (!selectedDateKey) return [];
+
+    return (
+      spaceBookings?.filter(
+        (booking) =>
+          booking.start_date === selectedDateKey &&
+          (booking.status === 'confirmed' || booking.status === 'pending')
+      ) ?? []
+    );
+  }, [spaceBookings, selectedDateKey]);
+
+  const blockedHoursForDay = useMemo(
+    () => blockedHours.filter((blockedHour) => blockedHour.blocked_date === selectedDateKey) ?? [],
+    [blockedHours, selectedDateKey]
+  );
+
+  const unavailableSlots = useMemo(() => {
+    if (!selectedDate) return new Set<string>();
+
+    const unavailable = new Set<string>();
+
+    for (const blockedHour of blockedHoursForDay) {
+      unavailable.add(blockedHour.start_time);
+    }
+
+    for (const booking of bookingsForDay) {
+      const slotStart = parse(booking.start_time, 'HH:mm', selectedDate);
+      const slotEnd = parse(booking.end_time, 'HH:mm', selectedDate);
+      let cursor = slotStart;
+
+      while (cursor < slotEnd) {
+        unavailable.add(format(cursor, 'HH:mm'));
+        cursor = addHours(cursor, 1);
+      }
+    }
+
+    return unavailable;
+  }, [blockedHoursForDay, bookingsForDay, selectedDate]);
+
+  const availableStartSlots = useMemo(() => {
+    if (!selectedDate) return [];
+
+    const dayStart = parse(dayAvailability.start, 'HH:mm', selectedDate);
+    const dayEnd = parse(dayAvailability.end, 'HH:mm', selectedDate);
+    const slots: string[] = [];
+    const isTodaySelected = isSameDay(selectedDate, new Date());
+
+    let cursor = dayStart;
+
+    while (addHours(cursor, 1) <= dayEnd) {
+      const slotKey = format(cursor, 'HH:mm');
+      const slotDateTime = cursor;
+      const isPastSlot = isTodaySelected && isBefore(slotDateTime, new Date());
+
+      if (!unavailableSlots.has(slotKey) && !isPastSlot) {
+        slots.push(slotKey);
+      }
+
+      cursor = addHours(cursor, 1);
+    }
+
+    return slots;
+  }, [dayAvailability.end, dayAvailability.start, selectedDate, unavailableSlots]);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+
+    if (availableStartSlots.length === 0) {
+      setSelectedSlot('');
+      if (startTime) setStartTime('');
+      if (endTime) setEndTime('');
+      return;
+    }
+
+    if (!startTime || !availableStartSlots.includes(startTime)) {
+      const nextSlot = availableStartSlots[0];
+      setSelectedSlot(nextSlot);
+      setStartTime(nextSlot);
+      const startDateTime = parse(nextSlot, 'HH:mm', selectedDate);
+      setEndTime(format(addHours(startDateTime, 1), 'HH:mm'));
+    }
+  }, [availableStartSlots, endTime, selectedDate, startTime]);
+
+  const handleTimeSlotChange = (slot: string) => {
+    if (!selectedDate) return;
+    setSelectedSlot(slot);
+    setStartTime(slot);
+    const startDateTime = parse(slot, 'HH:mm', selectedDate);
+    const endDateTime = addHours(startDateTime, 1);
+    setEndTime(format(endDateTime, 'HH:mm'));
+  };
+
+  const computedTotalHours = useMemo(() => {
+    if (!selectedDate || !startTime || !endTime) return 0;
+
+    const startDateTime = parse(startTime, 'HH:mm', selectedDate);
+    const endDateTime = parse(endTime, 'HH:mm', selectedDate);
+    const minutes = differenceInMinutes(endDateTime, startDateTime);
+
+    return minutes > 0 ? minutes / 60 : 0;
+  }, [endTime, selectedDate, startTime]);
+
+  const rawSubtotal = computedTotalHours * (space?.price_per_hour ?? 0);
+  const subtotal = Math.round(rawSubtotal * 100) / 100;
+  const serviceFee = Math.round(subtotal * 0.15);
+  const totalDue = Math.round((subtotal + serviceFee) * 100) / 100;
+
+  const availabilityLoading = isBlockedHoursLoading || isBlockedHoursFetching;
 
   const handleBooking = async () => {
     if (!user) {
@@ -60,29 +243,61 @@ const SpaceDetail = () => {
       return;
     }
 
-    if (!selectedDate || !space) return;
+    if (!selectedDate || !space || !id) return;
+    if (!startTime || !endTime) {
+      toast({ title: t('spaceDetail.noTimeSelected'), variant: 'destructive' });
+      return;
+    }
 
-    const startDateTime = new Date(selectedDate);
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-    startDateTime.setHours(startHour, startMinute);
+    if (!availableStartSlots.includes(startTime)) {
+      toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
+      return;
+    }
 
-    const endDateTime = new Date(selectedDate);
-    const [endHour, endMinute] = endTime.split(':').map(Number);
-    endDateTime.setHours(endHour, endMinute);
+    const startDateTime = parse(startTime, 'HH:mm', selectedDate);
+    const endDateTime = parse(endTime, 'HH:mm', selectedDate);
+    const expectedEnd = addHours(startDateTime, 1);
+    if (endDateTime.getTime() !== expectedEnd.getTime()) {
+      toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
+      return;
+    }
+    const totalMinutes = differenceInMinutes(endDateTime, startDateTime);
 
-    const totalHours = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60);
-    const totalAmount = totalHours * space.price_per_hour;
+    if (totalMinutes <= 0 || totalMinutes % 60 !== 0) {
+      toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
+      return;
+    }
+
+    const now = new Date();
+    const isTodaySelected = isSameDay(selectedDate, now);
+    let cursor = startDateTime;
+
+    while (cursor < endDateTime) {
+      const slotKey = format(cursor, 'HH:mm');
+      const isPastSlot = isTodaySelected && isBefore(cursor, now);
+
+      if (unavailableSlots.has(slotKey) || isPastSlot) {
+        toast({ title: t('spaceDetail.unavailableSelectedTime'), variant: 'destructive' });
+        return;
+      }
+
+      cursor = addHours(cursor, 1);
+    }
+
+    const totalHoursSelected = totalMinutes / 60;
+    const totalAmount = totalHoursSelected * space.price_per_hour;
 
     try {
       // First create the booking
       const booking = await createBooking.mutateAsync({
-        space_id: id!,
+        space_id: id,
         start_date: selectedDate.toISOString().split('T')[0],
         end_date: selectedDate.toISOString().split('T')[0],
         start_time: startTime,
         end_time: endTime,
-        total_hours: Math.round(totalHours),
+        total_hours: Math.round(totalHoursSelected),
         total_amount: totalAmount,
+        currency,
         guests_count: guestsCount,
       });
 
@@ -90,10 +305,11 @@ const SpaceDetail = () => {
       if (booking) {
         createPayment({
           booking_id: booking.id,
-          space_id: id!,
+          space_id: id,
         });
       }
     } catch (error) {
+      console.error('Booking error:', error);
       toast({ title: t('spaceDetail.failedBooking'), variant: 'destructive' });
     }
   };
@@ -103,7 +319,9 @@ const SpaceDetail = () => {
       toast({ title: t('spaceDetail.signInFavorites'), variant: 'destructive' });
       return;
     }
-    toggleFavorite.mutate(id!);
+    if (id) {
+      toggleFavorite.mutate(id);
+    }
   };
 
   if (isLoading) {
@@ -129,7 +347,7 @@ const SpaceDetail = () => {
   if (!space) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
+        <Header forceScrolled={true} />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">{t('spaceDetail.spaceNotFound')}</h1>
           <Link to="/explore">
@@ -142,361 +360,428 @@ const SpaceDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header forceScrolled={true} />
 
-      {/* Breadcrumb */}
-      <div className="container mx-auto px-4 py-4">
-        <nav className="text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-primary">
-            {t('spaceDetail.home')}
-          </Link>
-          <span className="mx-2">›</span>
-          <Link to="/explore" className="hover:text-primary">
-            {t('spaceDetail.explore')}
-          </Link>
-          <span className="mx-2">›</span>
-          <span className="text-foreground">{space.title}</span>
-        </nav>
-      </div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mt-16">
+        {/* Header Section */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">{space.title}</h1>
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-current text-yellow-500" />
+              <span className="font-semibold">{space.rating}</span>
+              <span className="text-muted-foreground">({space.total_reviews} reviews)</span>
+            </div>
+            <span className="text-muted-foreground">•</span>
+            <div className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <MapPin className="h-4 w-4" />
+              <span className="underline">
+                {space.address}, {space.city}
+              </span>
+            </div>
+            <div className="ml-auto flex items-center gap-2">
+              <ShareDialog
+                title={space.title}
+                description={space.description}
+                image={space.images[0]}
+                location={`${space.city}, ${space.address}`}
+                rating={space.rating}
+                reviewCount={space.total_reviews}
+                spaceType={space.categories?.name}
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2 text-foreground hover:bg-secondary"
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t('spaceDetail.share')}</span>
+                </Button>
+              </ShareDialog>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleToggleFavorite}
+                className="flex items-center gap-2 text-foreground hover:bg-secondary"
+              >
+                <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                <span className="hidden sm:inline">
+                  {isFavorite ? t('spaceDetail.saved') : t('spaceDetail.save')}
+                </span>
+              </Button>
+            </div>
+          </div>
+        </div>
 
-      <div className="container mx-auto px-4 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {/* Image Gallery */}
-            <div className="mb-8">
-              <div className="relative mb-4 w-full h-96 overflow-hidden rounded-xl">
+        {/* Image Gallery - Airbnb Style */}
+        <div className="mb-12">
+          <div className="grid grid-cols-4 grid-rows-2 gap-2 h-[60vh] max-h-[600px] rounded-xl overflow-hidden">
+            {/* Main Image */}
+            <button
+              type="button"
+              className="col-span-4 md:col-span-2 md:row-span-2 relative group cursor-pointer overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <img
+                src={space.images[0] || '/placeholder.svg'}
+                alt={space.title}
+                className="w-full h-full object-cover hover:brightness-95 transition-all"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder.svg';
+                }}
+              />
+            </button>
+            {/* Secondary Images */}
+            {space.images.slice(1, 5).map((image, index) => (
+              <button
+                key={index + 1}
+                type="button"
+                className="col-span-2 md:col-span-1 relative group cursor-pointer overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary"
+              >
                 <img
-                  src={space.images[selectedImage] || '/placeholder.svg'}
-                  alt={space.title}
-                  className="w-full h-full object-cover"
+                  src={image}
+                  alt={`View ${index + 2}`}
+                  className="w-full h-full object-cover hover:brightness-95 transition-all"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.src = '/placeholder.svg';
                   }}
                 />
-                <div className="absolute top-4 right-4 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium z-10">
-                  {getCurrencySymbol()}
-                  {space.price_per_hour}
-                  {t('common.perHour')}
+              </button>
+            ))}
+          </div>
+          {space.images.length > 5 && (
+            <Button variant="outline" size="sm" className="mt-4">
+              {t('spaceDetail.showAllPhotos', { count: space.images.length })}
+            </Button>
+          )}
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+          {/* Left Column - Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Host Info Header */}
+            <div className="flex items-center justify-between pb-6 border-b">
+              <div className="flex-1">
+                <Link
+                  to={createLocalizedPath(`/host/${space.owner_id}`)}
+                  className="group inline-block"
+                >
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-lg group-hover:bg-primary/90 transition-colors">
+                      {(space.profiles?.full_name || 'H')[0]}
+                    </div>
+                    <div>
+                      <h2 className="text-xl sm:text-2xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {t('spaceDetail.hostedBy', { name: space.profiles?.full_name || 'Host' })}
+                      </h2>
+                      <span className="text-sm text-muted-foreground group-hover:underline">
+                        {t('hostProfile.title')}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+                <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                  <span className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    {t('spaceDetail.upToPeople', { count: space.capacity })}
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Maximize2 className="h-4 w-4" />
+                    {space.area_sqm} m²
+                  </span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    {t('spaceDetail.hourlyBooking')}
+                  </span>
                 </div>
               </div>
+            </div>
 
-              {space.images && space.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {space.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`relative rounded-lg overflow-hidden ${
-                        selectedImage === index ? 'ring-2 ring-primary' : ''
-                      }`}
+            {/* Description */}
+            <div className="pb-8 border-b">
+              <p className="text-foreground text-base leading-relaxed whitespace-pre-line">
+                {space.description}
+              </p>
+            </div>
+
+            {/* Features & Amenities */}
+            <div className="pb-8 border-b space-y-6">
+              <div>
+                <h3 className="text-xl font-semibold text-foreground mb-4">
+                  {t('spaceDetail.features')}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {space.features.map((feature) => (
+                    <Badge
+                      key={feature}
+                      variant="secondary"
+                      className="px-3 py-1.5 text-sm font-normal"
                     >
-                      <img
-                        src={image}
-                        alt={`View ${index + 1}`}
-                        className="w-full h-20 object-cover hover:opacity-80 transition-opacity"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder.svg';
-                        }}
-                      />
-                    </button>
+                      {feature}
+                    </Badge>
                   ))}
                 </div>
-              )}
-            </div>
-
-            {/* Space Info */}
-            <div className="mb-8">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{space.title}</h1>
-                  <p className="text-muted-foreground text-lg">
-                    <i className="fas fa-map-marker-alt mr-2"></i>
-                    {space.address}, {space.city}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-1 text-yellow-500">
-                  <i className="fas fa-star"></i>
-                  <span className="font-medium text-foreground">{space.rating}</span>
-                  <span className="text-muted-foreground">({space.total_reviews} reviews)</span>
-                </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-4 bg-secondary rounded-lg">
-                  <i className="fas fa-users text-2xl text-primary mb-2"></i>
-                  <p className="font-medium">
-                    {t('spaceDetail.upToPeople', { count: space.capacity })}
-                  </p>
-                </div>
-                <div className="text-center p-4 bg-secondary rounded-lg">
-                  <i className="fas fa-ruler-combined text-2xl text-primary mb-2"></i>
-                  <p className="font-medium">{space.area_sqm} m²</p>
-                </div>
-                <div className="text-center p-4 bg-secondary rounded-lg">
-                  <i className="fas fa-clock text-2xl text-primary mb-2"></i>
-                  <p className="font-medium">{t('spaceDetail.hourlyBooking')}</p>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground mb-4">
+                  {t('spaceDetail.amenities')}
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {space.amenities.map((amenity) => (
+                    <div key={amenity} className="flex items-center gap-3">
+                      <AmenityBadge amenity={amenity} variant="icon-only" />
+                    </div>
+                  ))}
                 </div>
               </div>
-
-              <p className="text-foreground text-lg leading-relaxed">{space.description}</p>
             </div>
 
-            {/* Tabs Content */}
-            <Tabs defaultValue="amenities" className="mb-8">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="amenities">{t('spaceDetail.amenities')}</TabsTrigger>
-                <TabsTrigger value="availability">{t('spaceDetail.availability')}</TabsTrigger>
-                <TabsTrigger value="policies">{t('spaceDetail.policies')}</TabsTrigger>
-                <TabsTrigger value="reviews">{t('spaceDetail.reviews')}</TabsTrigger>
-              </TabsList>
+            {/* Availability Calendar */}
+            <div className="pb-8 border-b">
+              <h3 className="text-xl font-semibold text-foreground mb-4">
+                {t('spaceDetail.availability')}
+              </h3>
+              <AvailabilityCalendar
+                bookings={spaceBookings || []}
+                mode="single"
+                showLegend={true}
+                className="w-full"
+              />
+            </div>
 
-              <TabsContent value="amenities" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('spaceDetail.features')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {space.features.map((feature) => (
-                        <Badge key={feature} variant="secondary">
-                          {feature}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t('spaceDetail.amenities')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3">
-                      {space.amenities.map((amenity) => (
-                        <AmenityBadge key={amenity} amenity={amenity} variant="icon-only" />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="availability">
-                <AvailabilityCalendar
-                  bookings={spaceBookings || []}
-                  mode="single"
-                  showLegend={true}
-                  className="w-full"
-                />
-              </TabsContent>
-
-              <TabsContent value="policies">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t('spaceDetail.bookingPolicies')}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {space.policies ? (
-                      <div>
-                        <h4 className="font-medium mb-2">{t('spaceDetail.policies')}</h4>
-                        <p className="text-muted-foreground">{space.policies}</p>
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground">{t('spaceDetail.noPolicies')}</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="reviews">
-                <ReviewsSection spaceId={space.id} />
-              </TabsContent>
-            </Tabs>
-
-            {/* Owner Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t('spaceDetail.hostedBy', { name: space.profiles?.full_name || 'Host' })}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-4">
-                  <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-xl">
-                    {(space.profiles?.full_name || 'H')[0]}
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {space.profiles?.full_name || 'Host'}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {t('spaceDetail.workspaceOwner')}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Policies */}
+            {space.policies && (
+              <div className="pb-8">
+                <h3 className="text-xl font-semibold text-foreground mb-4">
+                  {t('spaceDetail.bookingPolicies')}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">{space.policies}</p>
+              </div>
+            )}
           </div>
 
-          {/* Booking Sidebar */}
+          {/* Right Column - Booking Card (Sticky) */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span>
-                    {getCurrencySymbol()}
-                    {space.price_per_hour} {t('common.perHour')}
-                  </span>
-                  <div className="flex items-center space-x-1 text-yellow-500 text-sm">
-                    <i className="fas fa-star"></i>
-                    <span>{space.rating}</span>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <div>
-                  <Label className="text-sm font-medium mb-2">{t('spaceDetail.selectDate')}</Label>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    disabled={(date) => date < new Date()}
-                    className="rounded-md border w-full"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-sm font-medium mb-1">{t('spaceDetail.startTime')}</Label>
-                    <Input
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium mb-1">{t('spaceDetail.endTime')}</Label>
-                    <Input
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium mb-1">
-                    {t('spaceDetail.numberOfGuests')}
-                  </Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    max={space.capacity}
-                    value={guestsCount}
-                    onChange={(e) => setGuestsCount(parseInt(e.target.value) || 1)}
-                  />
-                </div>
-
-                {selectedDate && (
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between mb-2">
-                      <span>
-                        {getCurrencySymbol()}
-                        {space.price_per_hour} x{' '}
-                        {(new Date(`2000-01-01T${endTime}`).getTime() -
-                          new Date(`2000-01-01T${startTime}`).getTime()) /
-                          (1000 * 60 * 60)}{' '}
-                        {t('common.hours')}
+            <div className="sticky top-24">
+              <Card className="border-2 shadow-lg">
+                <CardContent className="p-6 space-y-6">
+                  {/* Price Header */}
+                  <div className="flex items-baseline justify-between">
+                    <div>
+                      <span className="text-2xl font-semibold text-foreground">
+                        {formatCurrency(space.price_per_hour, currency)}
                       </span>
-                      <span>
-                        {getCurrencySymbol()}
-                        {((new Date(`2000-01-01T${endTime}`).getTime() -
-                          new Date(`2000-01-01T${startTime}`).getTime()) /
-                          (1000 * 60 * 60)) *
-                          space.price_per_hour}
+                      <span className="text-base text-muted-foreground ml-1">
+                        {t('common.perHour')}
                       </span>
                     </div>
-                    <div className="flex justify-between mb-2">
-                      <span>{t('spaceDetail.serviceFee')}</span>
-                      <span>
-                        {getCurrencySymbol()}
-                        {Math.round(
-                          ((new Date(`2000-01-01T${endTime}`).getTime() -
-                            new Date(`2000-01-01T${startTime}`).getTime()) /
-                            (1000 * 60 * 60)) *
-                            space.price_per_hour *
-                            0.15
+                    <div className="flex items-center gap-1 text-sm">
+                      <Star className="h-4 w-4 fill-current text-yellow-500" />
+                      <span className="font-semibold">{space.rating}</span>
+                      <span className="text-muted-foreground">({space.total_reviews})</span>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Date & Time Selection */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                        {t('spaceDetail.selectDate')}
+                      </Label>
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={setSelectedDate}
+                        disabled={(date) => date < new Date()}
+                        className="rounded-md border w-full"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                          {t('spaceDetail.selectTimeSlot')}
+                        </Label>
+                        {availabilityLoading && (
+                          <p className="mb-2 text-xs text-muted-foreground">
+                            {t('spaceDetail.loadingAvailability')}
+                          </p>
                         )}
-                      </span>
+                        {availableStartSlots.length === 0 ? (
+                          <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                            {t('spaceDetail.noAvailabilityForDay')}
+                          </div>
+                        ) : (
+                          <Select
+                            value={selectedSlot || undefined}
+                            onValueChange={(value) => {
+                              handleTimeSlotChange(value);
+                            }}
+                          >
+                            <SelectTrigger className="h-12 px-4 text-left">
+                              <SelectValue placeholder={t('spaceDetail.selectTimePlaceholder')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableStartSlots.map((slot) => {
+                                const slotDateTime = selectedDate
+                                  ? parse(slot, 'HH:mm', selectedDate)
+                                  : parse(slot, 'HH:mm', new Date());
+                                const label = `${format(slotDateTime, 'h:mm a')} - ${format(
+                                  addHours(slotDateTime, 1),
+                                  'h:mm a'
+                                )}`;
+                                return (
+                                  <SelectItem key={slot} value={slot}>
+                                    {label}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex justify-between font-bold text-lg border-t pt-2">
-                      <span>{t('spaceDetail.total')}</span>
-                      <span>
-                        {getCurrencySymbol()}
-                        {((new Date(`2000-01-01T${endTime}`).getTime() -
-                          new Date(`2000-01-01T${startTime}`).getTime()) /
-                          (1000 * 60 * 60)) *
-                          space.price_per_hour +
-                          Math.round(
-                            ((new Date(`2000-01-01T${endTime}`).getTime() -
-                              new Date(`2000-01-01T${startTime}`).getTime()) /
-                              (1000 * 60 * 60)) *
-                              space.price_per_hour *
-                              0.15
-                          )}
-                      </span>
+
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                        {t('spaceDetail.numberOfGuests')}
+                      </Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max={space.capacity}
+                        value={guestsCount}
+                        onChange={(e) => setGuestsCount(Number.parseInt(e.target.value, 10) || 1)}
+                        className="h-12 px-4"
+                      />
                     </div>
                   </div>
-                )}
 
-                <Button
-                  className="w-full btn-primary"
-                  size="lg"
-                  onClick={handleBooking}
-                  disabled={!selectedDate || createBooking.isPending || isCreatingPayment}
-                >
-                  {createBooking.isPending
-                    ? t('spaceDetail.creatingBooking')
-                    : isCreatingPayment
-                      ? t('spaceDetail.redirectingPayment')
-                      : t('spaceDetail.reservePayNow')}
-                </Button>
+                  {/* Price Breakdown */}
+                  {selectedDate && computedTotalHours > 0 && (
+                    <>
+                      <Separator />
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground underline">
+                            {formatCurrency(space.price_per_hour, currency)} x {computedTotalHours}{' '}
+                            {t('common.hours')}
+                          </span>
+                          <span className="font-medium">{formatCurrency(subtotal, currency)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground underline">
+                            {t('spaceDetail.serviceFee')}
+                          </span>
+                          <span className="font-medium">
+                            {formatCurrency(serviceFee, currency)}
+                          </span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between font-semibold text-base pt-2">
+                          <span>{t('spaceDetail.total')}</span>
+                          <span>{formatCurrency(totalDue, currency)}</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
-                <p className="text-center text-sm text-muted-foreground">
-                  {t('spaceDetail.securePayment')}
-                </p>
-
-                <div className="space-y-2">
-                  <Button variant="outline" className="w-full" onClick={handleToggleFavorite}>
-                    <Heart
-                      className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-                    />
-                    {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                  {/* Booking Button */}
+                  <Button
+                    className="w-full h-12 bg-primary hover:bg-[#3B82F6] text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                    onClick={handleBooking}
+                    disabled={
+                      !selectedDate ||
+                      !startTime ||
+                      !endTime ||
+                      computedTotalHours <= 0 ||
+                      createBooking.isPending ||
+                      isCreatingPayment
+                    }
+                  >
+                    {(() => {
+                      if (createBooking.isPending) return t('spaceDetail.creatingBooking');
+                      if (isCreatingPayment) return t('spaceDetail.redirectingPayment');
+                      return t('spaceDetail.reservePayNow');
+                    })()}
                   </Button>
 
+                  <p className="text-center text-xs text-muted-foreground">
+                    {t('spaceDetail.securePayment')}
+                  </p>
+
+                  <Separator />
+
+                  {/* Contact Owner */}
                   <ContactOwnerButton
                     spaceId={space.id}
                     ownerId={space.owner_id}
                     className="w-full"
                   />
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleToggleFavorite}
-                    disabled={toggleFavorite.isPending}
-                  >
-                    <i className={`fas fa-heart mr-2 ${isFavorite ? 'text-red-500' : ''}`}></i>
-                    {isFavorite ? 'Remove from Favorites' : 'Save to Favorites'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
+
+        {/* Full Width Sections */}
+        {/* Reviews Section - Full Width */}
+        <div className="mt-12 pt-12 border-t">
+          <div className="flex items-center gap-2 mb-6">
+            <Star className="h-6 w-6 fill-current text-yellow-500" />
+            <h3 className="text-2xl font-semibold text-foreground">
+              {space.rating} · {space.total_reviews} reviews
+            </h3>
+          </div>
+          <ReviewsSection spaceId={space.id} />
+        </div>
+
+        {/* Location Map Section - Full Width */}
+        {!!(space.latitude && space.longitude) && (
+          <div className="mt-12 pt-12 border-t">
+            <h3 className="text-2xl font-semibold text-foreground mb-2">
+              {t('spaceDetail.whereYoullBe')}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              <a
+                href={generateGoogleMapsLink(space.latitude, space.longitude)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {space.address}, {space.city}
+              </a>
+            </p>
+            {isMapboxConfigured() ? (
+              <div className="h-[480px] w-full rounded-xl overflow-hidden border">
+                <MapboxProvider>
+                  <SpaceLocationMap
+                    latitude={space.latitude}
+                    longitude={space.longitude}
+                    zoom={15}
+                  />
+                </MapboxProvider>
+              </div>
+            ) : (
+              <div className="h-[480px] w-full rounded-xl overflow-hidden border bg-muted flex items-center justify-center">
+                <div className="text-center p-8">
+                  <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">{t('spaceDetail.mapNotAvailable')}</h3>
+                  <p className="text-muted-foreground">{t('spaceDetail.mapNotConfigured')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Related Spaces Section - Full Width */}
+        <RelatedSpaces currentSpace={space} excludeSpaceId={space.id} />
       </div>
 
       <Footer />

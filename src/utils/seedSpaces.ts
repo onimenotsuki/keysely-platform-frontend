@@ -120,8 +120,23 @@ const addresses = [
   'Av. Santa Fe',
 ];
 
-export const generateSeedSpaces = async (userId: string) => {
+export const generateSeedSpaces = async (hostIds: string[]) => {
   try {
+    if (!hostIds || hostIds.length === 0) {
+      throw new Error('No host IDs provided. Please provide at least one host ID.');
+    }
+
+    console.log(`📊 Distributing spaces among ${hostIds.length} hosts`);
+
+    // Validate host IDs are UUIDs
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const invalidIds = hostIds.filter((id) => !uuidRegex.test(id));
+    
+    if (invalidIds.length > 0) {
+      console.error('❌ Invalid UUIDs detected in hostIds:', invalidIds);
+      throw new Error(`Invalid UUIDs provided: ${invalidIds.join(', ')}`);
+    }
+
     // Get all categories
     const { data: categories, error: categoriesError } = await supabase
       .from('categories')
@@ -133,6 +148,7 @@ export const generateSeedSpaces = async (userId: string) => {
     }
 
     const spaces = [];
+    let spaceIndex = 0; // Track space index for round-robin distribution
 
     // Generate spaces for each city
     for (const city of cities) {
@@ -189,22 +205,27 @@ export const generateSeedSpaces = async (userId: string) => {
           }),
         };
 
+        // Distribute spaces using round-robin among hosts
+        const ownerId = hostIds[spaceIndex % hostIds.length];
+        spaceIndex++;
+
         const space = {
-          owner_id: userId,
+          owner_id: ownerId,
           title: template.replace('{location}', city.name),
           description: descriptions[Math.floor(Math.random() * descriptions.length)],
           category_id: category.id,
           address: `${addresses[Math.floor(Math.random() * addresses.length)]} ${randomInRange(100, 999)}, ${city.name}`,
           city: city.name,
           price_per_hour: randomInRange(15, 200),
+          currency: 'MXN',
           capacity: randomInRange(2, 50),
           area_sqm: randomInRange(20, 300),
           latitude: city.lat + latVariation,
           longitude: city.lng + lngVariation,
           images: [
-            '/placeholder.svg?height=400&width=600&text=Space+1',
-            '/placeholder.svg?height=400&width=600&text=Space+2',
-            '/placeholder.svg?height=400&width=600&text=Space+3',
+            'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop',
+            'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&h=600&fit=crop',
           ],
           features: getRandomItems(features, randomInRange(4, 8)),
           amenities: getRandomItems(AMENITIES_LIST, randomInRange(5, 12)),
@@ -225,7 +246,14 @@ export const generateSeedSpaces = async (userId: string) => {
 
     if (error) throw error;
 
-    console.log(`Successfully seeded ${data?.length || 0} spaces`);
+    // Calculate distribution
+    const spacesPerHost = Math.floor(spaces.length / hostIds.length);
+    const remainder = spaces.length % hostIds.length;
+
+    console.log(`✨ Successfully seeded ${data?.length || 0} spaces`);
+    console.log(
+      `📊 Distribution: ~${spacesPerHost} spaces per host (+${remainder} extra for first hosts)`
+    );
     return data;
   } catch (error) {
     console.error('Error seeding spaces:', error);

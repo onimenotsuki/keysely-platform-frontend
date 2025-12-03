@@ -3,9 +3,19 @@ import {
   algoliaClient,
   isAlgoliaConfigured,
 } from '@/integrations/algolia/client';
-import type { AlgoliaSpace, MapBounds, SearchFilters } from '@/integrations/algolia/types';
+import type { AlgoliaSpace, SearchFilters } from '@/integrations/algolia/types';
 import { useQuery } from '@tanstack/react-query';
 import type { Space } from './useSpaces';
+
+const DEFAULT_MAX_PRICE = 1000;
+const DEFAULT_HITS_PER_PAGE = 24;
+
+interface AlgoliaSearchParams {
+  filters?: string;
+  hitsPerPage?: number;
+  page?: number;
+  insideBoundingBox?: number[][];
+}
 
 // Convert Algolia space to regular Space type
 const convertAlgoliaToSpace = (algoliaSpace: AlgoliaSpace): Space => {
@@ -28,11 +38,15 @@ const buildAlgoliaFilters = (filters: SearchFilters): string => {
     filterParts.push(`city:"${filters.city}"`);
   }
 
+  if (filters.state) {
+    filterParts.push(`state:"${filters.state}"`);
+  }
+
   if (filters.minPrice !== undefined && filters.minPrice > 0) {
     filterParts.push(`price_per_hour >= ${filters.minPrice}`);
   }
 
-  if (filters.maxPrice !== undefined && filters.maxPrice < 10000) {
+  if (filters.maxPrice !== undefined && filters.maxPrice < DEFAULT_MAX_PRICE) {
     filterParts.push(`price_per_hour <= ${filters.maxPrice}`);
   }
 
@@ -48,15 +62,7 @@ const buildAlgoliaFilters = (filters: SearchFilters): string => {
     filterParts.push(`(${amenitiesFilter})`);
   }
 
-  // Always filter active spaces
-  filterParts.push('is_active:true');
-
   return filterParts.join(' AND ');
-};
-
-// Convert map bounds to Algolia insideBoundingBox format
-const mapBoundsToAlgolia = (bounds: MapBounds): number[][] => {
-  return [[bounds.ne.lat, bounds.ne.lng, bounds.sw.lat, bounds.sw.lng]];
 };
 
 interface UseAlgoliaSearchOptions extends SearchFilters {
@@ -66,7 +72,13 @@ interface UseAlgoliaSearchOptions extends SearchFilters {
 }
 
 export const useAlgoliaSearch = (options: UseAlgoliaSearchOptions = {}) => {
-  const { searchTerm = '', page = 0, hitsPerPage = 24, enabled = true, ...filters } = options;
+  const {
+    searchTerm = '',
+    page = 0,
+    hitsPerPage = DEFAULT_HITS_PER_PAGE,
+    enabled = true,
+    ...filters
+  } = options;
 
   // Check if Algolia is configured
   const algoliaEnabled = isAlgoliaConfigured();
@@ -74,26 +86,28 @@ export const useAlgoliaSearch = (options: UseAlgoliaSearchOptions = {}) => {
   return useQuery({
     queryKey: ['algolia-spaces', searchTerm, filters, page, hitsPerPage],
     queryFn: async () => {
-      if (!algoliaEnabled) {
+      if (!algoliaEnabled || !algoliaClient) {
         throw new Error('Algolia is not configured');
       }
 
-      interface AlgoliaSearchParams {
-        filters: string;
-        hitsPerPage: number;
-        page: number;
-        insideBoundingBox?: number[][];
+      const filterString = buildAlgoliaFilters(filters);
+
+      const searchParams: AlgoliaSearchParams = {};
+
+      if (filterString) {
+        searchParams.filters = filterString;
       }
 
-      const searchParams: AlgoliaSearchParams = {
-        filters: buildAlgoliaFilters(filters),
-        hitsPerPage,
-        page,
-      };
+      if (filters.mapBounds?.insideBoundingBox) {
+        searchParams.insideBoundingBox = [filters.mapBounds.insideBoundingBox];
+      }
 
-      // Add geo search if map bounds are provided
-      if (filters.mapBounds) {
-        searchParams.insideBoundingBox = mapBoundsToAlgolia(filters.mapBounds);
+      if (hitsPerPage !== DEFAULT_HITS_PER_PAGE) {
+        searchParams.hitsPerPage = hitsPerPage;
+      }
+
+      if (page > 0) {
+        searchParams.page = page;
       }
 
       const result = await algoliaClient.searchSingleIndex({
@@ -127,8 +141,8 @@ export const shouldUseAlgolia = (filters: SearchFilters): boolean => {
   // - There are amenities filters
   // - There are map bounds (geo search)
   return !!(
-    (filters.searchTerm || (filters.amenities && filters.amenities.length > 0))
-    // Temporarily disabled map bounds to prevent using Algolia for geo-search
-    // || filters.mapBounds
+    filters.searchTerm ||
+    (filters.amenities && filters.amenities.length > 0) ||
+    filters.mapBounds
   );
 };

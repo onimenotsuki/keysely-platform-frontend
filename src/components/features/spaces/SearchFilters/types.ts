@@ -7,6 +7,7 @@ export interface MapBounds {
     lat: number;
     lng: number;
   };
+  insideBoundingBox: [number, number, number, number];
 }
 
 export interface SearchFilters {

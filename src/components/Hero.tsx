@@ -186,7 +186,7 @@ const Hero = () => {
 
                 <button
                   type="submit"
-                  className="bg-[#1A2B42] hover:bg-[#3B82F6] text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg whitespace-nowrap"
+                  className="h-12 bg-primary hover:bg-[#3B82F6] text-white px-8 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all whitespace-nowrap"
                 >
                   {t('hero.search')}
                 </button>

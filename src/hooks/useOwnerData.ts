@@ -16,6 +16,7 @@ export interface OwnerSpace {
   title: string;
   city: string;
   price_per_hour: number;
+  currency: string;
   is_active: boolean;
   rating: number;
   total_reviews: number;
@@ -32,6 +33,7 @@ export interface OwnerBooking {
   end_time: string;
   status: string;
   total_amount: number;
+  currency: string;
   guests_count: number;
   notes?: string;
   space_id: string;
@@ -67,7 +69,7 @@ export const useOwnerSpaces = () => {
         spaces.map(async (space) => {
           const { data: bookings } = await supabase
             .from('bookings')
-            .select('total_amount, created_at')
+            .select('total_amount, created_at, currency')
             .eq('space_id', space.id);
 
           const currentMonth = new Date().getMonth();
@@ -76,6 +78,7 @@ export const useOwnerSpaces = () => {
           interface BookingData {
             total_amount: number;
             created_at: string;
+            currency: string;
           }
 
           const monthlyBookings =
@@ -91,13 +94,15 @@ export const useOwnerSpaces = () => {
             title: space.title,
             city: space.city,
             price_per_hour: space.price_per_hour,
+            currency: space.currency || 'MXN',
             is_active: space.is_active,
             rating: space.rating || 0,
             total_reviews: space.total_reviews || 0,
             images: space.images || [],
             bookings_this_month: monthlyBookings.length,
             earnings_this_month: monthlyBookings.reduce(
-              (sum: number, booking: BookingData) => sum + Number(booking.total_amount),
+              (sum: number, booking: BookingData) =>
+                booking.currency === space.currency ? sum + Number(booking.total_amount) : sum,
               0
             ),
           } as OwnerSpace;
@@ -154,6 +159,7 @@ export const useOwnerStats = () => {
           total_amount,
           created_at,
           status,
+          currency,
           spaces!inner(owner_id)
         `
         )
@@ -172,6 +178,7 @@ export const useOwnerStats = () => {
       interface BookingWithAmountAndDate {
         total_amount: number;
         created_at: string;
+        currency: string;
       }
 
       const currentMonth = new Date().getMonth();

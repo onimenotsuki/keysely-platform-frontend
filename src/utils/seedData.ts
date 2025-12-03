@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export const createSeedData = async () => {
+export const createSeedData = async (hostIds?: string[]) => {
   try {
     // Get current user
     const {
@@ -8,16 +8,40 @@ export const createSeedData = async () => {
     } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Check if user already has spaces
-    const { data: existingSpaces } = await supabase
-      .from('spaces')
-      .select('id')
-      .eq('owner_id', user.id)
-      .limit(1);
+    // Determine owner IDs for the 3 sample spaces
+    let ownerIds: string[];
+    if (hostIds && hostIds.length > 0) {
+      // Validate host IDs are UUIDs
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const invalidIds = hostIds.filter((id) => !uuidRegex.test(id));
+      
+      if (invalidIds.length > 0) {
+        console.error('❌ Invalid UUIDs detected in hostIds:', invalidIds);
+        return;
+      }
 
-    if (existingSpaces && existingSpaces.length > 0) {
-      console.log('User already has spaces, skipping seed data creation');
-      return;
+      // Distribute among provided host IDs
+      ownerIds = [
+        hostIds[0 % hostIds.length],
+        hostIds[1 % hostIds.length],
+        hostIds[2 % hostIds.length],
+      ];
+      console.log(`📊 Creating 3 sample spaces distributed among ${hostIds.length} hosts`);
+    } else {
+      // Use current user for all spaces (legacy behavior)
+      ownerIds = [user.id, user.id, user.id];
+
+      // Check if user already has spaces
+      const { data: existingSpaces } = await supabase
+        .from('spaces')
+        .select('id')
+        .eq('owner_id', user.id)
+        .limit(1);
+
+      if (existingSpaces && existingSpaces.length > 0) {
+        console.log('User already has spaces, skipping seed data creation');
+        return;
+      }
     }
 
     // Get categories
@@ -32,7 +56,7 @@ export const createSeedData = async () => {
     const meetingCategory = categories.find((c) => c.name === 'Sala de Reuniones')?.id;
     const coworkingCategory = categories.find((c) => c.name === 'Coworking')?.id;
 
-    // Create sample spaces for the current user
+    // Create sample spaces with distributed ownership
     const sampleSpaces = [
       {
         title: 'Oficina Privada Premium Polanco',
@@ -43,11 +67,12 @@ export const createSeedData = async () => {
         latitude: 19.4326,
         longitude: -99.1932,
         price_per_hour: 350,
+        currency: 'MXN',
         capacity: 6,
         area_sqm: 40,
         images: [
-          '/placeholder.svg?height=400&width=600&text=Oficina+Principal',
-          '/placeholder.svg?height=400&width=600&text=Vista+Interior',
+          'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop',
         ],
         features: [
           'Vista panorámica',
@@ -73,7 +98,7 @@ export const createSeedData = async () => {
         },
         policies:
           'No se permite fumar. Política de cancelación: 24 horas de anticipación. Depósito reembolsable requerido.',
-        owner_id: user.id,
+        owner_id: ownerIds[0],
         category_id: officeCategory,
         is_active: true,
       },
@@ -86,11 +111,12 @@ export const createSeedData = async () => {
         latitude: 19.3595,
         longitude: -99.2632,
         price_per_hour: 480,
+        currency: 'MXN',
         capacity: 10,
         area_sqm: 25,
         images: [
-          '/placeholder.svg?height=400&width=600&text=Sala+Reuniones',
-          '/placeholder.svg?height=400&width=600&text=Sala+Equipada',
+          'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=800&h=600&fit=crop',
         ],
         features: [
           'Mesa ejecutiva',
@@ -118,7 +144,7 @@ export const createSeedData = async () => {
         },
         policies:
           'Reserva mínima de 2 horas. Incluye servicio básico de café. Cancelación gratuita 24 horas antes.',
-        owner_id: user.id,
+        owner_id: ownerIds[1],
         category_id: meetingCategory,
         is_active: true,
       },
@@ -131,11 +157,12 @@ export const createSeedData = async () => {
         latitude: 19.4284,
         longitude: -99.1677,
         price_per_hour: 180,
+        currency: 'MXN',
         capacity: 20,
         area_sqm: 120,
         images: [
-          '/placeholder.svg?height=400&width=600&text=Coworking+Space',
-          '/placeholder.svg?height=400&width=600&text=Area+Colaborativa',
+          'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800&h=600&fit=crop',
         ],
         features: [
           'Internet de alta velocidad',
@@ -166,7 +193,7 @@ export const createSeedData = async () => {
         },
         policies:
           'Espacio pet-friendly. No fumar. Cancelación gratuita 24 horas antes. Membresías mensuales disponibles.',
-        owner_id: user.id,
+        owner_id: ownerIds[2],
         category_id: coworkingCategory,
         is_active: true,
       },

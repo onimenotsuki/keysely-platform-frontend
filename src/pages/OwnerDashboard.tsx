@@ -1,63 +1,32 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { OwnerAvailabilityManager } from '@/components/features/owner-dashboard/OwnerAvailabilityManager';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import { useOwnerBookings, useOwnerSpaces, useOwnerStats } from '@/hooks/useOwnerData';
 import { useTranslation } from '@/hooks/useTranslation';
-import { format } from 'date-fns';
-import { useState } from 'react';
+import { createListSpaceStepPath } from '@/pages/list-space/paths';
+import { formatCurrency } from '@/utils/formatCurrency';
+import { Calendar, CreditCard, ExternalLink, ListChecks } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
-import StripeConnectOnboarding from '../components/StripeConnectOnboarding';
 
 const OwnerDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { t } = useTranslation();
-  const { data: ownerSpaces = [], isLoading: spacesLoading } = useOwnerSpaces();
+  const { createLocalizedPath, currentLanguage } = useLanguageRouting();
+  const { data: ownerSpaces = [] } = useOwnerSpaces();
   const { data: ownerStats, isLoading: statsLoading } = useOwnerStats();
-  const { data: ownerBookings = [], isLoading: bookingsLoading } = useOwnerBookings();
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-success text-success-foreground';
-      case 'pending':
-        return 'bg-yellow-500 text-white';
-      case 'inactive':
-        return 'bg-muted text-muted-foreground';
-      case 'confirmed':
-        return 'bg-primary text-primary-foreground';
-      case 'completed':
-        return 'bg-success text-success-foreground';
-      default:
-        return 'bg-muted text-muted-foreground';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active':
-        return t('ownerDashboard.active');
-      case 'pending':
-        return t('ownerDashboard.pending');
-      case 'inactive':
-        return t('ownerDashboard.inactive');
-      case 'confirmed':
-        return t('ownerDashboard.confirmed');
-      case 'completed':
-        return t('ownerDashboard.completed');
-      default:
-        return status;
-    }
-  };
+  const { data: ownerBookings = [] } = useOwnerBookings();
+  const primaryCurrency = ownerSpaces[0]?.currency ?? ownerBookings[0]?.currency ?? 'MXN';
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header forceScrolled />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 mt-12">
         <div className="max-w-7xl mx-auto">
           {/* Page Header */}
           <div className="flex justify-between items-center mb-8">
@@ -67,11 +36,48 @@ const OwnerDashboard = () => {
               </h1>
               <p className="text-xl text-muted-foreground">{t('ownerDashboard.subtitle')}</p>
             </div>
-            <Button className="btn-primary" onClick={() => navigate('/list-space')}>
+            <Button
+              className="btn-primary"
+              onClick={() => {
+                if (user) {
+                  navigate(createListSpaceStepPath(currentLanguage, user.id, 0));
+                }
+              }}
+              disabled={!user}
+            >
               <i className="fas fa-plus mr-2"></i>
               {t('ownerDashboard.addNewListing')}
             </Button>
           </div>
+
+          {/* Public Profile Card */}
+          {user && (
+            <Card className="mb-8 bg-accent/5 border-accent/20">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center">
+                      <i className="fas fa-user-circle text-accent text-2xl"></i>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground text-lg">
+                        {t('hostProfile.viewPublicProfile')}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {t('hostProfile.editHostInfo')}
+                      </p>
+                    </div>
+                  </div>
+                  <Button asChild variant="outline" className="gap-2">
+                    <Link to={createLocalizedPath(`/host/${user.id}`)}>
+                      <ExternalLink className="h-4 w-4" />
+                      {t('hostProfile.title')}
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats Cards */}
           {statsLoading ? (
@@ -97,7 +103,7 @@ const OwnerDashboard = () => {
                         {t('ownerDashboard.totalEarnings')}
                       </p>
                       <p className="text-2xl font-bold text-foreground">
-                        ${ownerStats?.total_earnings || 0}
+                        {formatCurrency(ownerStats?.total_earnings ?? 0, primaryCurrency)}
                       </p>
                     </div>
                     <div className="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
@@ -115,7 +121,7 @@ const OwnerDashboard = () => {
                         {t('ownerDashboard.thisMonth')}
                       </p>
                       <p className="text-2xl font-bold text-foreground">
-                        ${ownerStats?.this_month_earnings || 0}
+                        {formatCurrency(ownerStats?.this_month_earnings ?? 0, primaryCurrency)}
                       </p>
                     </div>
                     <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
@@ -163,263 +169,114 @@ const OwnerDashboard = () => {
             </div>
           )}
 
-          {/* Main Content */}
-          <Tabs defaultValue="payments" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="payments">{t('ownerDashboard.paymentSetup')}</TabsTrigger>
-              <TabsTrigger value="listings">{t('ownerDashboard.myListings')}</TabsTrigger>
-              <TabsTrigger value="bookings">{t('ownerDashboard.recentBookings')}</TabsTrigger>
-              <TabsTrigger value="analytics">{t('ownerDashboard.analytics')}</TabsTrigger>
-              <TabsTrigger value="calendar">{t('ownerDashboard.calendar')}</TabsTrigger>
-            </TabsList>
-
-            {/* Payment Setup Tab */}
-            <TabsContent value="payments" className="space-y-6">
-              <StripeConnectOnboarding />
-            </TabsContent>
-
-            {/* Listings Tab */}
-            <TabsContent value="listings" className="space-y-6">
-              {spacesLoading ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {[1, 2, 3].map((i) => (
-                    <Card key={i}>
-                      <div className="animate-pulse">
-                        <div className="w-full h-48 bg-muted rounded-t-lg"></div>
-                        <CardContent className="p-6">
-                          <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                          <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
-                          <div className="h-4 bg-muted rounded w-1/4"></div>
-                        </CardContent>
-                      </div>
-                    </Card>
-                  ))}
+          {/* Quick Actions */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+            <Card className="bg-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <div>
+                  <CardTitle className="text-lg">{t('ownerDashboard.paymentSetup')}</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {t('ownerDashboard.paymentSetupDescription')}
+                  </p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {ownerSpaces.map((space) => (
-                    <Card
-                      key={space.id}
-                      className="hover:shadow-md transition-shadow overflow-hidden"
-                    >
-                      <div className="relative w-full h-48 overflow-hidden">
-                        <img
-                          src={space.images[0] || '/placeholder.svg'}
-                          alt={space.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/placeholder.svg';
-                          }}
-                        />
-                        <Badge
-                          className={`absolute top-2 right-2 z-10 ${getStatusColor(space.is_active ? 'active' : 'inactive')}`}
-                        >
-                          {getStatusText(space.is_active ? 'active' : 'inactive')}
-                        </Badge>
-                      </div>
-
-                      <CardContent className="p-6">
-                        <h3 className="font-semibold text-foreground mb-2">{space.title}</h3>
-                        <p className="text-muted-foreground text-sm mb-3">
-                          <i className="fas fa-map-marker-alt mr-1"></i>
-                          {space.city}
-                        </p>
-
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="font-semibold text-foreground">
-                            ${space.price_per_hour}/{t('ownerDashboard.hour')}
-                          </span>
-                          <div className="flex items-center space-x-1 text-yellow-500 text-sm">
-                            <i className="fas fa-star"></i>
-                            <span>{space.rating}</span>
-                            <span className="text-muted-foreground">({space.total_reviews})</span>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-                          <div>
-                            <p className="text-muted-foreground">{t('ownerDashboard.thisMonth')}</p>
-                            <p className="font-medium">
-                              {space.bookings_this_month} {t('ownerDashboard.bookings')}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">{t('ownerDashboard.earnings')}</p>
-                            <p className="font-medium">${space.earnings_this_month}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex space-x-2">
-                          <Button variant="outline" size="sm" className="flex-1">
-                            <i className="fas fa-edit mr-2"></i>
-                            {t('ownerDashboard.edit')}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => navigate(`/space/${space.id}`)}
-                          >
-                            <i className="fas fa-eye mr-2"></i>
-                            {t('ownerDashboard.view')}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-
-                  {/* Add New Listing Card */}
-                  <Card
-                    className="border-2 border-dashed border-border hover:border-primary transition-colors cursor-pointer"
-                    onClick={() => navigate('/list-space')}
-                  >
-                    <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-64">
-                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                        <i className="fas fa-plus text-primary text-2xl"></i>
-                      </div>
-                      <h3 className="font-semibold text-foreground mb-2">
-                        {t('ownerDashboard.addNewListingCard')}
-                      </h3>
-                      <p className="text-muted-foreground text-sm text-center mb-4">
-                        {t('ownerDashboard.addNewListingDesc')}
-                      </p>
-                      <Button className="btn-primary">{t('ownerDashboard.getStarted')}</Button>
-                    </CardContent>
-                  </Card>
+                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <CreditCard className="h-6 w-6 text-primary" />
                 </div>
-              )}
-            </TabsContent>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t('ownerDashboard.paymentSetupCta')}
+                </p>
+                <Button asChild>
+                  <Link to={createLocalizedPath('/owner-dashboard/payment-settings')}>
+                    {t('ownerDashboard.manage')}
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
 
-            {/* Bookings Tab */}
-            <TabsContent value="bookings" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('ownerDashboard.recentBookings')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {bookingsLoading ? (
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="animate-pulse p-4 border border-border rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-10 h-10 bg-muted rounded-full"></div>
-                            <div className="flex-1">
-                              <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
-                              <div className="h-3 bg-muted rounded w-1/2"></div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : ownerBookings.length === 0 ? (
-                    <div className="text-center py-12">
-                      <i className="fas fa-calendar-times text-4xl text-muted-foreground mb-4"></i>
-                      <p className="text-muted-foreground">{t('ownerDashboard.noBookings')}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {ownerBookings.map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="flex items-center justify-between p-4 border border-border rounded-lg"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <Avatar>
-                              <AvatarImage
-                                src={booking.profiles?.avatar_url}
-                                alt={booking.profiles?.full_name}
-                              />
-                              <AvatarFallback>
-                                {booking.profiles?.full_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium text-foreground">
-                                {booking.profiles?.full_name || t('ownerDashboard.unknownGuest')}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {booking.spaces?.title}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(new Date(booking.start_date), 'MMM dd, yyyy')} •{' '}
-                                {booking.start_time} - {booking.end_time} • {booking.guests_count}{' '}
-                                {t('ownerDashboard.guests')}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-4">
-                            <div className="text-right">
-                              <p className="font-semibold text-foreground">
-                                ${booking.total_amount}
-                              </p>
-                              <Badge className={getStatusColor(booking.status)}>
-                                {getStatusText(booking.status)}
-                              </Badge>
-                            </div>
-                            <Button variant="outline" size="sm">
-                              <i className="fas fa-envelope mr-2"></i>
-                              {t('ownerDashboard.message')}
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+            <Card className="bg-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <div>
+                  <CardTitle className="text-lg">{t('ownerDashboard.myListings')}</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {t('ownerDashboard.myListingsDescription')}
+                  </p>
+                </div>
+                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <ListChecks className="h-6 w-6 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t('ownerDashboard.listingsCount', { count: ownerSpaces.length })}
+                </p>
+                <Button asChild>
+                  <Link to={createLocalizedPath('/owner-dashboard/my-spaces')}>
+                    {t('ownerDashboard.manage')}
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
 
-            {/* Analytics Tab */}
-            <TabsContent value="analytics" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t('ownerDashboard.earningsOverview')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-12">
-                      <i className="fas fa-chart-bar text-4xl text-muted-foreground mb-4"></i>
-                      <p className="text-muted-foreground">
-                        {t('ownerDashboard.earningsChartPlaceholder')}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+            <Card className="bg-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                <div>
+                  <CardTitle className="text-lg">{t('ownerDashboard.recentBookings')}</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    {t('ownerDashboard.recentBookingsDescription')}
+                  </p>
+                </div>
+                <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t('ownerDashboard.bookingsCount', { count: ownerBookings.length })}
+                </p>
+                <Button asChild>
+                  <Link to={createLocalizedPath('/owner-dashboard/bookings')}>
+                    {t('ownerDashboard.viewAll')}
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>{t('ownerDashboard.bookingTrends')}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-12">
-                      <i className="fas fa-chart-line text-4xl text-muted-foreground mb-4"></i>
-                      <p className="text-muted-foreground">
-                        {t('ownerDashboard.bookingTrendsPlaceholder')}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
+          {/* Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('ownerDashboard.earningsOverview')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <i className="fas fa-chart-bar text-4xl text-muted-foreground mb-4"></i>
+                  <p className="text-muted-foreground">
+                    {t('ownerDashboard.earningsChartPlaceholder')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* Calendar Tab */}
-            <TabsContent value="calendar" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('ownerDashboard.availabilityCalendar')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <i className="fas fa-calendar-alt text-4xl text-muted-foreground mb-4"></i>
-                    <p className="text-muted-foreground">
-                      {t('ownerDashboard.calendarPlaceholder')}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('ownerDashboard.bookingTrends')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <i className="fas fa-chart-line text-4xl text-muted-foreground mb-4"></i>
+                  <p className="text-muted-foreground">
+                    {t('ownerDashboard.bookingTrendsPlaceholder')}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Availability Manager */}
+          <OwnerAvailabilityManager spaces={ownerSpaces} />
         </div>
       </div>
 

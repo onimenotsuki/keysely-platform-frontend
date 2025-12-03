@@ -1,5 +1,6 @@
 import { Heart } from 'lucide-react';
 import { useTranslation } from '../../../../hooks/useTranslation';
+import { formatCurrency } from '../../../../utils/formatCurrency';
 import { Badge } from '../../../ui/badge';
 import { Button } from '../../../ui/button';
 
@@ -7,6 +8,7 @@ interface SpaceImageProps {
   imageUrl: string;
   title: string;
   pricePerHour: number;
+  currency: string;
   isFavorite: boolean;
   onToggleFavorite: (e: React.MouseEvent) => void;
 }
@@ -15,6 +17,7 @@ export const SpaceImage = ({
   imageUrl,
   title,
   pricePerHour,
+  currency,
   isFavorite,
   onToggleFavorite,
 }: SpaceImageProps) => {
@@ -42,9 +45,7 @@ export const SpaceImage = ({
         />
       </Button>
       <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground z-10">
-        {t('common.currency')}
-        {pricePerHour}
-        {t('common.perHour')}
+        {formatCurrency(pricePerHour, currency)} {t('common.perHour')}
       </Badge>
     </div>
   );

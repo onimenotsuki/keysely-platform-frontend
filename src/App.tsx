@@ -12,17 +12,30 @@ import Auth from './pages/Auth';
 import Bookings from './pages/Bookings';
 import Explore from './pages/Explore';
 import Favorites from './pages/Favorites';
+import HostProfile from './pages/HostProfile';
 import Index from './pages/Index';
-import ListSpace from './pages/ListSpace';
 import ListSpaceNew from './pages/ListSpaceNew';
 import Messages from './pages/Messages';
 import MyReviews from './pages/MyReviews';
 import NotFound from './pages/NotFound';
+import Onboarding from './pages/Onboarding';
 import OwnerDashboard from './pages/OwnerDashboard';
 import PaymentCancelled from './pages/PaymentCancelled';
 import PaymentSuccess from './pages/PaymentSuccess';
 import Profile from './pages/Profile';
 import SpaceDetail from './pages/SpaceDetail';
+import {
+  ListSpaceEntryRedirect,
+  ListSpaceLayout,
+  Step1BasicInfo,
+  Step2Address,
+  Step3Amenities,
+  Step4Media,
+  Step5Pricing,
+} from './pages/list-space';
+import OwnerDashboardBookings from './pages/owner-dashboard/Bookings';
+import MySpaces from './pages/owner-dashboard/MySpaces';
+import PaymentSettings from './pages/owner-dashboard/PaymentSettings';
 
 const queryClient = new QueryClient();
 
@@ -37,6 +50,9 @@ const App = () => (
             <Routes>
               {/* Redirect root to default language */}
               <Route path="/" element={<Navigate to="/es" replace />} />
+
+              {/* Onboarding route - no language prefix, accessible right after signup */}
+              <Route path="/onboarding" element={<Onboarding />} />
 
               {/* Language-prefixed routes */}
               <Route
@@ -60,6 +76,14 @@ const App = () => (
                 element={
                   <LanguageWrapper>
                     <SpaceDetail />
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/host/:id"
+                element={
+                  <LanguageWrapper>
+                    <HostProfile />
                   </LanguageWrapper>
                 }
               />
@@ -122,17 +146,64 @@ const App = () => (
                 element={
                   <LanguageWrapper>
                     <ProtectedRoute>
-                      <ListSpace />
+                      <ListSpaceEntryRedirect />
                     </ProtectedRoute>
                   </LanguageWrapper>
                 }
               />
+              <Route
+                path="/:lang/list-space/:userId"
+                element={
+                  <LanguageWrapper>
+                    <ProtectedRoute>
+                      <ListSpaceLayout />
+                    </ProtectedRoute>
+                  </LanguageWrapper>
+                }
+              >
+                <Route index element={<Navigate to="step-1" replace />} />
+                <Route path="step-1" element={<Step1BasicInfo />} />
+                <Route path="step-2" element={<Step2Address />} />
+                <Route path="step-3" element={<Step3Amenities />} />
+                <Route path="step-4" element={<Step4Media />} />
+                <Route path="step-5" element={<Step5Pricing />} />
+              </Route>
               <Route
                 path="/:lang/owner-dashboard"
                 element={
                   <LanguageWrapper>
                     <ProtectedRoute>
                       <OwnerDashboard />
+                    </ProtectedRoute>
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/owner-dashboard/payment-settings"
+                element={
+                  <LanguageWrapper>
+                    <ProtectedRoute>
+                      <PaymentSettings />
+                    </ProtectedRoute>
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/owner-dashboard/my-spaces"
+                element={
+                  <LanguageWrapper>
+                    <ProtectedRoute>
+                      <MySpaces />
+                    </ProtectedRoute>
+                  </LanguageWrapper>
+                }
+              />
+              <Route
+                path="/:lang/owner-dashboard/bookings"
+                element={
+                  <LanguageWrapper>
+                    <ProtectedRoute>
+                      <OwnerDashboardBookings />
                     </ProtectedRoute>
                   </LanguageWrapper>
                 }

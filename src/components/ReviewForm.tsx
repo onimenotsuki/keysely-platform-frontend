@@ -19,25 +19,25 @@ type ReviewFormData = z.infer<typeof reviewSchema>;
 
 interface ReviewFormProps {
   spaceId: string;
-  bookingId?: string;
+  bookingId: string; // Now required
   existingReview?: Review;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-const ReviewForm = ({ 
-  spaceId, 
-  bookingId, 
-  existingReview, 
-  onSuccess, 
-  onCancel 
+const ReviewForm = ({
+  spaceId,
+  bookingId,
+  existingReview,
+  onSuccess,
+  onCancel,
 }: ReviewFormProps) => {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [selectedRating, setSelectedRating] = useState(existingReview?.rating || 0);
-  
+
   const createReview = useCreateReview();
   const updateReview = useUpdateReview();
-  
+
   const {
     register,
     handleSubmit,
@@ -70,19 +70,21 @@ const ReviewForm = ({
           },
         });
       } else {
+        if (!bookingId) {
+          toast.error('ID de reserva es requerido');
+          return;
+        }
+
         const reviewData: CreateReviewData = {
           space_id: spaceId,
+          booking_id: bookingId,
           rating: data.rating,
           comment: data.comment,
         };
-        
-        if (bookingId) {
-          reviewData.booking_id = bookingId;
-        }
-        
+
         await createReview.mutateAsync(reviewData);
       }
-      
+
       onSuccess?.();
     } catch (error) {
       // Error handling is done in the hooks
@@ -99,7 +101,7 @@ const ReviewForm = ({
     return Array.from({ length: 5 }, (_, i) => {
       const starValue = i + 1;
       const isActive = starValue <= (hoveredRating || selectedRating);
-      
+
       return (
         <button
           key={i}
@@ -111,9 +113,7 @@ const ReviewForm = ({
         >
           <Star
             className={`h-8 w-8 transition-colors ${
-              isActive
-                ? 'text-yellow-400 fill-yellow-400'
-                : 'text-gray-300 hover:text-yellow-200'
+              isActive ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 hover:text-yellow-200'
             }`}
           />
         </button>
@@ -144,39 +144,29 @@ const ReviewForm = ({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Rating Stars */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Calificación *</Label>
-            <div className="flex items-center space-x-1">
-              {renderStars()}
-            </div>
+            <Label className="text-sm font-medium text-gray-700">Calificación *</Label>
+            <div className="flex items-center space-x-1">{renderStars()}</div>
             {selectedRating > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {getRatingText(selectedRating)}
-              </p>
+              <p className="text-sm text-muted-foreground">{getRatingText(selectedRating)}</p>
             )}
-            {errors.rating && (
-              <p className="text-sm text-red-600">{errors.rating.message}</p>
-            )}
+            {errors.rating && <p className="text-sm text-red-600">{errors.rating.message}</p>}
           </div>
 
           {/* Comment */}
           <div className="space-y-2">
-            <Label htmlFor="comment" className="text-sm font-medium">
+            <Label htmlFor="comment" className="text-sm font-medium text-gray-700">
               Comentario (opcional)
             </Label>
             <Textarea
               id="comment"
               placeholder="Comparte tu experiencia con este espacio..."
-              className="min-h-24 resize-none"
+              className="min-h-32 px-4 resize-none"
               maxLength={500}
               {...register('comment')}
             />
             <div className="flex justify-between items-center">
-              <p className="text-xs text-muted-foreground">
-                Máximo 500 caracteres
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {watchedComment?.length || 0}/500
-              </p>
+              <p className="text-xs text-muted-foreground">Máximo 500 caracteres</p>
+              <p className="text-xs text-muted-foreground">{watchedComment?.length || 0}/500</p>
             </div>
           </div>
 
@@ -185,7 +175,7 @@ const ReviewForm = ({
             <Button
               type="submit"
               disabled={selectedRating === 0 || createReview.isPending || updateReview.isPending}
-              className="flex-1"
+              className="flex-1 h-12 bg-primary hover:bg-[#3B82F6] text-white shadow-md hover:shadow-lg transition-all"
             >
               {(createReview.isPending || updateReview.isPending) && (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -193,13 +183,14 @@ const ReviewForm = ({
               <Send className="h-4 w-4 mr-2" />
               {isEditing ? 'Actualizar Review' : 'Enviar Review'}
             </Button>
-            
+
             {onCancel && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={onCancel}
                 disabled={createReview.isPending || updateReview.isPending}
+                className="h-12"
               >
                 Cancelar
               </Button>

@@ -1,99 +1,99 @@
-# Guía de Datos de Inicio (Seed Data)
+# Seed Data Guide
 
-Esta guía explica cómo usar el sistema de seeding para poblar tu base de datos con datos de prueba.
+This guide explains how to use the seeding system to populate your database with test data.
 
-## 📁 Archivos de Seeding
+## 📁 Seeding Files
 
 ### 1. `src/utils/seedData.ts`
 
-Crea 3 espacios de muestra para el usuario actual:
+Creates 3 sample spaces for the current user:
 
-- Oficina Privada Premium en Polanco
-- Sala de Reuniones Ejecutiva en Santa Fe
-- Espacio Coworking en Reforma
+- Premium Private Office in Polanco
+- Executive Meeting Room in Santa Fe
+- Coworking Space in Reforma
 
-**Características:**
+**Features:**
 
-- Datos detallados y realistas
-- Coordenadas GPS reales de Ciudad de México
-- Horarios de disponibilidad configurados
-- Amenidades y características completas
-- Se ejecuta automáticamente al hacer login (con retraso de 1 segundo)
+- Detailed and realistic data
+- Real GPS coordinates from Mexico City
+- Configured availability hours
+- Complete amenities and features
+- Automatically runs on login (with 1 second delay)
 
 ### 2. `src/utils/seedSpaces.ts`
 
-Genera hasta 55 espacios distribuidos en 6 ciudades mexicanas:
+Generates up to 55 spaces distributed across 6 Mexican cities:
 
-- Ciudad de México (20 espacios)
-- Monterrey (10 espacios)
-- Guadalajara (10 espacios)
-- Puebla (5 espacios)
-- Querétaro (5 espacios)
-- Mérida (5 espacios)
+- Mexico City (20 spaces)
+- Monterrey (10 spaces)
+- Guadalajara (10 spaces)
+- Puebla (5 spaces)
+- Querétaro (5 spaces)
+- Mérida (5 spaces)
 
-**Características:**
+**Features:**
 
-- Nombres de espacios dinámicos por categoría
-- Coordenadas GPS reales con variación
-- Precios aleatorios entre $15 y $200 por hora
-- Capacidad aleatoria de 2 a 50 personas
-- Áreas de 20 a 300 m²
-- Amenidades y características aleatorias
-- Ratings de 3.0 a 5.0
-- Horarios de disponibilidad dinámicos
+- Dynamic space names by category
+- Real GPS coordinates with variation
+- Random prices between $15 and $200 per hour
+- Random capacity from 2 to 50 people
+- Areas from 20 to 300 m²
+- Random amenities and features
+- Ratings from 3.0 to 5.0
+- Dynamic availability hours
 
-### 3. `src/utils/runSeed.ts` (Nuevo)
+### 3. `src/utils/runSeed.ts` (New)
 
-Utilidades helper para ejecutar el seeding fácilmente.
+Helper utilities to easily run seeding.
 
-## 🚀 Cómo Usar
+## 🚀 How to Use
 
-### Opción 1: Uso desde Código
+### Option 1: Usage from Code
 
 ```typescript
 import { runFullSeed, runBasicSeed, runBulkSeed } from '@/utils/runSeed';
 
-// Opción A: Seed completo (inicial + múltiples espacios)
+// Option A: Full seed (initial + multiple spaces)
 await runFullSeed({
-  clearExisting: false, // No borrar espacios existentes
-  generateMultipleSpaces: true, // Generar espacios en múltiples ciudades
+  clearExisting: false, // Don't delete existing spaces
+  generateMultipleSpaces: true, // Generate spaces in multiple cities
 });
 
-// Opción B: Solo espacios iniciales (3 espacios)
+// Option B: Initial spaces only (3 spaces)
 await runBasicSeed();
 
-// Opción C: Solo espacios masivos (55 espacios)
+// Option C: Bulk spaces only (55 spaces)
 await runBulkSeed();
 ```
 
-### Opción 2: Uso desde Consola del Navegador
+### Option 2: Usage from Browser Console
 
-Abre la consola del navegador (F12) y ejecuta:
+Open the browser console (F12) and run:
 
 ```javascript
-// Ver utilidades disponibles
+// View available utilities
 window.seedUtils;
 
-// Seed completo
+// Full seed
 await window.seedUtils.runFullSeed();
 
-// Seed básico (3 espacios)
+// Basic seed (3 spaces)
 await window.seedUtils.runBasicSeed();
 
-// Seed masivo (55 espacios)
+// Bulk seed (55 spaces)
 await window.seedUtils.runBulkSeed();
 
-// Limpiar todos los espacios
+// Clear all spaces
 await window.seedUtils.clearSpaces();
 
-// Ver estadísticas
+// View statistics
 await window.seedUtils.getSpaceStats();
 
-// Ver amenidades disponibles
+// View available amenities
 window.seedUtils.showAvailableAmenities();
 ```
 
-### Opción 3: Desde un Componente
+### Option 3: From a Component
 
 ```typescript
 import { useEffect } from 'react';
@@ -102,58 +102,58 @@ import { runFullSeed } from '@/utils/runSeed';
 function AdminPanel() {
   const handleSeed = async () => {
     const result = await runFullSeed({
-      clearExisting: true,  // Limpiar datos existentes
+      clearExisting: true,  // Clear existing data
       generateMultipleSpaces: true
     });
 
     if (result.success) {
-      console.log('¡Seeding exitoso!');
+      console.log('Seeding successful!');
     }
   };
 
   return (
     <button onClick={handleSeed}>
-      Generar Datos de Prueba
+      Generate Test Data
     </button>
   );
 }
 ```
 
-## 📊 Datos Generados
+## 📊 Generated Data
 
-### Campos de los Espacios
+### Space Fields
 
-Cada espacio incluye:
+Each space includes:
 
 ```typescript
 {
-  title: string              // Nombre del espacio
-  description: string        // Descripción detallada
-  address: string           // Dirección completa
-  city: string             // Ciudad
-  latitude: number         // Coordenada GPS
-  longitude: number        // Coordenada GPS
-  price_per_hour: number   // Precio por hora ($15-$200)
-  capacity: number         // Capacidad (2-50 personas)
-  area_sqm: number        // Área en m² (20-300)
-  category_id: uuid       // ID de categoría
-  owner_id: uuid          // ID del propietario
-  images: string[]        // URLs de imágenes
-  features: string[]      // Características (4-8)
-  amenities: string[]     // Amenidades (5-12)
-  availability_hours: {   // Horarios de disponibilidad
+  title: string              // Space name
+  description: string        // Detailed description
+  address: string           // Full address
+  city: string             // City
+  latitude: number         // GPS coordinate
+  longitude: number        // GPS coordinate
+  price_per_hour: number   // Price per hour ($15-$200)
+  capacity: number         // Capacity (2-50 people)
+  area_sqm: number        // Area in m² (20-300)
+  category_id: uuid       // Category ID
+  owner_id: uuid          // Owner ID
+  images: string[]        // Image URLs
+  features: string[]      // Features (4-8)
+  amenities: string[]     // Amenities (5-12)
+  availability_hours: {   // Availability hours
     monday: { start, end }
     tuesday: { start, end }
     // ... etc
   }
-  policies: string        // Políticas del espacio
-  is_active: boolean     // Activo/Inactivo
+  policies: string        // Space policies
+  is_active: boolean     // Active/Inactive
   rating: number        // Rating (3.0-5.0)
-  total_reviews: number // Número de reseñas (0-50)
+  total_reviews: number // Number of reviews (0-50)
 }
 ```
 
-### Amenidades Disponibles
+### Available Amenities
 
 ```typescript
 - WiFi
@@ -173,67 +173,67 @@ Cada espacio incluye:
 - Disabled Access
 ```
 
-### Características Disponibles
+### Available Features
 
 ```typescript
-- Internet de alta velocidad
-- Mobiliario ergonómico
-- Sala de descanso
-- Cocina equipada
-- Áreas comunes
-- Seguridad 24/7
-- Servicio de limpieza
-- Recepcionista
-- Vista panorámica
-- Luz natural
-- Sistema de audio
-- Pantalla de presentación
-- Pizarra interactiva
-- Área de cafetería
-- Lockers personales
-- Impresora y escáner
+- High-speed Internet
+- Ergonomic Furniture
+- Break Room
+- Equipped Kitchen
+- Common Areas
+- 24/7 Security
+- Cleaning Service
+- Receptionist
+- Panoramic View
+- Natural Light
+- Audio System
+- Presentation Screen
+- Interactive Whiteboard
+- Cafeteria Area
+- Personal Lockers
+- Printer and Scanner
 ```
 
-## 🗺️ Ciudades y Coordenadas
+## 🗺️ Cities and Coordinates
 
-| Ciudad           | Lat     | Lng       | Espacios |
-| ---------------- | ------- | --------- | -------- |
-| Ciudad de México | 19.4326 | -99.1332  | 20       |
-| Monterrey        | 25.6866 | -100.3161 | 10       |
-| Guadalajara      | 20.6597 | -103.3496 | 10       |
-| Puebla           | 19.0414 | -98.2063  | 5        |
-| Querétaro        | 20.5888 | -100.3899 | 5        |
-| Mérida           | 20.9674 | -89.5926  | 5        |
+| City        | Lat     | Lng       | Spaces |
+| ----------- | ------- | --------- | ------ |
+| Mexico City | 19.4326 | -99.1332  | 20     |
+| Monterrey   | 25.6866 | -100.3161 | 10     |
+| Guadalajara | 20.6597 | -103.3496 | 10     |
+| Puebla      | 19.0414 | -98.2063  | 5      |
+| Querétaro   | 20.5888 | -100.3899 | 5      |
+| Mérida      | 20.9674 | -89.5926  | 5      |
 
-Cada espacio tiene una pequeña variación en las coordenadas (~5km) para distribuirlos en la ciudad.
+Each space has a small variation in coordinates (~5km) to distribute them across the city.
 
-## ⚠️ Notas Importantes
+## ⚠️ Important Notes
 
-1. **Autenticación Requerida**: Debes estar autenticado antes de ejecutar el seeding.
+1. **Authentication Required**: You must be authenticated before running the seeding.
 
-2. **Seed Automático**: El archivo `seedData.ts` se ejecuta automáticamente al hacer login por primera vez.
+2. **Automatic Seed**: The `seedData.ts` file runs automatically on first login.
 
-3. **Duplicados**: El sistema verifica si el usuario ya tiene espacios antes de crear los iniciales.
+3. **Duplicates**: The system checks if the user already has spaces before creating initial ones.
 
-4. **Categorías**: Asegúrate de que las categorías existan en la base de datos:
-   - Oficina Privada
-   - Sala de Reuniones
+4. **Categories**: Make sure categories exist in the database:
+   - Private Office
+   - Meeting Room
    - Coworking
-   - Sala de Conferencias
-   - Estudio Creativo
+   - Conference Room
+   - Creative Studio
 
-5. **Imágenes**: Los espacios usan imágenes placeholder. Actualiza las URLs para usar imágenes reales.
+5. **Images**: Spaces use placeholder images. Update URLs to use real images.
 
-6. **Limpieza**: Usa `clearSpaces()` con precaución, ya que eliminará TODOS los espacios de la base de datos.
+6. **Cleanup**: Use `clearSpaces()` with caution, as it will delete ALL spaces from the database.
 
-## 🔄 Actualizar Datos Existentes
+## 🔄 Update Existing Data
 
-Si necesitas actualizar las coordenadas o campos adicionales en espacios existentes:
+If you need to update coordinates or additional fields in existing spaces:
 
 ```typescript
 import { supabase } from '@/integrations/supabase/client';
 
-// Actualizar un espacio específico
+// Update a specific space
 await supabase
   .from('spaces')
   .update({
@@ -242,58 +242,58 @@ await supabase
   })
   .eq('id', 'SPACE_ID');
 
-// Actualizar espacios por ciudad
+// Update spaces by city
 await supabase
   .from('spaces')
   .update({ latitude: 19.4326, longitude: -99.1332 })
-  .eq('city', 'Ciudad de México');
+  .eq('city', 'Mexico City');
 ```
 
 ## 🧪 Testing
 
-Para probar el sistema de seeding:
+To test the seeding system:
 
-1. Crea un usuario de prueba
-2. Ejecuta `runFullSeed({ clearExisting: true })`
-3. Verifica en Supabase que se crearon los espacios
-4. Prueba el buscador y filtros con los datos generados
-5. Verifica que las coordenadas GPS funcionen en el mapa
+1. Create a test user
+2. Run `runFullSeed({ clearExisting: true })`
+3. Verify in Supabase that spaces were created
+4. Test the search and filters with generated data
+5. Verify that GPS coordinates work on the map
 
-## 📝 Personalización
+## 📝 Customization
 
-Para personalizar los datos generados, edita:
+To customize the generated data, edit:
 
-- **Nombres**: Modifica `spaceTemplates` en `seedSpaces.ts`
-- **Descripciones**: Modifica `descriptions` en `seedSpaces.ts`
-- **Características**: Modifica `features` en `seedSpaces.ts`
-- **Amenidades**: Modifica `AMENITIES_LIST` en `seedSpaces.ts`
-- **Ciudades**: Modifica `cities` en `seedSpaces.ts`
-- **Rangos de precios**: Modifica `randomInRange(15, 200)` en `seedSpaces.ts`
+- **Names**: Modify `spaceTemplates` in `seedSpaces.ts`
+- **Descriptions**: Modify `descriptions` in `seedSpaces.ts`
+- **Features**: Modify `features` in `seedSpaces.ts`
+- **Amenities**: Modify `AMENITIES_LIST` in `seedSpaces.ts`
+- **Cities**: Modify `cities` in `seedSpaces.ts`
+- **Price ranges**: Modify `randomInRange(15, 200)` in `seedSpaces.ts`
 
 ## 🐛 Troubleshooting
 
 ### Error: "No categories found"
 
-**Solución**: Crea las categorías primero en Supabase.
+**Solution**: Create categories first in Supabase.
 
 ### Error: "User not authenticated"
 
-**Solución**: Inicia sesión antes de ejecutar el seeding.
+**Solution**: Login before running the seeding.
 
 ### Error: "Permission denied"
 
-**Solución**: Verifica las políticas RLS en Supabase.
+**Solution**: Verify RLS policies in Supabase.
 
-### Los espacios no aparecen en el mapa
+### Spaces don't appear on the map
 
-**Solución**: Verifica que los campos `latitude` y `longitude` existan en tu tabla y tengan valores válidos.
+**Solution**: Verify that `latitude` and `longitude` fields exist in your table and have valid values.
 
-## 🎯 Siguientes Pasos
+## 🎯 Next Steps
 
-Después de generar los datos:
+After generating the data:
 
-1. ✅ Prueba el sistema de búsqueda en `/explore`
-2. ✅ Verifica los filtros por ciudad, precio y capacidad
-3. ✅ Prueba el mapa interactivo con las coordenadas GPS
-4. ✅ Revisa que Algolia indexe correctamente los espacios
-5. ✅ Genera reservas de prueba si es necesario
+1. ✅ Test the search system at `/explore`
+2. ✅ Verify filters by city, price, and capacity
+3. ✅ Test the interactive map with GPS coordinates
+4. ✅ Review that Algolia indexes spaces correctly
+5. ✅ Generate test bookings if needed

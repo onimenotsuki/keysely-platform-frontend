@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useLanguageContext } from '../../../contexts/LanguageContext';
 import { useTranslation } from '../../../hooks/useTranslation';
 import LanguageSelector from '../../LanguageSelector';
+import { UserMenu } from './UserMenu';
 
 interface DesktopNavProps {
   isScrolled?: boolean;
@@ -30,6 +31,7 @@ export const DesktopNav = ({ isScrolled = false }: DesktopNavProps) => {
       <Link to={`/${language}/host`} className={linkClass}>
         {t('header.listSpace')}
       </Link>
+      <UserMenu isScrolled={isScrolled} />
     </nav>
   );
 };

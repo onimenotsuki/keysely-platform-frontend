@@ -9,12 +9,16 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+
+import { useAuth } from '@/contexts/AuthContext';
+import { createListSpaceStepPath } from '@/pages/list-space/paths';
 import { Footer } from '../components/layout/Footer';
 import { Header } from '../components/layout/Header';
 import { useTranslation } from '../hooks/useTranslation';
 
 const ListSpaceNew = () => {
   const { t, language } = useTranslation();
+  const { user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
   const stats = [
@@ -138,7 +142,7 @@ const ListSpaceNew = () => {
             {t('listSpace.marketing.hero.subtitle')}
           </p>
           <Link
-            to={`/${language}/list-space`}
+            to={user ? createListSpaceStepPath(language, user.id, 0) : `/${language}/auth`}
             className="inline-flex items-center gap-2 bg-white text-primary hover:bg-white/90 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:shadow-2xl hover:scale-105"
           >
             {t('listSpace.marketing.hero.cta')}
@@ -281,7 +285,7 @@ const ListSpaceNew = () => {
             {t('listSpace.marketing.finalCta.subtitle')}
           </p>
           <Link
-            to={`/${language}/list-space`}
+            to={user ? createListSpaceStepPath(language, user.id, 0) : `/${language}/auth`}
             className="inline-flex items-center gap-2 bg-white text-primary hover:bg-white/90 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 hover:shadow-2xl hover:scale-105"
           >
             {t('listSpace.marketing.finalCta.cta')}

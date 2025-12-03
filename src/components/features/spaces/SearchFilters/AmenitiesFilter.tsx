@@ -32,7 +32,7 @@ export const AmenitiesFilter = ({
   return (
     <div className="space-y-3">
       <Label className="text-base font-semibold">Amenidades</Label>
-      <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+      <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto pr-2 sm:grid-cols-2 lg:grid-cols-4">
         {amenitiesConfig.map((amenity) => {
           const Icon = amenity.icon;
           return (

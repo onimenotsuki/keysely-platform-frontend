@@ -11,7 +11,9 @@ interface AlgoliaSpace {
   description: string;
   address: string;
   city: string;
+  state?: string;
   price_per_hour: number;
+  currency: string;
   capacity: number;
   area_sqm?: number;
   images: string[];
@@ -36,7 +38,12 @@ interface SupabaseSpace {
   description: string;
   address: string;
   city: string;
+  address_object?: {
+    state?: string;
+    [key: string]: unknown;
+  } | null;
   price_per_hour: number;
+  currency: string;
   capacity: number;
   area_sqm?: number;
   images?: string[];
@@ -53,13 +60,18 @@ interface SupabaseSpace {
 
 // Helper function to add/update a record in Algolia
 async function indexSpace(space: SupabaseSpace) {
+  // Extract state from address_object if available
+  const state = space.address_object?.state || undefined;
+
   const algoliaSpace: AlgoliaSpace = {
     objectID: space.id,
     title: space.title,
     description: space.description,
     address: space.address,
     city: space.city,
+    state: state,
     price_per_hour: space.price_per_hour,
+    currency: space.currency || 'MXN',
     capacity: space.capacity,
     area_sqm: space.area_sqm,
     images: space.images || [],

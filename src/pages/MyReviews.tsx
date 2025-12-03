@@ -151,10 +151,11 @@ const MyReviews = () => {
           )}
 
           {/* Edit Review Form */}
-          {editingReview && (
+          {editingReview && editingReview.booking_id && (
             <div className="mb-8">
               <ReviewForm
                 spaceId={editingReview.space_id}
+                bookingId={editingReview.booking_id}
                 existingReview={editingReview}
                 onSuccess={handleUpdateSuccess}
                 onCancel={handleCancelEdit}

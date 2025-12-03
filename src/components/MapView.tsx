@@ -1,11 +1,12 @@
 import { usePagination } from '@/hooks/usePagination';
 import type { Space } from '@/hooks/useSpaces';
+import { useTranslation } from '@/hooks/useTranslation';
 import { MapPin } from 'lucide-react';
 import { useState } from 'react';
 import type { MapBounds } from './features/spaces/SearchFilters/types';
 import { SpaceCard } from './features/spaces/SpaceCard';
-import { GoogleMapProvider, isGoogleMapsConfigured } from './map/GoogleMapView';
 import { InteractiveMap } from './map/InteractiveMap';
+import { MapboxProvider, isMapboxConfigured } from './map/MapboxProvider';
 import { PaginationControls } from './ui/pagination-controls';
 
 interface MapViewProps {
@@ -15,8 +16,9 @@ interface MapViewProps {
 }
 
 export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) => {
+  const { t } = useTranslation();
   const [selectedSpaceId, setSelectedSpaceId] = useState<string | null>(null);
-  const mapsConfigured = isGoogleMapsConfigured();
+  const mapsConfigured = isMapboxConfigured();
 
   // Pagination for results
   const { currentPage, totalPages, paginatedItems, goToPage, startIndex, endIndex, totalItems } =
@@ -27,7 +29,7 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-300px)] min-h-[600px]">
+      <div className="flex h-[calc(100vh-150px)] w-full">
         {/* Map Loading Skeleton - 40vw */}
         <div className="w-[40vw] h-full bg-muted animate-pulse"></div>
 
@@ -48,24 +50,24 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange }: MapViewProps) 
   }
 
   return (
-    <div className="flex h-[calc(100vh-300px)] min-h-[600px]">
+    <div className="flex h-[calc(100vh-150px)] w-full">
       {/* Map Section - Fixed 40vw */}
       <div className="w-[40vw] h-full sticky top-0">
         {mapsConfigured ? (
-          <GoogleMapProvider>
+          <MapboxProvider>
             <InteractiveMap
               spaces={spaces}
               onBoundsChange={onMapBoundsChange}
               selectedSpaceId={selectedSpaceId}
               onSpaceSelect={setSelectedSpaceId}
             />
-          </GoogleMapProvider>
+          </MapboxProvider>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-muted">
             <div className="text-center p-8">
               <MapPin className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Mapa no disponible</h3>
-              <p className="text-muted-foreground">Google Maps no está configurado</p>
+              <h3 className="text-lg font-semibold mb-2">{t('map.notAvailable')}</h3>
+              <p className="text-muted-foreground">{t('map.notConfigured')}</p>
             </div>
           </div>
         )}

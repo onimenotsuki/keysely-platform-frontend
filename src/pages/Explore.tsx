@@ -5,6 +5,7 @@ import type {
   SearchFilters as SearchFiltersType,
 } from '@/components/features/spaces/SearchFilters/types';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -14,6 +15,7 @@ import { shouldUseAlgolia, useAlgoliaSearch } from '../hooks/useAlgoliaSearch';
 import { useSpaces } from '../hooks/useSpaces';
 
 const Explore = () => {
+  const { t } = useTranslation();
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const [filters, setFilters] = useState<SearchFiltersType>({
     searchTerm: '',
@@ -127,21 +129,22 @@ const Explore = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header forceScrolled={true} />
 
-      {/* Enhanced Search and Filters */}
-      <section className="py-10 mt-10">
-        <div className="container mx-auto px-4">
+      {/* Modern Search Bar - Full Width */}
+      <section className="mt-16 bg-white border-b border-gray-200">
+        <div className="w-full">
           <SearchFilters
             filters={filters}
             onFiltersChange={handleFiltersChange}
             onReset={handleReset}
+            resultsCount={spaces.length}
           />
         </div>
       </section>
 
-      {/* Results - Full Width */}
+      {/* Results - Full Width - Fixed height for map view */}
       <section className="w-full">
         {isLoading && (
           <MapView spaces={[]} isLoading={true} onMapBoundsChange={handleMapBoundsChange} />
@@ -152,16 +155,16 @@ const Explore = () => {
         )}
 
         {!isLoading && (!spaces || spaces.length === 0) && (
-          <div className="container mx-auto px-4">
-            <div className="text-center py-16">
+          <div className="container mx-auto px-4 h-[calc(100vh-200px)] flex items-center justify-center">
+            <div className="text-center">
               <div className="max-w-md mx-auto">
                 <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No se encontraron espacios</h3>
-                <p className="text-muted-foreground mb-6">
-                  Intenta ajustar tus filtros de búsqueda o explora diferentes criterios.
-                </p>
+                <h3 className="text-xl font-semibold mb-2">
+                  {t('explore.searchBar.noSpacesFound')}
+                </h3>
+                <p className="text-muted-foreground mb-6">{t('explore.searchBar.adjustFilters')}</p>
                 <Button onClick={handleReset} variant="outline">
-                  Limpiar filtros
+                  {t('explore.searchBar.clearFilters')}
                 </Button>
               </div>
             </div>
