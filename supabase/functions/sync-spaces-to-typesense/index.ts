@@ -3,31 +3,6 @@ import Typesense from 'npm:typesense';
 
 const TYPESENSE_COLLECTION_NAME = 'spaces';
 
-const schema = {
-  name: TYPESENSE_COLLECTION_NAME,
-  fields: [
-    { name: 'id', type: 'string' },
-    { name: 'title', type: 'string' },
-    { name: 'description', type: 'string', optional: true },
-    { name: 'address', type: 'string' },
-    { name: 'city', type: 'string' },
-    { name: 'state', type: 'string', optional: true },
-    { name: 'price_per_hour', type: 'float' },
-    { name: 'currency', type: 'string' },
-    { name: 'capacity', type: 'int32' },
-    { name: 'area_sqm', type: 'float', optional: true },
-    { name: 'images', type: 'string[]', optional: true },
-    { name: 'features', type: 'string[]', optional: true },
-    { name: 'amenities', type: 'string[]', optional: true },
-    { name: 'is_active', type: 'bool', default: false },
-    { name: 'rating', type: 'float', default: 0 },
-    { name: 'total_reviews', type: 'int32', default: 0 },
-    { name: 'category_id', type: 'string', optional: true },
-    { name: 'owner_id', type: 'string' },
-    { name: 'location', type: 'geopoint', optional: true },
-  ],
-};
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -81,22 +56,6 @@ interface SupabaseSpace {
   longitude?: number;
 }
 
-async function createCollectionIfNotExists() {
-  console.log('Creating collection if not exists...');
-
-  const typesenseClient = getClient();
-  try {
-    console.log('Retrieving collection...');
-
-    await typesenseClient.collections(schema.name).retrieve();
-  } catch (_error: Typesense.HttpError) {
-    console.error('Collection not found, creating...');
-    console.log('Creating collection...');
-
-    return await typesenseClient.collections().create(schema);
-  }
-}
-
 function getClient() {
   const TYPESENSE_HOST = Deno.env.get('TYPESENSE_HOST');
   const TYPESENSE_API_KEY = Deno.env.get('TYPESENSE_API_KEY');
@@ -129,6 +88,14 @@ function getClient() {
 // Helper function to add/update a record in Typesense
 async function indexSpace(space: SupabaseSpace) {
   const typesenseClient = getClient();
+
+  // If space is not active, ensure it is removed from Typesense
+  if (!space.is_active) {
+    console.log(`Space ${space.id} is inactive, removing from Typesense if exists...`);
+
+    return await deleteSpace(space.id);
+  }
+
   const state = space.address_object?.state ?? '';
 
   const document: TypesenseSpace = {
@@ -174,8 +141,6 @@ serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
-
-  await createCollectionIfNotExists();
 
   try {
     // Check if Typesense is configured
@@ -228,7 +193,7 @@ serve(async (req: Request) => {
     // Handle different event types
     if (type === 'INSERT' || type === 'UPDATE') {
       await indexSpace(record as SupabaseSpace);
-      console.log(`Successfully indexed space ${record.id}`);
+      console.log(`Successfully processed space ${record.id}`);
     } else if (type === 'DELETE') {
       await deleteSpace(old_record.id);
       console.log(`Successfully deleted space ${old_record.id} from Typesense`);
