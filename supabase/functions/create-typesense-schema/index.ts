@@ -1,3 +1,4 @@
+import { getTypesenseClient } from '@shared/typesenseClient.ts';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import Typesense from 'npm:typesense';
 
@@ -90,24 +91,8 @@ export async function createTypesenseSchema(client: Typesense.Client) {
 }
 
 serve(async (_req: Request) => {
-  const TYPESENSE_HOST = Deno.env.get('TYPESENSE_HOST');
-  const TYPESENSE_API_KEY = Deno.env.get('TYPESENSE_API_KEY');
-  const TYPESENSE_PORT = Deno.env.get('TYPESENSE_PORT');
-  const TYPESENSE_PROTOCOL = Deno.env.get('TYPESENSE_PROTOCOL');
-
-  const client = new Typesense.Client({
-    nodes: [
-      {
-        host: TYPESENSE_HOST,
-        port: TYPESENSE_PORT,
-        protocol: TYPESENSE_PROTOCOL,
-      },
-    ],
-    apiKey: TYPESENSE_API_KEY,
-    timeoutSeconds: 2,
-  });
-
   try {
+    const client = getTypesenseClient();
     await createTypesenseSchema(client);
 
     return new Response(JSON.stringify({ message: 'Schema created/updated successfully' }), {

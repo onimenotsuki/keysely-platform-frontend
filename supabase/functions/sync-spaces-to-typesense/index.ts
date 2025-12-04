@@ -1,12 +1,9 @@
+import { corsHeaders } from '@shared/cors.ts';
+import { getTypesenseClient } from '@shared/typesenseClient.ts';
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import Typesense from 'npm:typesense';
 
 const TYPESENSE_COLLECTION_NAME = 'spaces';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 interface TypesenseSpace {
   id: string;
@@ -56,38 +53,9 @@ interface SupabaseSpace {
   longitude?: number;
 }
 
-function getClient() {
-  const TYPESENSE_HOST = Deno.env.get('TYPESENSE_HOST');
-  const TYPESENSE_API_KEY = Deno.env.get('TYPESENSE_API_KEY');
-  const TYPESENSE_PORT = Deno.env.get('TYPESENSE_PORT');
-  const TYPESENSE_PROTOCOL = Deno.env.get('TYPESENSE_PROTOCOL');
-
-  if (!TYPESENSE_HOST || !TYPESENSE_API_KEY) {
-    throw new Error('Typesense not configured');
-  }
-
-  console.log('Initializing Typesense client with:', {
-    host: TYPESENSE_HOST,
-    apiKeyPrefix: TYPESENSE_API_KEY.substring(0, 5) + '...',
-    apiKeyLength: TYPESENSE_API_KEY.length,
-  });
-
-  return new Typesense.Client({
-    nodes: [
-      {
-        host: TYPESENSE_HOST,
-        port: TYPESENSE_PORT,
-        protocol: TYPESENSE_PROTOCOL,
-      },
-    ],
-    apiKey: TYPESENSE_API_KEY,
-    connectionTimeoutSeconds: 5,
-  });
-}
-
 // Helper function to add/update a record in Typesense
 async function indexSpace(space: SupabaseSpace) {
-  const typesenseClient = getClient();
+  const typesenseClient = getTypesenseClient();
 
   // If space is not active, ensure it is removed from Typesense
   if (!space.is_active) {
@@ -125,7 +93,7 @@ async function indexSpace(space: SupabaseSpace) {
 
 // Helper function to delete a record from Typesense
 async function deleteSpace(spaceId: string) {
-  const typesenseClient = getClient();
+  const typesenseClient = getTypesenseClient();
   try {
     return await typesenseClient.collections(TYPESENSE_COLLECTION_NAME).documents(spaceId).delete();
   } catch (error) {
