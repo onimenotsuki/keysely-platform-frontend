@@ -34,3 +34,5 @@ export interface SearchFilters {
   availableTo?: Date;
   mapBounds?: MapBounds | null;
 }
+
+export type FacetCounts = Record<string, Record<string, number>>;

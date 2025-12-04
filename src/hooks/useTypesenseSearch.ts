@@ -104,6 +104,8 @@ const buildTypesenseFilters = (filters: SearchFilters): string => {
   return filterParts.join(' && ');
 };
 
+import type { FacetCounts } from '@/integrations/typesense/types';
+
 export const useTypesenseSearch = (options: UseTypesenseSearchOptions = {}) => {
   const {
     searchTerm = '',
@@ -133,12 +135,25 @@ export const useTypesenseSearch = (options: UseTypesenseSearchOptions = {}) => {
         filter_by: filterString,
         page: page + 1, // Typesense is 1-indexed
         per_page: hitsPerPage,
+        facet_by: 'category_id,amenities,city,state,price_per_hour,capacity,rating',
       };
 
       const result = await typesenseClient
         .collections(SPACES_COLLECTION_NAME)
         .documents()
         .search(searchParameters);
+
+      // Process facets
+      const facets: FacetCounts = {};
+      if (result.facet_counts) {
+        result.facet_counts.forEach((facet) => {
+          const fieldName = facet.field_name;
+          facets[fieldName] = {};
+          facet.counts.forEach((count) => {
+            facets[fieldName][count.value] = count.count;
+          });
+        });
+      }
 
       return {
         spaces: (result.hits || []).map((hit) =>
@@ -147,6 +162,7 @@ export const useTypesenseSearch = (options: UseTypesenseSearchOptions = {}) => {
         total: result.found,
         page: result.page - 1, // Convert back to 0-indexed for consistency
         nbPages: Math.ceil(result.found / hitsPerPage),
+        facets,
       };
     },
     enabled: enabled && typesenseEnabled,

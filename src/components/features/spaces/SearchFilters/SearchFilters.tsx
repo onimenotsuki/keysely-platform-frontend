@@ -13,12 +13,14 @@ import { LocationInput } from './LocationInput';
 import { PriceRangeFilter } from './PriceRangeFilter';
 import { SearchInput } from './SearchInput';
 import { SearchFilters as SearchFiltersType } from './types';
+import { FacetCounts } from '@/integrations/typesense/types';
 
 interface SearchFiltersProps {
   filters: SearchFiltersType;
   onFiltersChange: (filters: SearchFiltersType) => void;
   onReset: () => void;
   resultsCount?: number;
+  facets?: FacetCounts;
 }
 
 export const SearchFilters = ({
@@ -26,6 +28,7 @@ export const SearchFilters = ({
   onFiltersChange,
   onReset,
   resultsCount = 0,
+  facets,
 }: SearchFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation();
@@ -136,6 +139,7 @@ export const SearchFilters = ({
                         value={filters.categoryId}
                         onFiltersChange={onFiltersChange}
                         filters={filters}
+                        facets={facets}
                       />
 
                       <PriceRangeFilter
@@ -155,6 +159,7 @@ export const SearchFilters = ({
                         selectedAmenities={filters.amenities || []}
                         onFiltersChange={onFiltersChange}
                         filters={filters}
+                        facets={facets}
                       />
 
                       <EnhancedAvailabilityCalendar

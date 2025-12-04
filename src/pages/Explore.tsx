@@ -226,6 +226,7 @@ const Explore = () => {
             onFiltersChange={handleFiltersChange}
             onReset={handleReset}
             resultsCount={spaces.length}
+            facets={typesenseData?.facets}
           />
         </div>
       </section>
