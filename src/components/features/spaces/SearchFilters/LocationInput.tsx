@@ -88,7 +88,7 @@ export const LocationInput = ({ value, onFiltersChange, filters }: LocationInput
 
   return (
     <div className="lg:w-56 group">
-      <div className="px-8 py-5 cursor-pointer hover:bg-gray-50 transition-colors">
+      <div className="px-8 py-5 cursor-pointer hover:bg-gray-50 transition-colors h-[86px]">
         <label className="block text-xs font-semibold text-gray-900 mb-1.5">
           {t('explore.searchBar.location')}
         </label>

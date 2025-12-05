@@ -12,7 +12,7 @@ export const SearchInput = ({ value, onFiltersChange, filters }: SearchInputProp
 
   return (
     <div className="flex-1 group">
-      <div className="px-8 py-5 cursor-pointer hover:bg-gray-50 transition-colors">
+      <div className="px-8 py-5 cursor-pointer hover:bg-gray-50 transition-colors h-[86px]">
         <label htmlFor="search-input" className="block text-xs font-semibold text-gray-900 mb-1.5">
           {t('explore.searchBar.whatLookingFor')}
         </label>

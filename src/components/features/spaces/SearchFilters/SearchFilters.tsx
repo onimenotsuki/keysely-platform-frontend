@@ -2,12 +2,18 @@ import { useTranslation } from '@/hooks/useTranslation';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../../../ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../../../ui/sheet';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../../../ui/dialog';
 import { ActiveFilters } from './ActiveFilters';
 import { AmenitiesFilter } from './AmenitiesFilter';
 import { CapacityFilter } from './CapacityFilter';
 import { CategoryFilter } from './CategoryFilter';
-import { DatePicker } from './DatePicker';
+import { DateInput } from './DateInput';
 import { EnhancedAvailabilityCalendar } from './EnhancedAvailabilityCalendar';
 import { LocationInput } from './LocationInput';
 import { PriceRangeFilter } from './PriceRangeFilter';
@@ -72,53 +78,43 @@ export const SearchFilters = ({
               filters={filters}
             />
 
-            {/* Check-in Date Section */}
-            <DatePicker
-              date={filters.checkInDate}
-              label={t('explore.searchBar.checkIn')}
-              onFiltersChange={onFiltersChange}
-              filters={filters}
-              type="checkInDate"
-            />
-
-            {/* Check-out Date Section */}
-            <DatePicker
-              date={filters.checkOutDate}
-              label={t('explore.searchBar.checkOut')}
-              minDate={filters.checkInDate}
-              onFiltersChange={onFiltersChange}
-              filters={filters}
-              type="checkOutDate"
-            />
+            {/* Date Range Section */}
+            {/* Date Range Section */}
+            <DateInput filters={filters} onFiltersChange={onFiltersChange} />
 
             {/* Search Button & Filters */}
-            <div className="flex items-center gap-3 px-4 py-4 lg:pl-4">
-              <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <SheetTrigger asChild>
+            <div className="flex items-center gap-3 px-4 py-4 lg:pl-4 h-[86px]">
+              <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-lg relative hover:bg-gray-100 transition-colors"
+                    variant="outline"
+                    className="h-12 px-6 gap-2 rounded-lg border-primary/20 text-primary hover:bg-primary hover:text-white transition-all duration-300 relative"
                   >
-                    <SlidersHorizontal className="w-5 h-5 text-gray-600" />
+                    <span className="font-semibold">{t('explore.searchBar.filters')}</span>
+                    <SlidersHorizontal className="w-4 h-4" />
                     {hasActiveFilters() && (
-                      <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
                         !
                       </span>
                     )}
                   </Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="bottom"
-                  className="h-[100vh] w-screen max-w-none rounded-none bg-background p-0 sm:h-screen"
-                >
-                  <div className="flex h-full flex-col">
-                    <SheetHeader className="border-b px-6 py-4">
-                      <SheetTitle className="flex items-center justify-between text-lg">
-                        {t('explore.searchBar.advancedFilters')}
-                      </SheetTitle>
-                    </SheetHeader>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto p-0 gap-0">
+                  <DialogHeader className="px-6 py-4 border-b sticky top-0 bg-white z-10">
+                    <DialogTitle className="flex items-center justify-between text-lg">
+                      {t('explore.searchBar.advancedFilters')}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="-mr-2"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </DialogTitle>
+                  </DialogHeader>
 
+                  <div className="flex flex-col">
                     {hasActiveFilters() && (
                       <div className="border-b px-6 py-4">
                         <p className="text-sm font-medium text-muted-foreground">
@@ -134,7 +130,7 @@ export const SearchFilters = ({
                       </div>
                     )}
 
-                    <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+                    <div className="px-6 py-6 space-y-8">
                       <CategoryFilter
                         value={filters.categoryId}
                         onFiltersChange={onFiltersChange}
@@ -159,7 +155,6 @@ export const SearchFilters = ({
                         selectedAmenities={filters.amenities || []}
                         onFiltersChange={onFiltersChange}
                         filters={filters}
-                        facets={facets}
                       />
 
                       <EnhancedAvailabilityCalendar
@@ -169,20 +164,27 @@ export const SearchFilters = ({
                         filters={filters}
                       />
                     </div>
+                  </div>
 
-                    <div className="border-t px-6 py-4">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <Button variant="ghost" onClick={clearAllFilters}>
-                          {t('explore.searchBar.clearFiltersButton')}
-                        </Button>
-                        <Button className="flex-1 sm:flex-none" onClick={() => setIsOpen(false)}>
-                          {t('explore.searchBar.showResults', { count: resultsCount })}
-                        </Button>
-                      </div>
+                  <div className="border-t px-6 py-4 sticky bottom-0 bg-white z-10">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <Button
+                        variant="ghost"
+                        onClick={clearAllFilters}
+                        className="text-gray-500 hover:text-gray-900 font-semibold underline"
+                      >
+                        {t('explore.searchBar.clearFiltersButton')}
+                      </Button>
+                      <Button
+                        className="flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white px-8 py-2.5 h-auto text-base font-semibold rounded-lg"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {t('explore.searchBar.showResults', { count: resultsCount })}
+                      </Button>
                     </div>
                   </div>
-                </SheetContent>
-              </Sheet>
+                </DialogContent>
+              </Dialog>
 
               {/* Primary Search Button */}
               <Button

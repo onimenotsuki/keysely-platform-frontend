@@ -1,29 +1,21 @@
 import { useHeroBanner } from '@/hooks/useContentful';
 import { cn } from '@/lib/utils';
 import { autocompletePlaces, GeocodeResult } from '@/utils/mapboxGeocoding';
-import { format } from 'date-fns';
-import { enUS, es } from 'date-fns/locale';
-import { Calendar, Check, ChevronsUpDown, MapPin } from 'lucide-react';
+import { Check, MapPin } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { DateRange } from 'react-day-picker';
 import { useNavigate } from 'react-router-dom';
 import heroImage from '../assets/hero-office.jpg';
 import { useTranslation } from '../hooks/useTranslation';
-import { Calendar as CalendarComponent } from './ui/calendar';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from './ui/command';
+import DateRangePicker from '@/components/DateRangePicker';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from './ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState(''); // Stores the display value (full name or typed text)
   const [selectedPlace, setSelectedPlace] = useState<GeocodeResult | null>(null);
-  const [date, setDate] = useState<Date>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [openCombobox, setOpenCombobox] = useState(false);
   const [places, setPlaces] = useState<GeocodeResult[]>([]);
   // inputValue is now redundant if we use location for the input text,
@@ -111,7 +103,8 @@ const Hero = () => {
       params.append('city', cityName);
     }
 
-    if (date) params.append('checkIn', date.toISOString());
+    if (dateRange?.from) params.append('checkIn', dateRange.from.toISOString());
+    if (dateRange?.to) params.append('checkOut', dateRange.to.toISOString());
 
     const queryString = params.toString();
     navigate(`/${language}/explore${queryString ? `?${queryString}` : ''}`);
@@ -308,35 +301,7 @@ const Hero = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('hero.whenLabel')}
                   </label>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className={cn(
-                            'w-full text-left text-base border-none outline-none focus:ring-0 bg-transparent p-0',
-                            date ? 'text-gray-900' : 'text-gray-400'
-                          )}
-                        >
-                          {date
-                            ? format(date, 'd MMM yyyy', {
-                                locale: language === 'es' ? es : enUS,
-                              })
-                            : t('hero.datePlaceholder')}
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={date}
-                          onSelect={setDate}
-                          initialFocus
-                          disabled={(date) => date < new Date()}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                  <DateRangePicker date={dateRange} setDate={setDateRange} />
                 </div>
 
                 <button
