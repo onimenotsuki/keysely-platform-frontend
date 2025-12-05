@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState(''); // Stores the display value (full name or typed text)
+  const [selectedPlace, setSelectedPlace] = useState<GeocodeResult | null>(null);
   const [date, setDate] = useState<Date>();
   const [openCombobox, setOpenCombobox] = useState(false);
   const [places, setPlaces] = useState<GeocodeResult[]>([]);
@@ -97,7 +98,13 @@ const Hero = () => {
     if (searchQuery.trim()) params.append('search', searchQuery.trim());
 
     // Extract city name from location (e.g. "Guadalajara, Jalisco, México" -> "Guadalajara")
-    if (location.trim()) {
+    if (selectedPlace?.bbox) {
+      const [minLng, minLat, maxLng, maxLat] = selectedPlace.bbox;
+      params.append('ne_lat', maxLat.toString());
+      params.append('ne_lng', maxLng.toString());
+      params.append('sw_lat', minLat.toString());
+      params.append('sw_lng', minLng.toString());
+    } else if (location.trim()) {
       const cityName = location.split(',')[0].trim();
       params.append('city', cityName);
     }
@@ -222,6 +229,7 @@ const Hero = () => {
                         value={location}
                         onChange={(e) => {
                           setLocation(e.target.value);
+                          setSelectedPlace(null);
                           setOpenCombobox(true);
                         }}
                         className="w-full text-base text-gray-900 placeholder:text-gray-400 border-none outline-none focus:ring-0 bg-transparent p-0 truncate"
@@ -243,6 +251,11 @@ const Hero = () => {
                                   value={city.placeName}
                                   onSelect={(currentValue) => {
                                     setLocation(currentValue);
+                                    // Popular cities don't have bbox in the hardcoded list currently,
+                                    // so we pass null or cast if we wanted to add it later.
+                                    // For now, this will fall back to using 'city' param which is fine for popular cities
+                                    // unless we want to add hardcoded bboxes.
+                                    setSelectedPlace(city as unknown as GeocodeResult);
                                     setOpenCombobox(false);
                                   }}
                                 >
@@ -265,6 +278,7 @@ const Hero = () => {
                                   value={place.placeName}
                                   onSelect={(currentValue) => {
                                     setLocation(currentValue);
+                                    setSelectedPlace(place);
                                     setOpenCombobox(false);
                                   }}
                                 >

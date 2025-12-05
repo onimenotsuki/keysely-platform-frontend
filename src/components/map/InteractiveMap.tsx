@@ -27,6 +27,7 @@ interface InteractiveMapProps {
   onSpaceSelect?: (spaceId: string | null) => void;
   showSearchButton?: boolean;
   isLoading?: boolean;
+  mapBounds?: MapBounds | null;
 }
 
 const mapContainerStyle = {
@@ -83,6 +84,7 @@ export const InteractiveMap = ({
   onSpaceSelect,
   showSearchButton = true,
   isLoading = false,
+  mapBounds,
 }: InteractiveMapProps) => {
   const { navigateWithLang } = useLanguageRouting();
   const { t } = useTranslation();
@@ -179,6 +181,40 @@ export const InteractiveMap = ({
       hasMovedToGeo.current = true;
     }
   }, [location]);
+
+  // Handle external map bounds changes (e.g. from URL)
+  useEffect(() => {
+    if (!mapBounds || !mapRef.current) return;
+
+    const { insideBoundingBox } = mapBounds;
+    // Check if these bounds are different from what we last emitted
+    // This prevents infinite loops where map move -> emit bounds -> prop update -> map move
+    if (areBoundsEqual(lastEmittedBounds.current, insideBoundingBox)) {
+      return;
+    }
+
+    const mapInstance = mapRef.current.getMap();
+    const [maxLat, maxLng, minLat, minLng] = insideBoundingBox;
+
+    // Create LngLatBounds from the bbox array [maxLat, maxLng, minLat, minLng]
+    // Mapbox expects [swLng, swLat, neLng, neLat] or LngLatBoundsLike
+    // Our bbox seems to be [maxLat, maxLng, minLat, minLng] based on LocationInput.tsx
+    // Let's verify the order.
+    // In LocationInput: insideBoundingBox: [maxLat, maxLng, minLat, minLng]
+    // Mapbox fitBounds expects: [[minLng, minLat], [maxLng, maxLat]]
+
+    // Mapbox fitBounds accepts [[minLng, minLat], [maxLng, maxLat]]
+    mapInstance.fitBounds(
+      [
+        [minLng, minLat], // sw
+        [maxLng, maxLat], // ne
+      ],
+      { padding: 0, duration: 1000 }
+    );
+
+    // Update last emitted bounds to avoid loop
+    lastEmittedBounds.current = insideBoundingBox;
+  }, [mapBounds]);
 
   const emitBounds = useCallback(() => {
     if (!mapRef.current || !onBoundsChange) return;

@@ -30,18 +30,19 @@ export const LocationInput = ({ value, onFiltersChange, filters }: LocationInput
 
   // Popular cities in Mexico
   const popularCities = useMemo(
-    () => [
-      { placeName: 'Ciudad de México, México', lat: 19.4326, lng: -99.1332 },
-      { placeName: 'Guadalajara, Jalisco, México', lat: 20.6597, lng: -103.3496 },
-      { placeName: 'Monterrey, Nuevo León, México', lat: 25.6866, lng: -100.3161 },
-      { placeName: 'Querétaro, Querétaro, México', lat: 20.5888, lng: -100.3899 },
-      { placeName: 'Puebla, Puebla, México', lat: 19.0414, lng: -98.2063 },
-      { placeName: 'Cancún, Quintana Roo, México', lat: 21.1619, lng: -86.8515 },
-      { placeName: 'Mérida, Yucatán, México', lat: 20.9674, lng: -89.5926 },
-      { placeName: 'Tijuana, Baja California, México', lat: 32.5149, lng: -117.0382 },
-      { placeName: 'León, Guanajuato, México', lat: 21.1221, lng: -101.668 },
-      { placeName: 'Toluca, Estado de México, México', lat: 19.2826, lng: -99.6557 },
-    ],
+    () =>
+      [
+        { placeName: 'Ciudad de México, México', lat: 19.4326, lng: -99.1332 },
+        { placeName: 'Guadalajara, Jalisco, México', lat: 20.6597, lng: -103.3496 },
+        { placeName: 'Monterrey, Nuevo León, México', lat: 25.6866, lng: -100.3161 },
+        { placeName: 'Querétaro, Querétaro, México', lat: 20.5888, lng: -100.3899 },
+        { placeName: 'Puebla, Puebla, México', lat: 19.0414, lng: -98.2063 },
+        { placeName: 'Cancún, Quintana Roo, México', lat: 21.1619, lng: -86.8515 },
+        { placeName: 'Mérida, Yucatán, México', lat: 20.9674, lng: -89.5926 },
+        { placeName: 'Tijuana, Baja California, México', lat: 32.5149, lng: -117.0382 },
+        { placeName: 'León, Guanajuato, México', lat: 21.1221, lng: -101.668 },
+        { placeName: 'Toluca, Estado de México, México', lat: 19.2826, lng: -99.6557 },
+      ] as GeocodeResult[],
     []
   );
 
@@ -61,9 +62,27 @@ export const LocationInput = ({ value, onFiltersChange, filters }: LocationInput
   }, [value]);
 
   const handleSelect = (currentValue: string) => {
-    // Extract city name from location (e.g. "Guadalajara, Jalisco, México" -> "Guadalajara")
-    const cityName = currentValue.split(',')[0].trim();
-    onFiltersChange({ ...filters, city: cityName });
+    // Find the selected place from 'places' or 'popularCities'
+    const selectedPlace =
+      places.find((p) => p.placeName === currentValue) ||
+      popularCities.find((p) => p.placeName === currentValue);
+
+    if (selectedPlace?.bbox) {
+      const [minLng, minLat, maxLng, maxLat] = selectedPlace.bbox;
+      onFiltersChange({
+        ...filters,
+        city: currentValue, // Keep full name for display
+        mapBounds: {
+          ne: { lat: maxLat, lng: maxLng },
+          sw: { lat: minLat, lng: minLng },
+          insideBoundingBox: [maxLat, maxLng, minLat, minLng],
+        },
+      });
+    } else {
+      // Extract city name from location (e.g. "Guadalajara, Jalisco, México" -> "Guadalajara")
+      const cityName = currentValue.split(',')[0].trim();
+      onFiltersChange({ ...filters, city: cityName });
+    }
     setOpenCombobox(false);
   };
 

@@ -15,9 +15,16 @@ interface MapViewProps {
   isLoading: boolean;
   onMapBoundsChange?: (bounds: MapBounds) => void;
   handleReset?: () => void;
+  mapBounds?: MapBounds | null;
 }
 
-export const MapView = ({ spaces, isLoading, onMapBoundsChange, handleReset }: MapViewProps) => {
+export const MapView = ({
+  spaces,
+  isLoading,
+  onMapBoundsChange,
+  handleReset,
+  mapBounds,
+}: MapViewProps) => {
   const { t } = useTranslation();
   const [selectedSpaceId, setSelectedSpaceId] = useState<string | null>(null);
   const mapsConfigured = isMapboxConfigured();
@@ -41,6 +48,7 @@ export const MapView = ({ spaces, isLoading, onMapBoundsChange, handleReset }: M
               selectedSpaceId={selectedSpaceId}
               onSpaceSelect={setSelectedSpaceId}
               isLoading={isLoading}
+              mapBounds={mapBounds}
             />
           </MapboxProvider>
         ) : (

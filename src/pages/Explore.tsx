@@ -11,7 +11,7 @@ import { useSpaces } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
 import { shouldUseTypesense, useTypesenseSearch } from '@/hooks/useTypesenseSearch';
 import { geocodeAddress } from '@/utils/mapboxGeocoding';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 const Explore = () => {
@@ -87,10 +87,47 @@ const Explore = () => {
     }
   }, [urlSearchParams]);
 
+  const handleFiltersChange = useCallback(
+    (newFilters: SearchFiltersType) => {
+      setFilters(newFilters);
+
+      // Update URL params for shareable searches
+      const params = new URLSearchParams();
+      if (newFilters.searchTerm) params.set('search', newFilters.searchTerm);
+      if (newFilters.categoryId) params.set('category', newFilters.categoryId);
+
+      // Only add city to URL if we don't have map bounds, to prefer bbox navigation
+      if (newFilters.city && !newFilters.mapBounds) params.set('city', newFilters.city);
+      if (newFilters.minPrice > 0) params.set('minPrice', newFilters.minPrice.toString());
+
+      if (newFilters.maxPrice < 1000) params.set('maxPrice', newFilters.maxPrice.toString());
+      if (newFilters.minCapacity > 1) params.set('capacity', newFilters.minCapacity.toString());
+      if (newFilters.amenities && newFilters.amenities.length > 0) {
+        params.set('amenities', newFilters.amenities.join(','));
+      }
+      if (newFilters.checkInDate) params.set('checkIn', newFilters.checkInDate.toISOString());
+      if (newFilters.checkOutDate) params.set('checkOut', newFilters.checkOutDate.toISOString());
+      if (newFilters.availableFrom)
+        params.set('availableFrom', newFilters.availableFrom.toISOString());
+      if (newFilters.availableTo) params.set('availableTo', newFilters.availableTo.toISOString());
+
+      if (newFilters.mapBounds) {
+        params.set('ne_lat', newFilters.mapBounds.ne.lat.toString());
+        params.set('ne_lng', newFilters.mapBounds.ne.lng.toString());
+        params.set('sw_lat', newFilters.mapBounds.sw.lat.toString());
+        params.set('sw_lng', newFilters.mapBounds.sw.lng.toString());
+      }
+
+      setUrlSearchParams(params, { replace: true });
+    },
+    [setUrlSearchParams]
+  );
+
   // Fetch city bounds when city changes
   useEffect(() => {
     const fetchCityBounds = async () => {
-      if (!filters.city) {
+      // Only fetch if we have a city but NO map bounds (e.g. initial load from URL with just city)
+      if (!filters.city || filters.mapBounds) {
         setCityBounds(null);
         return;
       }
@@ -98,7 +135,19 @@ const Explore = () => {
       try {
         const result = await geocodeAddress(filters.city);
         if (result && result.bbox) {
+          const [minLng, minLat, maxLng, maxLat] = result.bbox;
           setCityBounds(result.bbox);
+
+          // Automatically update filters to use the bbox
+          // This will trigger handleFiltersChange which updates the URL
+          handleFiltersChange({
+            ...filters,
+            mapBounds: {
+              ne: { lat: maxLat, lng: maxLng },
+              sw: { lat: minLat, lng: minLng },
+              insideBoundingBox: [maxLat, maxLng, minLat, minLng],
+            },
+          });
         } else {
           setCityBounds(null);
         }
@@ -109,7 +158,7 @@ const Explore = () => {
     };
 
     fetchCityBounds();
-  }, [filters.city]);
+  }, [filters.city, filters.mapBounds, filters, handleFiltersChange]);
 
   // Decide whether to use Typesense or Supabase
   const useTypesense = shouldUseTypesense(filters);
@@ -140,36 +189,6 @@ const Explore = () => {
   // Use the appropriate data source
   const spaces = useTypesense ? typesenseData?.spaces || [] : supabaseSpaces || [];
   const isLoading = useTypesense ? typesenseLoading : supabaseLoading;
-
-  const handleFiltersChange = (newFilters: SearchFiltersType) => {
-    setFilters(newFilters);
-
-    // Update URL params for shareable searches
-    const params = new URLSearchParams();
-    if (newFilters.searchTerm) params.set('search', newFilters.searchTerm);
-    if (newFilters.categoryId) params.set('category', newFilters.categoryId);
-    if (newFilters.city) params.set('city', newFilters.city);
-    if (newFilters.minPrice > 0) params.set('minPrice', newFilters.minPrice.toString());
-    if (newFilters.maxPrice < 1000) params.set('maxPrice', newFilters.maxPrice.toString());
-    if (newFilters.minCapacity > 1) params.set('capacity', newFilters.minCapacity.toString());
-    if (newFilters.amenities && newFilters.amenities.length > 0) {
-      params.set('amenities', newFilters.amenities.join(','));
-    }
-    if (newFilters.checkInDate) params.set('checkIn', newFilters.checkInDate.toISOString());
-    if (newFilters.checkOutDate) params.set('checkOut', newFilters.checkOutDate.toISOString());
-    if (newFilters.availableFrom)
-      params.set('availableFrom', newFilters.availableFrom.toISOString());
-    if (newFilters.availableTo) params.set('availableTo', newFilters.availableTo.toISOString());
-
-    if (newFilters.mapBounds) {
-      params.set('ne_lat', newFilters.mapBounds.ne.lat.toString());
-      params.set('ne_lng', newFilters.mapBounds.ne.lng.toString());
-      params.set('sw_lat', newFilters.mapBounds.sw.lat.toString());
-      params.set('sw_lng', newFilters.mapBounds.sw.lng.toString());
-    }
-
-    setUrlSearchParams(params, { replace: true });
-  };
 
   const handleReset = () => {
     const resetFilters: SearchFiltersType = {
@@ -238,6 +257,7 @@ const Explore = () => {
           isLoading={isLoading}
           onMapBoundsChange={handleMapBoundsChange}
           handleReset={handleReset}
+          mapBounds={filters.mapBounds}
         />
       </section>
 
