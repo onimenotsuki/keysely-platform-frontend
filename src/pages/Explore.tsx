@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useSpaces } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
 import { shouldUseTypesense, useTypesenseSearch } from '@/hooks/useTypesenseSearch';
-import { geocodeAddress } from '@/utils/mapboxGeocoding';
+import { geocodeAddress, reverseGeocodeCity } from '@/utils/mapboxGeocoding';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -126,8 +126,8 @@ const Explore = () => {
   // Fetch city bounds when city changes
   useEffect(() => {
     const fetchCityBounds = async () => {
-      // Only fetch if we have a city but NO map bounds (e.g. initial load from URL with just city)
-      if (!filters.city || filters.mapBounds) {
+      // Always fetch city bounds if we have a city, to enable "leave zone" detection
+      if (!filters.city) {
         setCityBounds(null);
         return;
       }
@@ -138,16 +138,18 @@ const Explore = () => {
           const [minLng, minLat, maxLng, maxLat] = result.bbox;
           setCityBounds(result.bbox);
 
-          // Automatically update filters to use the bbox
-          // This will trigger handleFiltersChange which updates the URL
-          handleFiltersChange({
-            ...filters,
-            mapBounds: {
-              ne: { lat: maxLat, lng: maxLng },
-              sw: { lat: minLat, lng: minLng },
-              insideBoundingBox: [maxLat, maxLng, minLat, minLng],
-            },
-          });
+          // Only update map view if we DON'T have map bounds yet (e.g. initial load from URL with just city)
+          // If we already have map bounds (e.g. from Hero search), we respect them
+          if (!filters.mapBounds) {
+            handleFiltersChange({
+              ...filters,
+              mapBounds: {
+                ne: { lat: maxLat, lng: maxLng },
+                sw: { lat: minLat, lng: minLng },
+                insideBoundingBox: [maxLat, maxLng, minLat, minLng],
+              },
+            });
+          }
         } else {
           setCityBounds(null);
         }
@@ -159,6 +161,51 @@ const Explore = () => {
 
     fetchCityBounds();
   }, [filters.city, filters.mapBounds, filters, handleFiltersChange]);
+
+  // Default location logic (Geolocation -> Guadalajara)
+  useEffect(() => {
+    const initializeLocation = async () => {
+      // Check if URL params are empty (no city, no search, no bounds)
+      const hasParams =
+        urlSearchParams.has('city') ||
+        urlSearchParams.has('search') ||
+        urlSearchParams.has('ne_lat');
+
+      if (hasParams) return;
+
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            try {
+              // Reverse geocode to get city name
+              const cityName = await reverseGeocodeCity(
+                position.coords.latitude,
+                position.coords.longitude
+              );
+              if (cityName) {
+                handleFiltersChange({ ...filters, city: cityName });
+              } else {
+                // Fallback if reverse geocoding fails to find a city
+                handleFiltersChange({ ...filters, city: 'Guadalajara' });
+              }
+            } catch (error) {
+              console.error('Error reverse geocoding:', error);
+              handleFiltersChange({ ...filters, city: 'Guadalajara' });
+            }
+          },
+          (error) => {
+            console.error('Geolocation error:', error);
+            handleFiltersChange({ ...filters, city: 'Guadalajara' });
+          }
+        );
+      } else {
+        handleFiltersChange({ ...filters, city: 'Guadalajara' });
+      }
+    };
+
+    initializeLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   // Decide whether to use Typesense or Supabase
   const useTypesense = shouldUseTypesense(filters);

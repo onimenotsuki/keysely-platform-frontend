@@ -104,6 +104,8 @@ const Hero = () => {
       params.append('ne_lng', maxLng.toString());
       params.append('sw_lat', minLat.toString());
       params.append('sw_lng', minLng.toString());
+      // Also include city name for zone tracking in Explore
+      params.append('city', selectedPlace?.placeName);
     } else if (location.trim()) {
       const cityName = location.split(',')[0].trim();
       params.append('city', cityName);

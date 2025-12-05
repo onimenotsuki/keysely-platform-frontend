@@ -1,6 +1,7 @@
 interface MapboxFeature {
   center: [number, number];
   place_name: string;
+  text: string;
   bbox?: [number, number, number, number];
 }
 
@@ -12,6 +13,7 @@ export interface GeocodeResult {
   lat: number;
   lng: number;
   placeName: string;
+  text?: string;
   bbox?: [number, number, number, number];
 }
 
@@ -87,6 +89,7 @@ export const geocodeAddress = async (
     lat,
     lng,
     placeName: feature.place_name,
+    text: feature.text,
     bbox: feature.bbox,
   };
 };
@@ -115,8 +118,28 @@ export const reverseGeocode = async (
     lat: featureLat,
     lng: featureLng,
     placeName: feature.place_name,
+    text: feature.text,
     bbox: feature.bbox,
   };
+};
+
+export const reverseGeocodeCity = async (
+  lat: number,
+  lng: number,
+  options?: FetchMapboxOptions
+): Promise<string | null> => {
+  const data = await fetchFromMapbox(
+    `${lng},${lat}`,
+    {
+      limit: '1',
+      language: 'es,en',
+      types: 'place',
+    },
+    options
+  );
+
+  if (!data || !data.features || data.features.length === 0) return null;
+  return data.features[0].text;
 };
 
 export const autocompletePlaces = async (
@@ -149,6 +172,7 @@ export const autocompletePlaces = async (
       lat,
       lng,
       placeName: feature.place_name,
+      text: feature.text,
       bbox: feature.bbox,
     };
   });
