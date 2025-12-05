@@ -796,6 +796,7 @@
   "map": {
     "viewDetails": "View details",
     "searchThisArea": "Search this area",
+    "goToLocation": "Go to location",
     "notAvailable": "Map not available",
     "notConfigured": "Mapbox is not configured",
     "searchOnMove": "Search as I move"

@@ -798,6 +798,7 @@
   "map": {
     "viewDetails": "Ver detalles",
     "searchThisArea": "Buscar en esta área",
+    "goToLocation": "Ve hacia la ubicación",
     "notAvailable": "Mapa no disponible",
     "notConfigured": "Mapbox no está configurado",
     "searchOnMove": "Buscar al mover"
