@@ -6,50 +6,68 @@
 
 @layer base {
   :root {
-    /* Core Keysely Brand Colors - Nueva Paleta */
-    --primary: 214 44% 18%; /* Navy Blue #1A2B42 - Color principal del logo */
-    --primary-dark: 214 44% 14%; /* Navy Blue más oscuro para hover */
-    --primary-light: 217 91% 60%; /* Action Blue #3B82F6 - Azul de acento */
-    --primary-foreground: 210 17% 98%; /* Blanco suave para texto sobre primary */
+    /* Core Keysely Brand Colors - Flat Palette */
+    --brand-navy: 215 42% 17%;
+    /* RGB(25,40,61) */
+    --brand-blue: 217 91% 60%;
+    /* RGB(59,130,246) */
+    --brand-beige: 27 21% 71%;
+    /* RGB(196,179,165) */
+    --brand-lavender: 240 55% 71%;
+    /* RGB(139,139,221) */
+
+    /* Light Variants for Backgrounds */
+    --brand-navy-light: 215 42% 97%;
+    --brand-blue-light: 217 91% 97%;
+    --brand-beige-light: 27 21% 96%;
+    --brand-lavender-light: 240 55% 97%;
+
+    /* Semantic Mapping */
+    --primary: var(--brand-navy);
+    --primary-dark: 215 42% 12%;
+    --primary-light: var(--brand-blue);
+    --primary-foreground: 0 0% 100%;
 
     /* Neutral Colors */
-    --background: 210 17% 98%; /* Off-White #F8F9FA - Fondo principal */
-    --foreground: 210 9% 18%; /* Dark Gray #343A40 - Texto principal */
-    --muted: 210 7% 46%; /* Medium Gray #6C757D - Texto secundario */
-    --muted-foreground: 210 7% 46%;
+    --background: var(--brand-navy-light);
+    /* Subtle tint */
+    --foreground: 215 42% 17%;
+    /* Navy as text color */
+    --muted: 215 20% 65%;
+    --muted-foreground: 215 20% 45%;
 
     /* UI Elements */
-    --card: 0 0% 100%; /* Blanco puro para tarjetas */
-    --card-foreground: 210 9% 18%;
-    --popover: 0 0% 100%; /* Blanco puro para popovers */
-    --popover-foreground: 210 9% 18%; /* Texto oscuro para popovers */
-    --border: 210 14% 89%; /* Border sutil */
-    --input: 210 17% 95%; /* Inputs con fondo muy claro */
-    --ring: 217 91% 60%; /* Action Blue para focus ring */
+    --card: 0 0% 100%;
+    --card-foreground: 215 42% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 42% 17%;
+    --border: 215 20% 90%;
+    --input: 215 20% 95%;
+    --ring: var(--brand-blue);
 
     /* Interactive States */
-    --accent: 217 91% 60%; /* Action Blue #3B82F6 - CTAs y elementos interactivos */
-    --accent-foreground: 0 0% 100%; /* Blanco para texto sobre accent */
-    --secondary: 210 7% 46%; /* Medium Gray para elementos secundarios */
-    --secondary-foreground: 0 0% 100%;
+    --accent: var(--brand-blue);
+    --accent-foreground: 0 0% 100%;
+    --secondary: var(--brand-beige);
+    --secondary-foreground: 215 42% 17%;
 
-    /* Status Colors - Colores Semánticos */
-    --destructive: 354 70% 54%; /* Error Red #DC3545 */
+    /* Status Colors */
+    --destructive: 354 70% 54%;
     --destructive-foreground: 0 0% 100%;
-    --success: 151 69% 31%; /* Success Green #198754 */
+    --success: 151 69% 31%;
     --success-foreground: 0 0% 100%;
-    --warning: 45 100% 51%; /* Warning Yellow #FFC107 */
-    --warning-foreground: 210 9% 18%; /* Texto oscuro sobre warning */
+    --warning: 45 100% 51%;
+    --warning-foreground: 215 42% 17%;
 
     /* Design System Values */
     --radius: 0.75rem;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 2px 0 rgba(25, 40, 61, 0.05);
+    --shadow: 0 4px 6px -1px rgba(25, 40, 61, 0.1), 0 2px 4px -2px rgba(25, 40, 61, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(25, 40, 61, 0.1), 0 4px 6px -4px rgba(25, 40, 61, 0.1);
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-hero: linear-gradient(135deg, hsl(214 44% 14% / 0.95), hsl(214 44% 18% / 0.9));
+    /* Gradients Removed - Flat Colors (implemented as flat gradients for compatibility) */
+    --gradient-primary: linear-gradient(0deg, hsl(var(--brand-navy)), hsl(var(--brand-navy)));
+    --gradient-hero: linear-gradient(0deg, hsl(var(--brand-navy)), hsl(var(--brand-navy)));
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -274,5 +292,43 @@
 
   .space-card:hover .space-image {
     transform: scale(1.05);
+  }
+  /* Map Loader */
+  .loader {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: block;
+    margin: 15px auto;
+    position: relative;
+    background: hsl(var(--primary));
+    box-shadow:
+      -24px 0 hsl(var(--primary)),
+      24px 0 hsl(var(--primary));
+    box-sizing: border-box;
+    animation: shadowPulse 2s linear infinite;
+  }
+
+  @keyframes shadowPulse {
+    33% {
+      background: hsl(var(--primary));
+      box-shadow:
+        -24px 0 hsl(var(--primary-light)),
+        24px 0 hsl(var(--primary));
+    }
+
+    66% {
+      background: hsl(var(--primary-light));
+      box-shadow:
+        -24px 0 hsl(var(--primary)),
+        24px 0 hsl(var(--primary));
+    }
+
+    100% {
+      background: hsl(var(--primary));
+      box-shadow:
+        -24px 0 hsl(var(--primary)),
+        24px 0 hsl(var(--primary-light));
+    }
   }
 }

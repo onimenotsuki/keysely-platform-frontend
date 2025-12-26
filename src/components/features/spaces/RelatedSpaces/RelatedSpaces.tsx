@@ -7,9 +7,9 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAlgoliaSearch } from '@/hooks/useAlgoliaSearch';
 import type { Space } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useTypesenseSearch } from '@/hooks/useTypesenseSearch';
 
 interface RelatedSpacesProps {
   currentSpace: Space;
@@ -19,8 +19,8 @@ interface RelatedSpacesProps {
 export const RelatedSpaces = ({ currentSpace, excludeSpaceId }: RelatedSpacesProps) => {
   const { t } = useTranslation();
 
-  // Search for related spaces using Algolia
-  const { data, isLoading } = useAlgoliaSearch({
+  // Search for related spaces using Typesense
+  const { data, isLoading } = useTypesenseSearch({
     searchTerm: currentSpace?.city,
     hitsPerPage: 10,
   });

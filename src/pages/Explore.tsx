@@ -4,15 +4,15 @@ import type {
   MapBounds,
   SearchFilters as SearchFiltersType,
 } from '@/components/features/spaces/SearchFilters/types';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
+import { useSpaces } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Search } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { shouldUseTypesense, useTypesenseSearch } from '@/hooks/useTypesenseSearch';
+import { geocodeAddress, reverseGeocodeCity } from '@/utils/mapboxGeocoding';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Footer } from '../components/layout/Footer';
-import { Header } from '../components/layout/Header';
-import { shouldUseAlgolia, useAlgoliaSearch } from '../hooks/useAlgoliaSearch';
-import { useSpaces } from '../hooks/useSpaces';
 
 const Explore = () => {
   const { t } = useTranslation();
@@ -27,6 +27,8 @@ const Explore = () => {
     amenities: [],
     mapBounds: null,
   });
+
+  const [cityBounds, setCityBounds] = useState<[number, number, number, number] | null>(null);
 
   // Handle URL search parameters
   useEffect(() => {
@@ -53,13 +55,160 @@ const Explore = () => {
     const amenities = urlSearchParams.get('amenities');
     if (amenities) newFilters.amenities = amenities.split(',');
 
+    const checkIn = urlSearchParams.get('checkIn');
+    if (checkIn) newFilters.checkInDate = new Date(checkIn);
+
+    const checkOut = urlSearchParams.get('checkOut');
+    if (checkOut) newFilters.checkOutDate = new Date(checkOut);
+
+    const availableFrom = urlSearchParams.get('availableFrom');
+    if (availableFrom) newFilters.availableFrom = new Date(availableFrom);
+
+    const availableTo = urlSearchParams.get('availableTo');
+    if (availableTo) newFilters.availableTo = new Date(availableTo);
+
+    const neLat = urlSearchParams.get('ne_lat');
+    const neLng = urlSearchParams.get('ne_lng');
+    const swLat = urlSearchParams.get('sw_lat');
+    const swLng = urlSearchParams.get('sw_lng');
+
+    if (neLat && neLng && swLat && swLng) {
+      const ne = { lat: Number(neLat), lng: Number(neLng) };
+      const sw = { lat: Number(swLat), lng: Number(swLng) };
+      newFilters.mapBounds = {
+        ne,
+        sw,
+        insideBoundingBox: [ne.lat, ne.lng, sw.lat, sw.lng],
+      };
+    }
+
     if (Object.keys(newFilters).length > 0) {
       setFilters((prev) => ({ ...prev, ...newFilters }));
     }
   }, [urlSearchParams]);
 
-  // Decide whether to use Algolia or Supabase
-  const useAlgolia = shouldUseAlgolia(filters);
+  const handleFiltersChange = useCallback(
+    (newFilters: SearchFiltersType) => {
+      setFilters(newFilters);
+
+      // Update URL params for shareable searches
+      const params = new URLSearchParams();
+      if (newFilters.searchTerm) params.set('search', newFilters.searchTerm);
+      if (newFilters.categoryId) params.set('category', newFilters.categoryId);
+
+      // Only add city to URL if we don't have map bounds, to prefer bbox navigation
+      if (newFilters.city && !newFilters.mapBounds) params.set('city', newFilters.city);
+      if (newFilters.minPrice > 0) params.set('minPrice', newFilters.minPrice.toString());
+
+      if (newFilters.maxPrice < 1000) params.set('maxPrice', newFilters.maxPrice.toString());
+      if (newFilters.minCapacity > 1) params.set('capacity', newFilters.minCapacity.toString());
+      if (newFilters.amenities && newFilters.amenities.length > 0) {
+        params.set('amenities', newFilters.amenities.join(','));
+      }
+      if (newFilters.checkInDate) params.set('checkIn', newFilters.checkInDate.toISOString());
+      if (newFilters.checkOutDate) params.set('checkOut', newFilters.checkOutDate.toISOString());
+      if (newFilters.availableFrom)
+        params.set('availableFrom', newFilters.availableFrom.toISOString());
+      if (newFilters.availableTo) params.set('availableTo', newFilters.availableTo.toISOString());
+
+      if (newFilters.mapBounds) {
+        params.set('ne_lat', newFilters.mapBounds.ne.lat.toString());
+        params.set('ne_lng', newFilters.mapBounds.ne.lng.toString());
+        params.set('sw_lat', newFilters.mapBounds.sw.lat.toString());
+        params.set('sw_lng', newFilters.mapBounds.sw.lng.toString());
+      }
+
+      setUrlSearchParams(params, { replace: true });
+    },
+    [setUrlSearchParams]
+  );
+
+  // Fetch city bounds when city changes
+  useEffect(() => {
+    const fetchCityBounds = async () => {
+      // Always fetch city bounds if we have a city, to enable "leave zone" detection
+      if (!filters.city) {
+        setCityBounds(null);
+        return;
+      }
+
+      try {
+        const result = await geocodeAddress(filters.city);
+        if (result && result.bbox) {
+          const [minLng, minLat, maxLng, maxLat] = result.bbox;
+          setCityBounds(result.bbox);
+
+          // Only update map view if we DON'T have map bounds yet (e.g. initial load from URL with just city)
+          // If we already have map bounds (e.g. from Hero search), we respect them
+          if (!filters.mapBounds) {
+            handleFiltersChange({
+              ...filters,
+              mapBounds: {
+                ne: { lat: maxLat, lng: maxLng },
+                sw: { lat: minLat, lng: minLng },
+                insideBoundingBox: [maxLat, maxLng, minLat, minLng],
+              },
+            });
+          }
+        } else {
+          setCityBounds(null);
+        }
+      } catch (error) {
+        console.error('Error fetching city bounds:', error);
+        setCityBounds(null);
+      }
+    };
+
+    fetchCityBounds();
+  }, [filters.city, filters.mapBounds, filters, handleFiltersChange]);
+
+  // Default location logic (Geolocation -> Guadalajara)
+  useEffect(() => {
+    const initializeLocation = async () => {
+      // Check if URL params are empty (no city, no search, no bounds)
+      const hasParams =
+        urlSearchParams.has('city') ||
+        urlSearchParams.has('search') ||
+        urlSearchParams.has('ne_lat');
+
+      if (hasParams) return;
+
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            try {
+              // Reverse geocode to get city name
+              const cityName = await reverseGeocodeCity(
+                position.coords.latitude,
+                position.coords.longitude
+              );
+              if (cityName) {
+                handleFiltersChange({ ...filters, city: cityName });
+              } else {
+                // Fallback if reverse geocoding fails to find a city
+                handleFiltersChange({ ...filters, city: 'Guadalajara' });
+              }
+            } catch (error) {
+              console.error('Error reverse geocoding:', error);
+              handleFiltersChange({ ...filters, city: 'Guadalajara' });
+            }
+          },
+          (error) => {
+            console.error('Geolocation error:', error);
+            handleFiltersChange({ ...filters, city: 'Guadalajara' });
+          }
+        );
+      } else {
+        handleFiltersChange({ ...filters, city: 'Guadalajara' });
+      }
+    };
+
+    initializeLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
+
+  // Decide whether to use Typesense or Supabase
+  const useTypesense = shouldUseTypesense(filters);
 
   // Supabase search params
   const supabaseParams = useMemo(() => {
@@ -75,36 +224,18 @@ const Explore = () => {
     return params;
   }, [filters]);
 
-  // Algolia search
-  const { data: algoliaData, isLoading: algoliaLoading } = useAlgoliaSearch({
+  // Typesense search
+  const { data: typesenseData, isLoading: typesenseLoading } = useTypesenseSearch({
     ...filters,
-    enabled: useAlgolia,
+    enabled: useTypesense,
   });
 
   // Supabase search
   const { data: supabaseSpaces, isLoading: supabaseLoading } = useSpaces(supabaseParams);
 
   // Use the appropriate data source
-  const spaces = useAlgolia ? algoliaData?.spaces || [] : supabaseSpaces || [];
-  const isLoading = useAlgolia ? algoliaLoading : supabaseLoading;
-
-  const handleFiltersChange = (newFilters: SearchFiltersType) => {
-    setFilters(newFilters);
-
-    // Update URL params for shareable searches
-    const params = new URLSearchParams();
-    if (newFilters.searchTerm) params.set('search', newFilters.searchTerm);
-    if (newFilters.categoryId) params.set('category', newFilters.categoryId);
-    if (newFilters.city) params.set('city', newFilters.city);
-    if (newFilters.minPrice > 0) params.set('minPrice', newFilters.minPrice.toString());
-    if (newFilters.maxPrice < 1000) params.set('maxPrice', newFilters.maxPrice.toString());
-    if (newFilters.minCapacity > 1) params.set('capacity', newFilters.minCapacity.toString());
-    if (newFilters.amenities && newFilters.amenities.length > 0) {
-      params.set('amenities', newFilters.amenities.join(','));
-    }
-
-    setUrlSearchParams(params);
-  };
+  const spaces = useTypesense ? typesenseData?.spaces || [] : supabaseSpaces || [];
+  const isLoading = useTypesense ? typesenseLoading : supabaseLoading;
 
   const handleReset = () => {
     const resetFilters: SearchFiltersType = {
@@ -122,10 +253,31 @@ const Explore = () => {
   };
 
   const handleMapBoundsChange = (bounds: MapBounds) => {
-    setFilters((prev) => ({
-      ...prev,
-      mapBounds: bounds,
-    }));
+    const newFilters = { ...filters, mapBounds: bounds };
+
+    // Check if we moved out of city bounds
+    if (filters.city && cityBounds) {
+      const [minLng, minLat, maxLng, maxLat] = cityBounds;
+      const centerLat = (bounds.ne.lat + bounds.sw.lat) / 2;
+      const centerLng = (bounds.ne.lng + bounds.sw.lng) / 2;
+
+      // Check if center is outside city bounds
+      // Add a small buffer (e.g., 10% of width/height) to avoid accidental clearing
+      const latBuffer = (maxLat - minLat) * 0.1;
+      const lngBuffer = (maxLng - minLng) * 0.1;
+
+      const isOutside =
+        centerLat < minLat - latBuffer ||
+        centerLat > maxLat + latBuffer ||
+        centerLng < minLng - lngBuffer ||
+        centerLng > maxLng + lngBuffer;
+
+      if (isOutside) {
+        newFilters.city = '';
+      }
+    }
+
+    handleFiltersChange(newFilters);
   };
 
   return (
@@ -140,36 +292,20 @@ const Explore = () => {
             onFiltersChange={handleFiltersChange}
             onReset={handleReset}
             resultsCount={spaces.length}
+            facets={typesenseData?.facets}
           />
         </div>
       </section>
 
       {/* Results - Full Width - Fixed height for map view */}
       <section className="w-full">
-        {isLoading && (
-          <MapView spaces={[]} isLoading={true} onMapBoundsChange={handleMapBoundsChange} />
-        )}
-
-        {!isLoading && spaces && spaces.length > 0 && (
-          <MapView spaces={spaces} isLoading={false} onMapBoundsChange={handleMapBoundsChange} />
-        )}
-
-        {!isLoading && (!spaces || spaces.length === 0) && (
-          <div className="container mx-auto px-4 h-[calc(100vh-200px)] flex items-center justify-center">
-            <div className="text-center">
-              <div className="max-w-md mx-auto">
-                <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">
-                  {t('explore.searchBar.noSpacesFound')}
-                </h3>
-                <p className="text-muted-foreground mb-6">{t('explore.searchBar.adjustFilters')}</p>
-                <Button onClick={handleReset} variant="outline">
-                  {t('explore.searchBar.clearFilters')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <MapView
+          spaces={spaces}
+          isLoading={isLoading}
+          onMapBoundsChange={handleMapBoundsChange}
+          handleReset={handleReset}
+          mapBounds={filters.mapBounds}
+        />
       </section>
 
       <Footer />

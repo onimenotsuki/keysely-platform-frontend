@@ -1,6 +1,7 @@
 import { amenitiesConfig } from '@/config/amenitiesConfig';
 import { useTranslation } from '@/hooks/useTranslation';
-import { Checkbox } from '../../../ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Label } from '../../../ui/label';
 import { SearchFilters } from './types';
 
@@ -32,24 +33,26 @@ export const AmenitiesFilter = ({
   return (
     <div className="space-y-3">
       <Label className="text-base font-semibold">Amenidades</Label>
-      <div className="grid max-h-64 grid-cols-1 gap-2 overflow-y-auto pr-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="flex flex-wrap gap-2">
         {amenitiesConfig.map((amenity) => {
           const Icon = amenity.icon;
+          const isSelected = selectedAmenities?.includes(amenity.value);
+
           return (
-            <div key={amenity.key} className="flex items-center space-x-3 p-2 transition-colors">
-              <Checkbox
-                id={`amenity-${amenity.key}`}
-                checked={selectedAmenities?.includes(amenity.value) || false}
-                onCheckedChange={() => handleAmenityToggle(amenity.value)}
-              />
-              <Icon className="h-4 w-4 text-primary stroke-[1.5] flex-shrink-0" strokeWidth={1.5} />
-              <label
-                htmlFor={`amenity-${amenity.key}`}
-                className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
-              >
-                {t(`listSpace.amenitiesList.${amenity.key}`)}
-              </label>
-            </div>
+            <Badge
+              key={amenity.key}
+              variant={isSelected ? 'default' : 'outline'}
+              className={cn(
+                'cursor-pointer px-3 py-1.5 text-sm font-normal transition-all hover:bg-primary/90 hover:text-primary-foreground',
+                isSelected
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-white hover:bg-gray-100 hover:text-foreground'
+              )}
+              onClick={() => handleAmenityToggle(amenity.value)}
+            >
+              <Icon className="mr-2 h-4 w-4" />
+              {t(`listSpace.amenitiesList.${amenity.key}`)}
+            </Badge>
           );
         })}
       </div>

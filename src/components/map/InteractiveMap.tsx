@@ -1,6 +1,8 @@
 import type { MapBounds } from '@/components/features/spaces/SearchFilters/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import type { Space } from '@/hooks/useSpaces';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -9,7 +11,8 @@ import { MAPBOX_FIT_PADDING, MAPBOX_STYLE } from '@/utils/mapboxConfig';
 import { MapPin } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Map, {
+import {
+  Map,
   MapRef,
   Marker,
   Popup,
@@ -23,6 +26,8 @@ interface InteractiveMapProps {
   selectedSpaceId?: string | null;
   onSpaceSelect?: (spaceId: string | null) => void;
   showSearchButton?: boolean;
+  isLoading?: boolean;
+  mapBounds?: MapBounds | null;
 }
 
 const mapContainerStyle = {
@@ -78,16 +83,20 @@ export const InteractiveMap = ({
   selectedSpaceId,
   onSpaceSelect,
   showSearchButton = true,
+  isLoading = false,
+  mapBounds,
 }: InteractiveMapProps) => {
   const { navigateWithLang } = useLanguageRouting();
   const { t } = useTranslation();
   const mapRef = useRef<MapRef | null>(null);
-  const initialBoundsSet = useRef(false);
+  const hasFitToSpaces = useRef(false);
+  const hasMovedToGeo = useRef(false);
   const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
   const viewStateRef = useRef<ViewState>(defaultCenter);
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const [showSearchThisArea, setShowSearchThisArea] = useState(false);
+  const [searchOnMove, setSearchOnMove] = useState(true);
   const [mapError, setMapError] = useState<string | null>(null);
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const lastEmittedBounds = useRef<[number, number, number, number] | null>(null);
@@ -104,9 +113,7 @@ export const InteractiveMap = ({
           longitude: position.coords.longitude,
         });
       },
-      (err) => {
-        globalThis.alert(`[Mapbox] Geolocation error: ${err.message}`);
-      },
+      (_err) => {},
       {
         enableHighAccuracy: true,
         timeout: 5000,
@@ -142,7 +149,7 @@ export const InteractiveMap = ({
 
   // Fit bounds to show all spaces on initial load
   useEffect(() => {
-    if (!mapRef.current || initialBoundsSet.current) return;
+    if (!mapRef.current || hasFitToSpaces.current) return;
     if (activeSpaces.length === 0) return;
 
     const bounds = createBoundsFromSpaces(activeSpaces);
@@ -150,12 +157,15 @@ export const InteractiveMap = ({
     if (!bounds.isEmpty()) {
       const mapInstance = mapRef.current.getMap();
       mapInstance.fitBounds(bounds, { padding: MAPBOX_FIT_PADDING, duration: 0 });
-      initialBoundsSet.current = true;
+      hasFitToSpaces.current = true;
     }
   }, [activeSpaces]);
 
   useEffect(() => {
-    if (!location) return;
+    if (!location || hasMovedToGeo.current) return;
+
+    // If we already fit to spaces, don't move to geolocation
+    if (hasFitToSpaces.current) return;
 
     const mapInstance = mapRef.current?.getMap() as mapboxgl.Map | undefined;
     if (mapInstance?.easeTo) {
@@ -168,9 +178,43 @@ export const InteractiveMap = ({
         latitude: location.latitude,
         longitude: location.longitude,
       };
+      hasMovedToGeo.current = true;
     }
-    initialBoundsSet.current = true;
   }, [location]);
+
+  // Handle external map bounds changes (e.g. from URL)
+  useEffect(() => {
+    if (!mapBounds || !mapRef.current) return;
+
+    const { insideBoundingBox } = mapBounds;
+    // Check if these bounds are different from what we last emitted
+    // This prevents infinite loops where map move -> emit bounds -> prop update -> map move
+    if (areBoundsEqual(lastEmittedBounds.current, insideBoundingBox)) {
+      return;
+    }
+
+    const mapInstance = mapRef.current.getMap();
+    const [maxLat, maxLng, minLat, minLng] = insideBoundingBox;
+
+    // Create LngLatBounds from the bbox array [maxLat, maxLng, minLat, minLng]
+    // Mapbox expects [swLng, swLat, neLng, neLat] or LngLatBoundsLike
+    // Our bbox seems to be [maxLat, maxLng, minLat, minLng] based on LocationInput.tsx
+    // Let's verify the order.
+    // In LocationInput: insideBoundingBox: [maxLat, maxLng, minLat, minLng]
+    // Mapbox fitBounds expects: [[minLng, minLat], [maxLng, maxLat]]
+
+    // Mapbox fitBounds accepts [[minLng, minLat], [maxLng, maxLat]]
+    mapInstance.fitBounds(
+      [
+        [minLng, minLat], // sw
+        [maxLng, maxLat], // ne
+      ],
+      { padding: 0, duration: 1000 }
+    );
+
+    // Update last emitted bounds to avoid loop
+    lastEmittedBounds.current = insideBoundingBox;
+  }, [mapBounds]);
 
   const emitBounds = useCallback(() => {
     if (!mapRef.current || !onBoundsChange) return;
@@ -197,31 +241,28 @@ export const InteractiveMap = ({
     setShowSearchThisArea(false);
   }, [onBoundsChange]);
 
-  const handleMove = useCallback(
-    (evt: ViewStateChangeEvent) => {
-      const nextViewState = evt.viewState;
-      const hasChanged = !areViewStatesEqual(viewStateRef.current, nextViewState);
+  const handleMove = useCallback((evt: ViewStateChangeEvent) => {
+    const nextViewState = evt.viewState;
+    const hasChanged = !areViewStatesEqual(viewStateRef.current, nextViewState);
 
-      if (hasChanged) {
-        viewStateRef.current = {
-          latitude: nextViewState.latitude,
-          longitude: nextViewState.longitude,
-          zoom: nextViewState.zoom,
-          bearing: nextViewState.bearing ?? 0,
-          pitch: nextViewState.pitch ?? 0,
-        };
-      }
+    if (hasChanged) {
+      viewStateRef.current = {
+        latitude: nextViewState.latitude,
+        longitude: nextViewState.longitude,
+        zoom: nextViewState.zoom,
+        bearing: nextViewState.bearing ?? 0,
+        pitch: nextViewState.pitch ?? 0,
+      };
+    }
+  }, []);
 
-      if (!onBoundsChange || !hasChanged) return;
-
-      if (showSearchButton) {
-        setShowSearchThisArea(true);
-      } else {
-        emitBounds();
-      }
-    },
-    [emitBounds, onBoundsChange, showSearchButton]
-  );
+  const handleMoveEnd = useCallback(() => {
+    if (searchOnMove) {
+      emitBounds();
+    } else {
+      setShowSearchThisArea(true);
+    }
+  }, [searchOnMove, emitBounds]);
 
   const handleSearchThisArea = useCallback(() => {
     emitBounds();
@@ -256,11 +297,13 @@ export const InteractiveMap = ({
       <Map
         ref={mapRef}
         mapboxAccessToken={accessToken}
-        mapLib={mapboxgl as unknown as typeof import('mapbox-gl')}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mapLib={mapboxgl as any}
         mapStyle={MAPBOX_STYLE}
         style={mapContainerStyle}
         initialViewState={defaultCenter}
         onMove={handleMove}
+        onMoveEnd={handleMoveEnd}
         onError={(event) => {
           const message = event?.error?.message ?? 'Mapbox failed to load.';
           console.error('[Mapbox] error:', message, event?.error);
@@ -372,8 +415,29 @@ export const InteractiveMap = ({
         </div>
       )}
 
-      {showSearchButton && showSearchThisArea && !mapError && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+      {/* Search on Move Toggle */}
+      <div className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur-sm p-2 rounded-lg shadow-sm border flex items-center gap-2">
+        <Switch
+          id="search-mode"
+          checked={searchOnMove}
+          onCheckedChange={(checked) => {
+            setSearchOnMove(checked);
+            if (checked) {
+              // Trigger search immediately if turned on
+              emitBounds();
+            } else {
+              // Show "Search This Area" button if turned off
+              setShowSearchThisArea(true);
+            }
+          }}
+        />
+        <Label htmlFor="search-mode" className="text-sm font-medium cursor-pointer min-w-[100px]">
+          {isLoading ? <span className="loader !m-0 !mx-auto"></span> : t('map.searchOnMove')}
+        </Label>
+      </div>
+
+      {showSearchButton && showSearchThisArea && !mapError && !isLoading && (
+        <div className="absolute top-4 left-4 z-10">
           <Button
             onClick={handleSearchThisArea}
             className="bg-primary hover:bg-primary-light text-primary-foreground shadow-lg"

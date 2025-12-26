@@ -22,7 +22,7 @@
   "hero": {
     "title": "Encuentra el espacio de trabajo perfecto",
     "subtitle": "Descubre y reserva oficinas, salas de juntas y espacios de coworking en todo el mundo por hora, día o mes",
-    "searchPlaceholder": "Buscar por ubicación, tipo de espacio o características...",
+    "searchPlaceholder": "Buscar por tipo de espacio o características...",
     "searchButton": "Buscar",
     "search": "Buscar",
     "whatLabel": "¿Qué estás planeando?",
@@ -105,6 +105,10 @@
     "priceRange": "Rango de precio",
     "anyPrice": "Cualquier precio",
     "results": "{{count}} espacios encontrados",
+    "resultsCount": {
+      "singular": "espacio encontrado",
+      "plural": "espacios encontrados"
+    },
     "viewDetails": "Ver detalles",
     "bookNow": "Reservar ahora",
     "loadMore": "Cargar más espacios",
@@ -121,6 +125,7 @@
       "applyFilters": "Aplicar Filtros",
       "filters": "Filtros",
       "noSpacesFound": "No se encontraron espacios",
+      "noSpacesFoundDescription": "Intenta ajustar los filtros o buscar en una zona diferente del mapa.",
       "adjustFilters": "Intenta ajustar tus filtros de búsqueda o explora diferentes criterios.",
       "clearFilters": "Limpiar filtros",
       "removeFilter": "Remover filtro",
@@ -142,6 +147,23 @@
       "whiteboard": "Pizarrón",
       "airConditioning": "Aire acondicionado",
       "kitchen": "Cocina"
+    },
+    "activeFilters": {
+      "removeCategory": "Remover filtro de categoría",
+      "removeLocation": "Remover filtro de ubicación",
+      "removePrice": "Remover filtro de precio",
+      "priceRange": "Rango de precio",
+      "people": "personas",
+      "removeCapacity": "Remover filtro de capacidad",
+      "checkIn": "Entrada",
+      "removeCheckIn": "Remover filtro de fecha de entrada",
+      "checkOut": "Salida",
+      "removeCheckOut": "Remover filtro de fecha de salida",
+      "from": "Desde",
+      "removeAvailableFrom": "Remover filtro de disponibilidad desde",
+      "to": "Hasta",
+      "removeAvailableTo": "Remover filtro de disponibilidad hasta",
+      "removeAmenity": "Remover filtro {{amenity}}"
     }
   },
   "common": {
@@ -776,8 +798,10 @@
   "map": {
     "viewDetails": "Ver detalles",
     "searchThisArea": "Buscar en esta área",
+    "goToLocation": "Ve hacia la ubicación",
     "notAvailable": "Mapa no disponible",
-    "notConfigured": "Mapbox no está configurado"
+    "notConfigured": "Mapbox no está configurado",
+    "searchOnMove": "Buscar al mover"
   },
   "hostProfile": {
     "title": "Perfil de Anfitrión",
