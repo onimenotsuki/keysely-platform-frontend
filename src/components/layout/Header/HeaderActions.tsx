@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom';
+
+import { createListSpaceStepPath } from '@/pages/list-space/paths';
+
 import { useAuth } from '../../../contexts/AuthContext';
 import { useLanguageContext } from '../../../contexts/LanguageContext';
 import { useTranslation } from '../../../hooks/useTranslation';
+import { useProfile } from '@/hooks/useProfile';
 import LanguageSelector from '../../LanguageSelector';
 import NotificationBell from '../../NotificationBell';
 
@@ -13,6 +17,7 @@ export const HeaderActions = ({ isScrolled = false }: HeaderActionsProps) => {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const { language } = useLanguageContext();
+  const { data: profile } = useProfile();
 
   const handleSignOut = async () => {
     await signOut();
@@ -33,12 +38,14 @@ export const HeaderActions = ({ isScrolled = false }: HeaderActionsProps) => {
 
       {user ? (
         <>
-          <Link to={`/${language}/owner-dashboard`}>
-            <button className={buttonClass}>
-              <i className="fas fa-chart-line mr-2"></i>
-              {t('header.dashboard')}
-            </button>
-          </Link>
+          {profile?.is_host && (
+            <Link to={`/${language}/owner-dashboard`}>
+              <button className={buttonClass}>
+                <i className="fas fa-chart-line mr-2"></i>
+                {t('header.hostDashboard')}
+              </button>
+            </Link>
+          )}
           <Link to={`/${language}/messages`}>
             <button className={buttonClass}>
               <i className="fas fa-comments mr-2"></i>
@@ -51,7 +58,7 @@ export const HeaderActions = ({ isScrolled = false }: HeaderActionsProps) => {
               Favoritos
             </button>
           </Link>
-          <Link to={`/${language}/list-space`}>
+          <Link to={createListSpaceStepPath(language, user.id, 0)}>
             <button className={buttonClass}>
               <i className="fas fa-plus mr-2"></i>
               {t('header.listSpace')}

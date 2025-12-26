@@ -1,14 +1,25 @@
 import { useHeroBanner } from '@/hooks/useContentful';
-import { Calendar, MapPin } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { autocompletePlaces, GeocodeResult } from '@/utils/mapboxGeocoding';
+import { Check, MapPin } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { DateRange } from 'react-day-picker';
 import { useNavigate } from 'react-router-dom';
 import heroImage from '../assets/hero-office.jpg';
 import { useTranslation } from '../hooks/useTranslation';
+import DateRangePicker from '@/components/DateRangePicker';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from './ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('');
-  const [date, setDate] = useState('');
+  const [location, setLocation] = useState(''); // Stores the display value (full name or typed text)
+  const [selectedPlace, setSelectedPlace] = useState<GeocodeResult | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [places, setPlaces] = useState<GeocodeResult[]>([]);
+  // inputValue is now redundant if we use location for the input text,
+  // but let's keep location as the "value" and use it for driving the search.
   const { t, language } = useTranslation();
   const navigate = useNavigate();
   const { data: heroBannerData, isLoading: isLoadingHeroData } = useHeroBanner();
@@ -41,12 +52,59 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, [contentfulImages.length]);
 
+  // Popular cities in Mexico
+  const popularCities = useMemo(
+    () => [
+      { placeName: 'Ciudad de México, México', lat: 19.4326, lng: -99.1332 },
+      { placeName: 'Guadalajara, Jalisco, México', lat: 20.6597, lng: -103.3496 },
+      { placeName: 'Monterrey, Nuevo León, México', lat: 25.6866, lng: -100.3161 },
+      { placeName: 'Querétaro, Querétaro, México', lat: 20.5888, lng: -100.3899 },
+      { placeName: 'Puebla, Puebla, México', lat: 19.0414, lng: -98.2063 },
+      { placeName: 'Cancún, Quintana Roo, México', lat: 21.1619, lng: -86.8515 },
+      { placeName: 'Mérida, Yucatán, México', lat: 20.9674, lng: -89.5926 },
+      { placeName: 'Tijuana, Baja California, México', lat: 32.5149, lng: -117.0382 },
+      { placeName: 'León, Guanajuato, México', lat: 21.1221, lng: -101.668 },
+      { placeName: 'Toluca, Estado de México, México', lat: 19.2826, lng: -99.6557 },
+    ],
+    []
+  );
+
+  // Handle autocomplete search
+  useEffect(() => {
+    if (!location || location.length < 3) {
+      setPlaces([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const results = await autocompletePlaces(location);
+      setPlaces(results);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [location]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (searchQuery.trim()) params.append('search', searchQuery.trim());
-    if (location.trim()) params.append('location', location.trim());
-    if (date) params.append('date', date);
+
+    // Extract city name from location (e.g. "Guadalajara, Jalisco, México" -> "Guadalajara")
+    if (selectedPlace?.bbox) {
+      const [minLng, minLat, maxLng, maxLat] = selectedPlace.bbox;
+      params.append('ne_lat', maxLat.toString());
+      params.append('ne_lng', maxLng.toString());
+      params.append('sw_lat', minLat.toString());
+      params.append('sw_lng', minLng.toString());
+      // Also include city name for zone tracking in Explore
+      params.append('city', selectedPlace?.placeName);
+    } else if (location.trim()) {
+      const cityName = location.split(',')[0].trim();
+      params.append('city', cityName);
+    }
+
+    if (dateRange?.from) params.append('checkIn', dateRange.from.toISOString());
+    if (dateRange?.to) params.append('checkOut', dateRange.to.toISOString());
 
     const queryString = params.toString();
     navigate(`/${language}/explore${queryString ? `?${queryString}` : ''}`);
@@ -114,7 +172,7 @@ const Hero = () => {
       )}
 
       {/* Dark overlay for better text contrast */}
-      <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black/70 via-black/60 to-black/70 z-10"></div>
+      <div className="absolute inset-0 w-full h-full bg-black/60 z-10"></div>
 
       {/* Content wrapper */}
       <div className="relative z-20 w-full px-4 sm:px-6 lg:px-8 py-20">
@@ -156,13 +214,84 @@ const Hero = () => {
                 </label>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder={t('hero.locationPlaceholder')}
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full text-base text-gray-900 placeholder:text-gray-400 border-none outline-none focus:ring-0"
-                  />
+                  <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                    <PopoverTrigger asChild>
+                      <input
+                        type="text"
+                        role="combobox"
+                        aria-expanded={openCombobox}
+                        placeholder={t('hero.locationPlaceholder')}
+                        value={location}
+                        onChange={(e) => {
+                          setLocation(e.target.value);
+                          setSelectedPlace(null);
+                          setOpenCombobox(true);
+                        }}
+                        className="w-full text-base text-gray-900 placeholder:text-gray-400 border-none outline-none focus:ring-0 bg-transparent p-0 truncate"
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[300px] p-0"
+                      align="start"
+                      onOpenAutoFocus={(e) => e.preventDefault()}
+                    >
+                      <Command shouldFilter={false}>
+                        <CommandList>
+                          <CommandEmpty>No se encontraron lugares.</CommandEmpty>
+                          {!location && (
+                            <CommandGroup heading="Ciudades Populares">
+                              {popularCities.map((city) => (
+                                <CommandItem
+                                  key={city.placeName}
+                                  value={city.placeName}
+                                  onSelect={(currentValue) => {
+                                    setLocation(currentValue);
+                                    // Popular cities don't have bbox in the hardcoded list currently,
+                                    // so we pass null or cast if we wanted to add it later.
+                                    // For now, this will fall back to using 'city' param which is fine for popular cities
+                                    // unless we want to add hardcoded bboxes.
+                                    setSelectedPlace(city as unknown as GeocodeResult);
+                                    setOpenCombobox(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      location === city.placeName ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                  />
+                                  {city.placeName}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                          {location && places.length > 0 && (
+                            <CommandGroup heading="Resultados">
+                              {places.map((place) => (
+                                <CommandItem
+                                  key={place.placeName}
+                                  value={place.placeName}
+                                  onSelect={(currentValue) => {
+                                    setLocation(currentValue);
+                                    setSelectedPlace(place);
+                                    setOpenCombobox(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      'mr-2 h-4 w-4',
+                                      location === place.placeName ? 'opacity-100' : 'opacity-0'
+                                    )}
+                                  />
+                                  {place.placeName}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
@@ -172,21 +301,12 @@ const Hero = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('hero.whenLabel')}
                   </label>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                    <input
-                      type="text"
-                      placeholder={t('hero.datePlaceholder')}
-                      value={date}
-                      onChange={(e) => setDate(e.target.value)}
-                      className="w-full text-base text-gray-900 placeholder:text-gray-400 border-none outline-none focus:ring-0"
-                    />
-                  </div>
+                  <DateRangePicker date={dateRange} setDate={setDateRange} />
                 </div>
 
                 <button
                   type="submit"
-                  className="bg-[#1A2B42] hover:bg-[#3B82F6] text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg whitespace-nowrap"
+                  className="h-12 bg-primary hover:bg-[#3B82F6] text-white px-8 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all whitespace-nowrap"
                 >
                   {t('hero.search')}
                 </button>

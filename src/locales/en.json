@@ -4,12 +4,24 @@
     "explore": "Explore",
     "howItWorks": "How it works",
     "listSpace": "List your space",
-    "profile": "Profile"
+    "profile": "Profile",
+    "userMenu": {
+      "signInOrRegister": "Sign in or register",
+      "profile": "Profile",
+      "dashboard": "User dashboard",
+      "hostDashboard": "Host dashboard",
+      "paymentSettings": "Payment settings",
+      "mySpaces": "My spaces",
+      "bookings": "Bookings",
+      "favorites": "Favorites list",
+      "signOut": "Sign out"
+    },
+    "hostDashboard": "Host dashboard"
   },
   "hero": {
     "title": "Find the perfect workspace",
     "subtitle": "Discover and book offices, meeting rooms and coworking spaces worldwide by the hour, day or month",
-    "searchPlaceholder": "Search by location, space type, or features...",
+    "searchPlaceholder": "Search by space type, or features...",
     "searchButton": "Search",
     "search": "Search",
     "whatLabel": "What are you planning?",
@@ -92,9 +104,39 @@
     "priceRange": "Price range",
     "anyPrice": "Any price",
     "results": "{{count}} spaces found",
+    "resultsCount": {
+      "singular": "space found",
+      "plural": "spaces found"
+    },
     "viewDetails": "View details",
     "bookNow": "Book now",
     "loadMore": "Load more spaces",
+    "searchBar": {
+      "whatLookingFor": "What are you looking for?",
+      "searchSpaces": "Search spaces...",
+      "location": "Location",
+      "whereToGo": "Where to?",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "addDate": "Add date",
+      "advancedFilters": "Advanced Filters",
+      "clear": "Clear",
+      "applyFilters": "Apply Filters",
+      "filters": "Filters",
+      "noSpacesFound": "No spaces found",
+      "noSpacesFoundDescription": "Try adjusting the filters or searching in a different area of the map.",
+      "adjustFilters": "Try adjusting your search filters or explore different criteria.",
+      "clearFilters": "Clear filters",
+      "removeFilter": "Remove filter",
+      "categoryLabel": "Category",
+      "allCategories": "All categories",
+      "priceLabel": "Price per hour",
+      "priceMin": "Minimum price",
+      "priceMax": "Maximum price",
+      "selectedFilters": "Selected",
+      "clearFiltersButton": "Remove filters",
+      "showResults": "Show {{count}} spaces"
+    },
     "features": {
       "wifi": "WiFi",
       "coffee": "Coffee",
@@ -104,10 +146,29 @@
       "whiteboard": "Whiteboard",
       "airConditioning": "Air conditioning",
       "kitchen": "Kitchen"
+    },
+    "activeFilters": {
+      "removeCategory": "Remove category filter",
+      "removeLocation": "Remove location filter",
+      "removePrice": "Remove price filter",
+      "priceRange": "Price range",
+      "people": "people",
+      "removeCapacity": "Remove capacity filter",
+      "checkIn": "Check-in",
+      "removeCheckIn": "Remove check-in date filter",
+      "checkOut": "Check-out",
+      "removeCheckOut": "Remove check-out date filter",
+      "from": "From",
+      "removeAvailableFrom": "Remove available from filter",
+      "to": "To",
+      "removeAvailableTo": "Remove available to filter",
+      "removeAmenity": "Remove {{amenity}} filter"
     }
   },
   "common": {
+    "edit": "Edit",
     "perHour": "/hour",
+    "perHourShort": "/hr",
     "perDay": "/day",
     "perMonth": "/month",
     "rating": "Rating",
@@ -130,7 +191,19 @@
     "manageSpaces": "Manage Spaces",
     "goToDashboard": "Go to Dashboard",
     "spaceManagement": "Space Management",
-    "spaceManagementDesc": "Manage your listed spaces, review bookings and configure payments."
+    "spaceManagementDesc": "Manage your listed spaces, review bookings and configure payments.",
+    "exploreSpaces": "Explore Spaces",
+    "seeAll": "See All",
+    "back": "Back",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "add": "Add",
+    "delete": "Delete"
+  },
+  "errors": {
+    "notAuthenticated": "You must be signed in to perform this action.",
+    "genericError": "Something went wrong. Please try again."
   },
   "spaceDetail": {
     "home": "Home",
@@ -151,6 +224,12 @@
     "selectDate": "Select Date",
     "startTime": "Start Time",
     "endTime": "End Time",
+    "selectTimeSlot": "Select an hour",
+    "selectTimePlaceholder": "Choose an available hour",
+    "selectEndTime": "Select an end time",
+    "selectStartTimePrompt": "Choose a start time to continue.",
+    "noAvailabilityForDay": "No hourly slots are available for this date.",
+    "loadingAvailability": "Loading availability…",
     "numberOfGuests": "Number of Guests",
     "serviceFee": "Service fee",
     "total": "Total",
@@ -161,7 +240,28 @@
     "contactOwner": "Contact Owner",
     "pleaseSignIn": "Please sign in to make a booking",
     "signInFavorites": "Please sign in to save favorites",
-    "failedBooking": "Failed to create booking"
+    "failedBooking": "Failed to create booking",
+    "noTimeSelected": "Choose a start and end time before booking.",
+    "unavailableSelectedTime": "The selected time is no longer available. Please pick another slot.",
+    "share": "Share",
+    "save": "Save",
+    "saved": "Saved",
+    "showAllPhotos": "Show all {{count}} photos",
+    "whereYoullBe": "Where you'll be",
+    "mapNotAvailable": "Map not available",
+    "mapNotConfigured": "Mapbox is not configured",
+    "relatedSpacesTitle": "Popular spaces near {{city}}",
+    "shareDialog": {
+      "title": "Share this space",
+      "copyLink": "Copy link",
+      "email": "Email",
+      "whatsapp": "WhatsApp",
+      "facebook": "Facebook",
+      "twitter": "X",
+      "moreOptions": "More options",
+      "linkCopied": "Link copied to clipboard",
+      "rentalUnit": "Rental unit"
+    }
   },
   "listSpace": {
     "title": "List Your Workspace",
@@ -335,6 +435,254 @@
       }
     }
   },
+  "listSpaceOnboarding": {
+    "badge": "Step {{current}} of {{total}}",
+    "stepCounter": "Step {{current}} of {{total}}",
+    "progressLabel": "Progress: {{current}} of {{total}} steps",
+    "steps": {
+      "describe": {
+        "title": "Describe your space",
+        "subtitle": "Share the essential details so professionals can understand what you offer.",
+        "helper": "Tell us the basics: name of the space, its capacity, and where guests will find it. You can adjust these details later."
+      },
+      "highlight": {
+        "title": "Make it stand out",
+        "subtitle": "Showcase what makes your workspace unique with photos, amenities, and a compelling story.",
+        "helper": "Add amenities, describe the experience, and upload high-quality photos so guests feel confident booking."
+      },
+      "publish": {
+        "title": "Finish and publish",
+        "subtitle": "Set your pricing, define availability, and get ready to go live.",
+        "helper": "Choose when your space is open, confirm your rates, and review our guidelines before publishing."
+      }
+    },
+    "sections": {
+      "basics": {
+        "title": "Basic details",
+        "mapLabel": "Pin the exact location of your space"
+      },
+      "highlight": {
+        "details": "Share the highlights",
+        "descriptionPlaceholder": "Tell guests what makes your workspace ideal for them, including amenities, ambiance, and any special rules.",
+        "amenitiesTitle": "Select the amenities available in your space",
+        "photosHelper": "Upload at least one high-quality image. Add up to 10 photos to showcase every angle of your workspace."
+      },
+      "publish": {
+        "pricePlaceholder": "e.g., 450",
+        "days": "Choose the days that guests can book",
+        "readyTitle": "Almost ready to publish",
+        "readyDescription": "Review your details and make sure everything looks accurate before you publish your listing."
+      }
+    },
+    "actions": {
+      "back": "Back",
+      "next": "Next step",
+      "publish": "Publish listing"
+    },
+    "errors": {
+      "titleRequired": "Title is required",
+      "titleMax": "Title must be fewer than 100 characters",
+      "descriptionRequired": "Description is required",
+      "descriptionMax": "Description must be fewer than 1000 characters",
+      "categoryRequired": "Category is required",
+      "capacityInvalid": "Enter a valid capacity",
+      "capacityMinimum": "Capacity must be at least 1",
+      "areaInvalid": "Enter a valid area in square meters",
+      "areaMinimum": "Area must be greater than 0",
+      "addressRequired": "Address is required",
+      "cityRequired": "City is required",
+      "priceInvalid": "Enter a valid price",
+      "priceRequired": "Price must be at least 1",
+      "imagesRequired": "Add at least one photo to continue"
+    }
+  },
+  "listSpaceWizard": {
+    "stepCounter": "Step {{current}} of {{total}}",
+    "badge": "Step {{current}} of {{total}}",
+    "progressLabel": "Progress: {{current}} of {{total}} steps",
+    "actions": {
+      "back": "Back",
+      "next": "Next step",
+      "review": "Finish"
+    },
+    "amenityLabels": {
+      "highSpeedWifi": "High-speed WiFi",
+      "printerScanner": "Printer/Scanner",
+      "coffeeAndTea": "Coffee & Tea",
+      "kitchenAccess": "Kitchen Access",
+      "airConditioning": "Air Conditioning",
+      "naturalLight": "Natural Light",
+      "ergonomicFurniture": "Ergonomic Furniture",
+      "whiteboard": "Whiteboard",
+      "projectorScreen": "Projector/Screen",
+      "videoConferencing": "Video Conferencing",
+      "securitySystem": "Security System",
+      "access24x7": "24/7 Access",
+      "receptionServices": "Reception Services",
+      "cleaningService": "Cleaning Service",
+      "parking": "Parking",
+      "publicTransport": "Public Transport",
+      "bikeStorage": "Bike Storage",
+      "showerFacilities": "Shower Facilities",
+      "phoneBooth": "Phone Booth",
+      "lockers": "Lockers"
+    },
+    "step1": {
+      "sectionTitle": "Tell us about your space",
+      "savedTitle": "Basic information saved",
+      "savedDescription": "Your space details were stored in the draft."
+    },
+    "step2": {
+      "sectionTitle": "Where is your space located?",
+      "streetAddress": "Street Address",
+      "streetAddressPlaceholder": "e.g., 123 Reforma Avenue",
+      "postalCode": "Postal Code",
+      "postalCodePlaceholder": "e.g., 44100",
+      "city": "City",
+      "cityPlaceholder": "e.g., Guadalajara",
+      "state": "State / Province",
+      "statePlaceholder": "e.g., Jalisco",
+      "country": "Country",
+      "countryPlaceholder": "e.g., Mexico",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "mapTitle": "Confirm the exact location",
+      "mapHelper": "Drag the marker to fine-tune the entrance of your space.",
+      "completeStep1Title": "Complete previous steps",
+      "completeStep1Description": "Finish the basic information step before adding the address.",
+      "mapsMissingTitle": "Mapbox is not configured",
+      "mapsMissingDescription": "Add your Mapbox access token to enable the location picker.",
+      "savedTitle": "Location saved",
+      "savedDescription": "Your address and coordinates were stored in the draft.",
+      "missingSpace": "Finish earlier steps before saving the address.",
+      "errors": {
+        "streetRequired": "Street address is required",
+        "cityRequired": "City is required",
+        "stateRequired": "State or province is required",
+        "countryRequired": "Country is required",
+        "postalCodeRequired": "Postal code is required",
+        "latitudeInvalid": "Enter a valid latitude",
+        "longitudeInvalid": "Enter a valid longitude",
+        "latitudeRequired": "Select a location on the map",
+        "longitudeRequired": "Select a location on the map"
+      }
+    },
+    "step3": {
+      "amenitiesSectionTitle": "Amenities & services",
+      "amenitiesHelper": "Highlight the services guests can expect.",
+      "addAmenity": "Add amenity",
+      "createAmenityTitle": "Create custom amenity",
+      "createAmenityDescription": "Custom amenities are visible only on your listings.",
+      "amenityNameLabel": "Amenity name",
+      "amenityNamePlaceholder": "e.g., Concierge assistance",
+      "amenityDescriptionLabel": "Description (optional)",
+      "amenityDescriptionPlaceholder": "Explain what the amenity includes.",
+      "iconSelectorLabel": "Choose an icon",
+      "noAmenitiesTitle": "No amenities available",
+      "noAmenitiesDescription": "Start by creating your own amenities.",
+      "selected": "Selected",
+      "serviceHoursTitle": "Service hours",
+      "serviceHoursHelper": "Define when guests can use your space.",
+      "dayColumn": "Day",
+      "opensAt": "Opens at",
+      "closesAt": "Closes at",
+      "dayEnabledHint": "This day is available for bookings.",
+      "dayDisabledHint": "This day is currently unavailable.",
+      "characteristicsSectionTitle": "Space characteristics",
+      "addCharacteristic": "Add characteristic",
+      "noCharacteristicsPlaceholder": "Describe the unique qualities of your space.",
+      "deleteCharacteristicTitle": "Delete characteristic",
+      "deleteCharacteristicDescription": "Are you sure you want to delete “{{name}}”?",
+      "createCharacteristicTitle": "Add characteristic",
+      "editCharacteristicTitle": "Edit characteristic",
+      "characteristicDialogDescription": "Help guests understand what makes your space special.",
+      "characteristicTitleLabel": "Title",
+      "characteristicTitlePlaceholder": "e.g., Private reception desk",
+      "characteristicDescriptionLabel": "Description (optional)",
+      "characteristicDescriptionPlaceholder": "Describe the benefit or context.",
+      "errors": {
+        "amenityNameRequired": "Amenity name is required",
+        "characteristicTitle": "Enter a title for this characteristic",
+        "invalidServiceHoursRange": "Closing time must be later than opening time"
+      },
+      "amenityCreatedTitle": "Amenity created",
+      "amenityCreatedDescription": "The amenity was added to your draft.",
+      "characteristicCreatedTitle": "Characteristic added",
+      "characteristicCreatedDescription": "The characteristic was added to your draft.",
+      "characteristicUpdatedTitle": "Characteristic updated",
+      "characteristicUpdatedDescription": "The characteristic was updated.",
+      "characteristicDeletedTitle": "Characteristic removed",
+      "characteristicDeletedDescription": "The characteristic was deleted."
+    },
+    "step4": {
+      "mediaSectionTitle": "Photos of your space",
+      "guidelineResolution": "Use high-resolution images (minimum 1600 × 900 px).",
+      "guidelineRatio": "Landscape orientation works best (16:9 ratio).",
+      "guidelineLighting": "Capture natural lighting and key areas like meeting rooms or entrances.",
+      "guidelineOrder": "Upload at least 3 photos to inspire trust in potential guests.",
+      "savedTitle": "Gallery saved",
+      "savedDescription": "Your photos were stored in the draft.",
+      "completePreviousStepsDescription": "Finish the previous steps before uploading images."
+    },
+    "step5": {
+      "sectionTitle": "Set your price and discounts",
+      "priceLabel": "Hourly price (MXN)",
+      "pricePlaceholder": "e.g., 450",
+      "priceHelper": "You can adjust prices later from your dashboard.",
+      "discounts": {
+        "title": "Optional discounts",
+        "helper": "Encourage bookings with recommended presets.",
+        "newListing": {
+          "title": "New listing promotion",
+          "description": "Offer 20% off the first 3 reservations."
+        },
+        "lastMinute": {
+          "title": "Last-minute discount",
+          "description": "12% off reservations booked within 14 days."
+        },
+        "weekly": {
+          "title": "Weekly discount",
+          "description": "10% off stays of 7 nights or longer."
+        },
+        "monthly": {
+          "title": "Monthly discount",
+          "description": "20% off stays of 28 nights or longer."
+        }
+      },
+      "savedTitle": "Listing saved",
+      "savedDescription": "Your space is ready. You can manage it from your owner dashboard.",
+      "errors": {
+        "priceRequired": "Enter an hourly price greater than 0"
+      }
+    },
+    "steps": {
+      "basicInfo": {
+        "title": "Describe your space",
+        "subtitle": "Share the essential details so professionals can understand what you offer.",
+        "helper": "Tell us the basics: name of the space, its capacity, and where guests will find it. You can adjust these details later."
+      },
+      "address": {
+        "title": "Where is it located?",
+        "subtitle": "Provide the exact address so guests can find you without trouble.",
+        "helper": "Accuracy helps guests trust your listing and plan their arrival."
+      },
+      "amenities": {
+        "title": "Amenities & highlights",
+        "subtitle": "Show what makes your workspace special.",
+        "helper": "Pick the amenities you offer and describe unique characteristics."
+      },
+      "media": {
+        "title": "Add your best photos",
+        "subtitle": "High-quality images increase booking confidence.",
+        "helper": "Show the main areas, natural light, and any equipment provided."
+      },
+      "pricing": {
+        "title": "Set your pricing",
+        "subtitle": "Choose your hourly price and optional discounts.",
+        "helper": "You can adjust pricing later from your dashboard."
+      }
+    }
+  },
   "ownerDashboard": {
     "title": "Owner Dashboard",
     "subtitle": "Manage your listings and track your performance",
@@ -344,17 +692,34 @@
     "totalBookings": "Total Bookings",
     "occupancyRate": "Occupancy Rate",
     "paymentSetup": "Payment Setup",
+    "paymentSetupDescription": "Connect Stripe to receive payouts securely.",
+    "paymentSetupCta": "Complete your Stripe Connect onboarding to start receiving payouts.",
+    "paymentSetupPageDescription": "Follow the guided setup to connect your Stripe account and manage payouts.",
     "myListings": "My Listings",
+    "myListingsDescription": "Publish and manage the spaces you offer to guests.",
+    "myListingsPageDescription": "Review your active listings, finish drafts, and create new spaces.",
+    "publishedListings": "Published listings",
+    "unpublishedListings": "Unpublished listings",
+    "noPublishedListings": "You haven't published any spaces yet.",
+    "noUnpublishedListings": "No unpublished spaces at the moment.",
     "recentBookings": "Recent Bookings",
+    "recentBookingsDescription": "Review your latest reservations and respond to guests promptly.",
     "analytics": "Analytics",
     "calendar": "Calendar",
     "active": "active",
     "inactive": "inactive",
     "hour": "hour",
     "bookings": "bookings",
+    "bookingsCount": "{{count}} bookings",
+    "listingsCount": "{{count}} listings",
+    "viewAll": "View all",
+    "manage": "Manage",
     "earnings": "Earnings",
     "edit": "Edit",
     "view": "View",
+    "manageAvailability": "Manage availability",
+    "activeStatus": "Active",
+    "inactiveStatus": "Inactive",
     "addNewListingCard": "Add New Listing",
     "addNewListingDesc": "Create a new workspace listing and start earning",
     "getStarted": "Get Started",
@@ -367,9 +732,268 @@
     "bookingTrendsPlaceholder": "Booking trends chart will be displayed here",
     "availabilityCalendar": "Availability Calendar",
     "calendarPlaceholder": "Interactive calendar will be displayed here",
+    "availabilityManager": {
+      "title": "Availability manager",
+      "subtitle": "Choose a day to block or unblock hourly slots for your space.",
+      "spaceLabel": "Space",
+      "spacePlaceholder": "Select a space",
+      "timezoneLabel": "Time zone: {{timezone}}",
+      "noSpaces": "You need at least one published space to manage availability.",
+      "instructionsTitle": "Manage availability",
+      "instructionsSubtitle": "Stay in control of your calendar and prevent unwanted bookings.",
+      "instructions": {
+        "select": "Choose a date on the calendar to review availability.",
+        "toggle": "Use the selector to block an hour-long range instantly.",
+        "instant": "Manage blocked hours below to reopen slots whenever you need."
+      },
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "prevYear": "Previous year",
+      "nextYear": "Next year",
+      "loading": "Updating availability…",
+      "slotsTitle": "Hourly availability",
+      "selectDatePrompt": "Select a day to manage hourly availability.",
+      "blockedTag": "Blocked",
+      "availableTag": "Available",
+      "toastBlockedTitle": "Hour blocked",
+      "toastBlockedDescription": "{{hour}} has been blocked for guests.",
+      "toastUnblockedTitle": "Hour unblocked",
+      "toastUnblockedDescription": "{{hour}} is available again for bookings.",
+      "toastError": "We couldn't update the availability. Please try again.",
+      "unavailableListTitle": "Unavailable hours",
+      "unavailableListEmpty": "No blocked hours for this day.",
+      "unavailableReasonBlocked": "Blocked",
+      "unavailableReasonBooked": "Booked",
+      "rangeSelectLabel": "Select an hour to block",
+      "rangeSelectPlaceholder": "Pick an available hour",
+      "unblockAction": "Unblock",
+      "manageAvailabilityDialogTitle": "Manage availability",
+      "manageAvailabilityDialogDescription": "Review and adjust blocked hours for {{space}}.",
+      "weekdayLabels": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      }
+    },
     "unknownGuest": "Unknown Guest",
     "confirmed": "confirmed",
     "pending": "pending",
-    "completed": "completed"
+    "completed": "completed",
+    "paymentSettingsTitle": "Payment settings",
+    "paymentSettingsSubtitle": "Configure payouts and manage your Stripe connection.",
+    "mySpacesTitle": "My spaces",
+    "mySpacesSubtitle": "Organize and update the spaces you offer.",
+    "bookingsTitle": "Bookings",
+    "bookingsSubtitle": "Track, review, and manage your reservations.",
+    "backToDashboard": "Back to dashboard",
+    "manageAvailabilityDialogTitle": "Manage availability",
+    "manageAvailabilityDialogDescription": "Review and adjust blocked hours for {{space}}."
+  },
+  "map": {
+    "viewDetails": "View details",
+    "searchThisArea": "Search this area",
+    "goToLocation": "Go to location",
+    "notAvailable": "Map not available",
+    "notConfigured": "Mapbox is not configured",
+    "searchOnMove": "Search as I move"
+  },
+  "hostProfile": {
+    "title": "Host Profile",
+    "hostSince": "Host since {{year}}",
+    "superhost": "Superhost",
+    "superhostDescription": "Experienced hosts with excellent ratings",
+    "verifications": "Verifications",
+    "emailVerified": "Email verified",
+    "phoneVerified": "Phone verified",
+    "identityVerified": "Identity verified",
+    "languages": "Languages",
+    "noLanguages": "No languages specified",
+    "about": "About",
+    "aboutHost": "About {{name}}",
+    "workDescription": "Work",
+    "company": "Company",
+    "stats": {
+      "reviews": "Reviews",
+      "rating": "Rating",
+      "yearsHosting": "Years hosting",
+      "spaces": "Spaces",
+      "activeSpaces": "Active spaces",
+      "responseRate": "Response rate",
+      "responseTime": "Response time",
+      "within1Hour": "Within 1 hour",
+      "withinHours": "Within {{hours}} hours",
+      "within1Day": "Within 1 day"
+    },
+    "spaces": {
+      "title": "{{name}}'s spaces",
+      "activeSpaces": "{{count}} active spaces",
+      "noSpaces": "This host doesn't have any active spaces at this time",
+      "inactiveSpaces": "{{count}} inactive spaces"
+    },
+    "reviews": {
+      "title": "Reviews for {{name}}",
+      "totalReviews": "{{count}} reviews",
+      "averageRating": "Average rating: {{rating}}",
+      "noReviews": "This host hasn't received any reviews yet",
+      "reviewFor": "Review for {{space}}",
+      "showMore": "Show more reviews",
+      "showLess": "Show less"
+    },
+    "ownerProfile": {
+      "sendMessage": "Send message",
+      "goToOwnerDashboard": "Go to owner dashboard"
+    },
+    "contact": {
+      "contactHost": "Contact {{name}}",
+      "sendMessage": "Send message",
+      "goToOwnerDashboard": "Go to owner dashboard"
+    },
+    "errors": {
+      "notFound": "Host not found",
+      "notFoundDescription": "Sorry, we couldn't find the host profile you're looking for",
+      "goBack": "Go back",
+      "loadingError": "Error loading profile"
+    },
+    "viewPublicProfile": "View public profile",
+    "editHostInfo": "Edit host information",
+    "hostInformation": "Host Information",
+    "editLanguages": "Edit languages",
+    "selectLanguages": "Select the languages you speak",
+    "addLanguage": "Add language",
+    "saveChanges": "Save changes",
+    "cancel": "Cancel"
+  },
+  "onboarding": {
+    "title": "Complete your profile",
+    "subtitle": "Help us get to know you better",
+    "step": "Step {{current}} of {{total}}",
+    "continue": "Continue",
+    "back": "Back",
+    "skip": "Skip",
+    "complete": "Complete",
+    "fullName": {
+      "title": "What's your name?",
+      "label": "Full name",
+      "placeholder": "Your full name"
+    },
+    "occupation": {
+      "title": "What do you do?",
+      "label": "Occupation",
+      "placeholder": "e.g: Designer, Developer, Entrepreneur"
+    },
+    "birthday": {
+      "title": "When is your birthday?",
+      "label": "Date of birth",
+      "placeholder": "MM/DD/YYYY"
+    },
+    "address": {
+      "title": "Where are you located?",
+      "label": "Address",
+      "streetAddress": "Street Address",
+      "streetPlaceholder": "Street and number",
+      "city": "City",
+      "cityPlaceholder": "Your city",
+      "state": "State",
+      "statePlaceholder": "Your state",
+      "postalCode": "Postal Code",
+      "postalPlaceholder": "12345",
+      "country": "Country",
+      "countryPlaceholder": "United States",
+      "optional": "You can skip this step if you prefer not to share your address"
+    },
+    "bio": {
+      "title": "Tell us about yourself",
+      "label": "Biography",
+      "placeholder": "Share a bit about yourself and your interests (optional)"
+    }
+  },
+  "auth": {
+    "title": "Sign in or sign up",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "passwordMin": "Password (minimum 6 characters)",
+    "fullName": "Full name",
+    "continue": "Continue",
+    "or": "or",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "continueWithFacebook": "Continue with Facebook",
+    "termsText": "By signing up, you agree to our",
+    "termsLink": "Terms and Conditions",
+    "and": "and",
+    "privacyLink": "Privacy Policy",
+    "welcome": "Welcome!",
+    "signInSuccess": "You have successfully signed in",
+    "accountCreated": "Account created!",
+    "checkEmail": "Check your email to confirm your account",
+    "signInError": "Sign in error",
+    "signUpError": "Sign up error",
+    "passwordError": "Password error",
+    "passwordMinLength": "Password must be at least 6 characters"
+  },
+  "profile": {
+    "member": "Member",
+    "booking": "booking",
+    "bookings": "bookings",
+    "review": "review",
+    "reviews": "reviews",
+    "yearsOnPlatform": "years on Keysely",
+    "editProfile": "Edit Profile",
+    "keepProfileUpdated": "Keep your profile up to date to build trust with guests",
+    "changePhoto": "Change photo",
+    "updateAvatar": "Update profile photo",
+    "updateAvatarDescription": "Upload an image and adjust it before saving.",
+    "savePhoto": "Save photo",
+    "avatarUpdated": "Profile photo updated successfully!",
+    "avatarInvalidType": "Only image files are allowed",
+    "avatarTooLarge": "Image cannot exceed 5MB",
+    "verifiedIdentity": "Verified Identity",
+    "verifiedIdentityDesc": "This user has confirmed their identity and contact information",
+    "aboutMe": "About me",
+    "additionalInfo": "Additional Information",
+    "myBookings": "My Bookings",
+    "noBookings": "You don't have any bookings yet",
+    "favorites": "Favorites",
+    "personalInfo": "Personal Information",
+    "address": "Address",
+    "hostInfo": "Host Information",
+    "settings": "Settings",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us a bit about yourself...",
+    "addressInformation": "Address Information",
+    "streetAddress": "Street Address",
+    "streetAddressPlaceholder": "Street and number",
+    "city": "City",
+    "cityPlaceholder": "Your city",
+    "state": "State",
+    "statePlaceholder": "Your state",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "profileUpdated": "Profile updated successfully!",
+    "updateFailed": "Failed to update profile",
+    "pleaseSignIn": "Please sign in to view your profile"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "subtitle": "Spaces you've saved to book later",
+    "loginToView": "Sign in to view your favorites",
+    "removed": "Removed from favorites",
+    "removedDescription": "was removed from your favorites",
+    "couldNotRemove": "Could not remove from favorites",
+    "perHour": "/hour",
+    "spaceAvailable": "Space available",
+    "viewDetails": "View Details",
+    "noFavoritesYet": "No favorites yet",
+    "noFavoritesDesc": "Explore spaces and save the ones you like to find them easily"
   }
 }

@@ -1,138 +1,24 @@
 import type { MapBounds } from '@/components/features/spaces/SearchFilters/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useLanguageRouting } from '@/hooks/useLanguageRouting';
 import type { Space } from '@/hooks/useSpaces';
-import { GoogleMap, InfoWindow, MarkerF } from '@react-google-maps/api';
+import { useTranslation } from '@/hooks/useTranslation';
+import { formatCurrency } from '@/utils/formatCurrency';
+import { MAPBOX_FIT_PADDING, MAPBOX_STYLE } from '@/utils/mapboxConfig';
 import { MapPin } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-const mapContainerStyle = {
-  width: '100%',
-  height: '100%',
-};
-
-// Default center (Mexico City)
-const defaultCenter = {
-  lat: 19.4326,
-  lng: -99.1332,
-};
-
-const mapOptions: google.maps.MapOptions = {
-  disableDefaultUI: false,
-  zoomControl: true,
-  streetViewControl: false,
-  mapTypeControl: false,
-  fullscreenControl: true,
-  // mapId: 'keysely-map', // Commented out - causes issues with @react-google-maps/api v2.20.7
-  styles: [
-    {
-      elementType: 'geometry',
-      stylers: [{ color: '#F8F9FA' }],
-    },
-    {
-      elementType: 'labels.icon',
-      stylers: [{ visibility: 'off' }],
-    },
-    {
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#343A40' }],
-    },
-    {
-      elementType: 'labels.text.stroke',
-      stylers: [{ color: '#F8F9FA' }],
-    },
-    {
-      featureType: 'administrative',
-      elementType: 'geometry',
-      stylers: [{ color: '#6C757D' }],
-    },
-    {
-      featureType: 'administrative.country',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#1A2B42' }],
-    },
-    {
-      featureType: 'administrative.land_parcel',
-      stylers: [{ visibility: 'off' }],
-    },
-    {
-      featureType: 'administrative.locality',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#1A2B42' }],
-    },
-    {
-      featureType: 'poi',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#6C757D' }],
-    },
-    {
-      featureType: 'poi.park',
-      elementType: 'geometry',
-      stylers: [{ color: '#E8F5E9' }],
-    },
-    {
-      featureType: 'poi.park',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#6C757D' }],
-    },
-    {
-      featureType: 'road',
-      elementType: 'geometry',
-      stylers: [{ color: '#FFFFFF' }],
-    },
-    {
-      featureType: 'road',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#343A40' }],
-    },
-    {
-      featureType: 'road.arterial',
-      elementType: 'geometry',
-      stylers: [{ color: '#FFFFFF' }],
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'geometry',
-      stylers: [{ color: '#E3F2FD' }],
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'geometry.stroke',
-      stylers: [{ color: '#3B82F6' }, { weight: 0.5 }],
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#1A2B42' }],
-    },
-    {
-      featureType: 'road.local',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#6C757D' }],
-    },
-    {
-      featureType: 'transit',
-      elementType: 'geometry',
-      stylers: [{ color: '#E3F2FD' }],
-    },
-    {
-      featureType: 'transit.station',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#1A2B42' }],
-    },
-    {
-      featureType: 'water',
-      elementType: 'geometry',
-      stylers: [{ color: '#BBDEFB' }],
-    },
-    {
-      featureType: 'water',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#3B82F6' }],
-    },
-  ],
-};
+import mapboxgl from 'mapbox-gl';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Map,
+  MapRef,
+  Marker,
+  Popup,
+  type ViewState,
+  type ViewStateChangeEvent,
+} from 'react-map-gl';
 
 interface InteractiveMapProps {
   spaces: Space[];
@@ -140,7 +26,56 @@ interface InteractiveMapProps {
   selectedSpaceId?: string | null;
   onSpaceSelect?: (spaceId: string | null) => void;
   showSearchButton?: boolean;
+  isLoading?: boolean;
+  mapBounds?: MapBounds | null;
 }
+
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%',
+};
+
+const createBoundsFromSpaces = (spaces: Space[]) => {
+  const bounds = new mapboxgl.LngLatBounds();
+
+  for (const space of spaces) {
+    if (space.latitude && space.longitude) {
+      bounds.extend([space.longitude, space.latitude]);
+    }
+  }
+
+  return bounds;
+};
+
+const areViewStatesEqual = (a: ViewState, b: ViewState) => {
+  const nearlyEqual = (x: number | undefined, y: number | undefined, tolerance = 1e-5) => {
+    if (x === undefined && y === undefined) return true;
+    if (x === undefined || y === undefined) return false;
+    return Math.abs(x - y) <= tolerance;
+  };
+
+  return (
+    nearlyEqual(a.latitude, b.latitude) &&
+    nearlyEqual(a.longitude, b.longitude) &&
+    nearlyEqual(a.zoom, b.zoom) &&
+    nearlyEqual(a.pitch ?? 0, b.pitch ?? 0) &&
+    nearlyEqual(a.bearing ?? 0, b.bearing ?? 0)
+  );
+};
+
+const defaultCenter = {
+  latitude: 19.4326,
+  longitude: -99.1332,
+  zoom: 12,
+};
+
+const areBoundsEqual = (
+  a: [number, number, number, number] | null,
+  b: [number, number, number, number]
+) => {
+  if (!a) return false;
+  return a.every((value, index) => Math.abs(value - b[index]) < 1e-4);
+};
 
 export const InteractiveMap = ({
   spaces,
@@ -148,186 +83,284 @@ export const InteractiveMap = ({
   selectedSpaceId,
   onSpaceSelect,
   showSearchButton = true,
+  isLoading = false,
+  mapBounds,
 }: InteractiveMapProps) => {
-  const navigate = useNavigate();
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const { navigateWithLang } = useLanguageRouting();
+  const { t } = useTranslation();
+  const mapRef = useRef<MapRef | null>(null);
+  const hasFitToSpaces = useRef(false);
+  const hasMovedToGeo = useRef(false);
+  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+
+  const viewStateRef = useRef<ViewState>(defaultCenter);
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
   const [showSearchThisArea, setShowSearchThisArea] = useState(false);
-  const boundsChangedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const initialBoundsSet = useRef(false);
+  const [searchOnMove, setSearchOnMove] = useState(true);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const lastEmittedBounds = useRef<[number, number, number, number] | null>(null);
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    setMap(map);
+  useEffect(() => {
+    if (!('geolocation' in navigator)) {
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (_err) => {},
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0,
+      }
+    );
   }, []);
 
-  const onUnmount = useCallback(() => {
-    setMap(null);
+  const disableMapRotation = useCallback(() => {
+    const mapInstance = mapRef.current?.getMap();
+    if (!mapInstance) return;
+
+    mapInstance.dragRotate?.disable();
+    mapInstance.touchZoomRotate?.disableRotation();
   }, []);
+
+  const activeSpaces = useMemo(
+    () => spaces.filter((space) => space.latitude && space.longitude),
+    [spaces]
+  );
+
+  useEffect(() => {
+    if (!selectedSpaceId) {
+      setSelectedSpace(null);
+      return;
+    }
+
+    const match = spaces.find((space) => space.id === selectedSpaceId);
+    if (match) {
+      setSelectedSpace(match);
+    }
+  }, [selectedSpaceId, spaces]);
 
   // Fit bounds to show all spaces on initial load
   useEffect(() => {
-    if (map && spaces.length > 0 && !initialBoundsSet.current) {
-      const bounds = new google.maps.LatLngBounds();
-      spaces.forEach((space) => {
-        if (space.latitude && space.longitude) {
-          bounds.extend({ lat: space.latitude, lng: space.longitude });
-        }
+    if (!mapRef.current || hasFitToSpaces.current) return;
+    if (activeSpaces.length === 0) return;
+
+    const bounds = createBoundsFromSpaces(activeSpaces);
+
+    if (!bounds.isEmpty()) {
+      const mapInstance = mapRef.current.getMap();
+      mapInstance.fitBounds(bounds, { padding: MAPBOX_FIT_PADDING, duration: 0 });
+      hasFitToSpaces.current = true;
+    }
+  }, [activeSpaces]);
+
+  useEffect(() => {
+    if (!location || hasMovedToGeo.current) return;
+
+    // If we already fit to spaces, don't move to geolocation
+    if (hasFitToSpaces.current) return;
+
+    const mapInstance = mapRef.current?.getMap() as mapboxgl.Map | undefined;
+    if (mapInstance?.easeTo) {
+      mapInstance.easeTo({
+        center: [location.longitude, location.latitude],
+        duration: 1000,
       });
-
-      if (!bounds.isEmpty()) {
-        map.fitBounds(bounds);
-        initialBoundsSet.current = true;
-      }
-    }
-  }, [map, spaces]);
-
-  // Handle map bounds change with debounce
-  const handleBoundsChanged = useCallback(() => {
-    if (!map || !onBoundsChange) return;
-
-    // Show "Search this area" button when user moves map
-    setShowSearchThisArea(true);
-
-    // Clear previous timeout
-    if (boundsChangedTimeoutRef.current) {
-      clearTimeout(boundsChangedTimeoutRef.current);
-    }
-
-    // Debounce the bounds change event
-    boundsChangedTimeoutRef.current = setTimeout(() => {
-      const bounds = map.getBounds();
-      if (bounds) {
-        const ne = bounds.getNorthEast();
-        const sw = bounds.getSouthWest();
-
-        const mapBounds: MapBounds = {
-          ne: { lat: ne.lat(), lng: ne.lng() },
-          sw: { lat: sw.lat(), lng: sw.lng() },
-        };
-
-        onBoundsChange(mapBounds);
-        setShowSearchThisArea(false);
-      }
-    }, 500);
-  }, [map, onBoundsChange]);
-
-  const handleSearchThisArea = () => {
-    if (!map || !onBoundsChange) return;
-
-    const bounds = map.getBounds();
-    if (bounds) {
-      const ne = bounds.getNorthEast();
-      const sw = bounds.getSouthWest();
-
-      const mapBounds: MapBounds = {
-        ne: { lat: ne.lat(), lng: ne.lng() },
-        sw: { lat: sw.lat(), lng: sw.lng() },
+      viewStateRef.current = {
+        ...viewStateRef.current,
+        latitude: location.latitude,
+        longitude: location.longitude,
       };
+      hasMovedToGeo.current = true;
+    }
+  }, [location]);
 
-      onBoundsChange(mapBounds);
+  // Handle external map bounds changes (e.g. from URL)
+  useEffect(() => {
+    if (!mapBounds || !mapRef.current) return;
+
+    const { insideBoundingBox } = mapBounds;
+    // Check if these bounds are different from what we last emitted
+    // This prevents infinite loops where map move -> emit bounds -> prop update -> map move
+    if (areBoundsEqual(lastEmittedBounds.current, insideBoundingBox)) {
+      return;
+    }
+
+    const mapInstance = mapRef.current.getMap();
+    const [maxLat, maxLng, minLat, minLng] = insideBoundingBox;
+
+    // Create LngLatBounds from the bbox array [maxLat, maxLng, minLat, minLng]
+    // Mapbox expects [swLng, swLat, neLng, neLat] or LngLatBoundsLike
+    // Our bbox seems to be [maxLat, maxLng, minLat, minLng] based on LocationInput.tsx
+    // Let's verify the order.
+    // In LocationInput: insideBoundingBox: [maxLat, maxLng, minLat, minLng]
+    // Mapbox fitBounds expects: [[minLng, minLat], [maxLng, maxLat]]
+
+    // Mapbox fitBounds accepts [[minLng, minLat], [maxLng, maxLat]]
+    mapInstance.fitBounds(
+      [
+        [minLng, minLat], // sw
+        [maxLng, maxLat], // ne
+      ],
+      { padding: 0, duration: 1000 }
+    );
+
+    // Update last emitted bounds to avoid loop
+    lastEmittedBounds.current = insideBoundingBox;
+  }, [mapBounds]);
+
+  const emitBounds = useCallback(() => {
+    if (!mapRef.current || !onBoundsChange) return;
+
+    const map = mapRef.current.getMap();
+    const bounds = map.getBounds();
+    const ne = bounds.getNorthEast();
+    const sw = bounds.getSouthWest();
+    const boundingBox: [number, number, number, number] = [ne.lat, ne.lng, sw.lat, sw.lng];
+
+    if (areBoundsEqual(lastEmittedBounds.current, boundingBox)) {
       setShowSearchThisArea(false);
+      return;
     }
-  };
 
-  const handleMarkerClick = (space: Space) => {
-    setSelectedSpace(space);
-    if (onSpaceSelect) {
-      onSpaceSelect(space.id);
+    lastEmittedBounds.current = boundingBox;
+
+    onBoundsChange({
+      ne: { lat: ne.lat, lng: ne.lng },
+      sw: { lat: sw.lat, lng: sw.lng },
+      insideBoundingBox: boundingBox,
+    });
+
+    setShowSearchThisArea(false);
+  }, [onBoundsChange]);
+
+  const handleMove = useCallback((evt: ViewStateChangeEvent) => {
+    const nextViewState = evt.viewState;
+    const hasChanged = !areViewStatesEqual(viewStateRef.current, nextViewState);
+
+    if (hasChanged) {
+      viewStateRef.current = {
+        latitude: nextViewState.latitude,
+        longitude: nextViewState.longitude,
+        zoom: nextViewState.zoom,
+        bearing: nextViewState.bearing ?? 0,
+        pitch: nextViewState.pitch ?? 0,
+      };
     }
-  };
+  }, []);
 
-  const handleInfoWindowClose = () => {
+  const handleMoveEnd = useCallback(() => {
+    if (searchOnMove) {
+      emitBounds();
+    } else {
+      setShowSearchThisArea(true);
+    }
+  }, [searchOnMove, emitBounds]);
+
+  const handleSearchThisArea = useCallback(() => {
+    emitBounds();
+  }, [emitBounds]);
+
+  const handleMarkerClick = useCallback(
+    (space: Space) => {
+      setSelectedSpace(space);
+      onSpaceSelect?.(space.id);
+    },
+    [onSpaceSelect]
+  );
+
+  const handlePopupClose = useCallback(() => {
     setSelectedSpace(null);
-    if (onSpaceSelect) {
-      onSpaceSelect(null);
-    }
-  };
+    onSpaceSelect?.(null);
+  }, [onSpaceSelect]);
 
-  const handleViewDetails = (spaceId: string) => {
-    navigate(`/space/${spaceId}`);
-  };
+  const handleViewDetails = useCallback(
+    (spaceId: string) => {
+      navigateWithLang(`/space/${spaceId}`);
+    },
+    [navigateWithLang]
+  );
 
-  // Get marker icon based on whether the space is selected
-  const getMarkerIcon = (space: Space): google.maps.Icon | undefined => {
-    const isSelected = selectedSpaceId === space.id || selectedSpace?.id === space.id;
-    const price = Math.round(space.price_per_hour);
-    const priceText = `$${price}`;
-
-    // Keysely brand colors from design system
-    const primaryColor = '#1A2B42'; // Navy Blue - Primary brand color
-    const accentColor = '#3B82F6'; // Action Blue - Interactive state color
-    const whiteColor = '#FFFFFF'; // White for badge background
-
-    const bgColor = whiteColor;
-    const textColor = isSelected ? accentColor : primaryColor;
-
-    // Calculate text width based on price length (approximation)
-    const textLength = priceText.length;
-    const baseWidth = 50;
-    const charWidth = 9;
-    const badgeWidth = Math.max(baseWidth, textLength * charWidth + 20);
-    const badgeHeight = 36;
-
-    return {
-      url:
-        'data:image/svg+xml;charset=UTF-8,' +
-        encodeURIComponent(`
-          <svg width="${badgeWidth}" height="${badgeHeight + 8}" xmlns="http://www.w3.org/2000/svg">
-            <!-- Badge background with rounded corners -->
-            <rect x="0" y="0" width="${badgeWidth}" height="${badgeHeight}" rx="18" ry="18" 
-                  fill="${bgColor}"/>
-            
-            <!-- Price text -->
-            <text x="${badgeWidth / 2}" y="${badgeHeight / 2 + 1}" 
-                  font-family="Inter, system-ui, -apple-system, sans-serif" 
-                  font-size="16" 
-                  font-weight="700" 
-                  fill="${textColor}" 
-                  text-anchor="middle" 
-                  dominant-baseline="central">
-              ${priceText}
-            </text>
-            
-            <!-- Small triangle pointer at bottom -->
-            <polygon points="${badgeWidth / 2 - 6},${badgeHeight} ${badgeWidth / 2},${badgeHeight + 6} ${badgeWidth / 2 + 6},${badgeHeight}" 
-                     fill="${bgColor}"/>
-          </svg>
-        `),
-      scaledSize: new google.maps.Size(badgeWidth, badgeHeight + 8),
-      anchor: new google.maps.Point(badgeWidth / 2, badgeHeight + 8),
-    };
-  };
+  useEffect(() => {
+    disableMapRotation();
+  }, [disableMapRotation]);
 
   return (
     <div className="relative w-full h-full">
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={defaultCenter}
-        zoom={12}
-        onLoad={onLoad}
-        onUnmount={onUnmount}
-        onBoundsChanged={handleBoundsChanged}
-        options={mapOptions}
+      <Map
+        ref={mapRef}
+        mapboxAccessToken={accessToken}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mapLib={mapboxgl as any}
+        mapStyle={MAPBOX_STYLE}
+        style={mapContainerStyle}
+        initialViewState={defaultCenter}
+        onMove={handleMove}
+        onMoveEnd={handleMoveEnd}
+        onError={(event) => {
+          const message = event?.error?.message ?? 'Mapbox failed to load.';
+          console.error('[Mapbox] error:', message, event?.error);
+          setMapError(message);
+        }}
+        onClick={() => {
+          if (selectedSpace) {
+            handlePopupClose();
+          }
+        }}
+        onLoad={() => {
+          disableMapRotation();
+        }}
       >
-        {/* Render markers for each space */}
-        {spaces.map((space) => {
+        {activeSpaces.map((space) => {
           if (!space.latitude || !space.longitude) return null;
 
+          const isSelected = selectedSpace?.id === space.id;
+
           return (
-            <MarkerF
+            <Marker
               key={space.id}
-              position={{ lat: space.latitude, lng: space.longitude }}
-              onClick={() => handleMarkerClick(space)}
-              icon={getMarkerIcon(space)}
-            />
+              latitude={space.latitude}
+              longitude={space.longitude}
+              anchor="bottom"
+            >
+              <button
+                type="button"
+                className="group relative focus:outline-none"
+                aria-label={t('map.viewDetails')}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleMarkerClick(space);
+                }}
+              >
+                <span
+                  className={`bg-primary text-primary-foreground font-semibold text-sm px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap transition-transform ${
+                    isSelected ? 'scale-105 ring-2 ring-primary/60' : ''
+                  }`}
+                >
+                  {formatCurrency(space.price_per_hour, space.currency)}
+                </span>
+                <span className="absolute left-1/2 -translate-x-1/2 top-full mt-[-2px] h-0 w-0 border-x-[6px] border-x-transparent border-t-[6px] border-t-primary"></span>
+              </button>
+            </Marker>
           );
         })}
 
-        {/* Info Window for selected space */}
-        {selectedSpace && selectedSpace.latitude && selectedSpace.longitude && (
-          <InfoWindow
-            position={{ lat: selectedSpace.latitude, lng: selectedSpace.longitude }}
-            onCloseClick={handleInfoWindowClose}
+        {selectedSpace?.latitude != null && selectedSpace?.longitude != null && (
+          <Popup
+            latitude={selectedSpace.latitude}
+            longitude={selectedSpace.longitude}
+            anchor="bottom"
+            onClose={handlePopupClose}
+            closeButton
+            closeOnClick={false}
+            offset={30}
           >
             <div className="p-2 max-w-xs">
               {selectedSpace.images && selectedSpace.images.length > 0 && (
@@ -352,7 +385,8 @@ export const InteractiveMap = ({
               </p>
               <div className="flex items-center justify-between mb-2">
                 <Badge variant="secondary" className="text-sm bg-primary text-primary-foreground">
-                  ${selectedSpace.price_per_hour}/hr
+                  {formatCurrency(selectedSpace.price_per_hour, selectedSpace.currency)}{' '}
+                  {t('common.perHourShort')}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   ★ {selectedSpace.rating.toFixed(1)}
@@ -363,22 +397,53 @@ export const InteractiveMap = ({
                 className="w-full bg-primary hover:bg-primary-light"
                 onClick={() => handleViewDetails(selectedSpace.id)}
               >
-                Ver detalles
+                {t('map.viewDetails')}
               </Button>
             </div>
-          </InfoWindow>
+          </Popup>
         )}
-      </GoogleMap>
+      </Map>
 
-      {/* Search this area button */}
-      {showSearchButton && showSearchThisArea && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+      {mapError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm z-20 px-6 text-center">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">{t('map.notAvailable')}</h3>
+            <p className="text-sm text-muted-foreground">
+              {mapError} · {t('map.notConfigured')}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Search on Move Toggle */}
+      <div className="absolute top-4 right-4 z-10 bg-background/90 backdrop-blur-sm p-2 rounded-lg shadow-sm border flex items-center gap-2">
+        <Switch
+          id="search-mode"
+          checked={searchOnMove}
+          onCheckedChange={(checked) => {
+            setSearchOnMove(checked);
+            if (checked) {
+              // Trigger search immediately if turned on
+              emitBounds();
+            } else {
+              // Show "Search This Area" button if turned off
+              setShowSearchThisArea(true);
+            }
+          }}
+        />
+        <Label htmlFor="search-mode" className="text-sm font-medium cursor-pointer min-w-[100px]">
+          {isLoading ? <span className="loader !m-0 !mx-auto"></span> : t('map.searchOnMove')}
+        </Label>
+      </div>
+
+      {showSearchButton && showSearchThisArea && !mapError && !isLoading && (
+        <div className="absolute top-4 left-4 z-10">
           <Button
             onClick={handleSearchThisArea}
             className="bg-primary hover:bg-primary-light text-primary-foreground shadow-lg"
           >
             <MapPin className="w-4 h-4 mr-2" />
-            Buscar en esta área
+            {t('map.searchThisArea')}
           </Button>
         </div>
       )}

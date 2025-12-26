@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '@/contexts/AuthContext';
+import { createListSpaceStepPath } from '@/pages/list-space/paths';
 import {
   ArrowRight,
   Building2,
@@ -20,6 +22,11 @@ import { Header } from '../components/layout/Header';
 const ListSpaceMarketing = () => {
   const { t, language } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const listSpaceTarget = user
+    ? createListSpaceStepPath(language, user.id, 0)
+    : `/${language}/auth`;
+
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const stats = [
@@ -126,7 +133,7 @@ const ListSpaceMarketing = () => {
             </p>
             <Button
               size="lg"
-              onClick={() => navigate(`/${language}/list-space`)}
+              onClick={() => navigate(listSpaceTarget)}
               className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 rounded-xl font-semibold"
             >
               {t('listSpace.marketing.getStarted')}
@@ -214,7 +221,7 @@ const ListSpaceMarketing = () => {
           <div className="text-center mt-12">
             <Button
               size="lg"
-              onClick={() => navigate(`/${language}/list-space`)}
+              onClick={() => navigate(listSpaceTarget)}
               className="bg-primary hover:bg-primary-dark text-white text-lg px-8 py-6 rounded-xl font-semibold"
             >
               {t('listSpace.marketing.startListing')}
@@ -363,7 +370,7 @@ const ListSpaceMarketing = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
-                onClick={() => navigate(`/${language}/list-space`)}
+                onClick={() => navigate(listSpaceTarget)}
                 className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 rounded-xl font-semibold"
               >
                 {t('listSpace.marketing.listYourSpace')}
