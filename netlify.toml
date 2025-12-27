@@ -1,2 +1,3 @@
 [build]
-  command = "bun run build"
+  environment = { BUN_VERSION = "latest" }
+  command = "bun install && bun run build"
