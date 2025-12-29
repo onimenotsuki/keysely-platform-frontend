@@ -937,7 +937,13 @@
     "signInError": "Error de inicio de sesión",
     "signUpError": "Error de registro",
     "passwordError": "Error de contraseña",
-    "passwordMinLength": "La contraseña debe tener al menos 6 caracteres"
+    "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+    "emailSentDescription": "Hemos enviado un enlace mágico a tu correo electrónico. Haz clic en el enlace para iniciar sesión.",
+    "enterCode": "Ingresa el código de verificación",
+    "sentCodeTo": "Enviamos un código a",
+    "checkSpamFolder": "¿No lo encuentras? Revisa tu carpeta de spam.",
+    "tryDifferentEmail": "Intentar con otro correo",
+    "emailPlaceholder": "nombre@ejemplo.com"
   },
   "profile": {
     "member": "Miembro",

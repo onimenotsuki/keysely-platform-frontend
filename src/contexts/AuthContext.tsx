@@ -6,10 +6,13 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
-  signIn: (
+  signInWithOtp: (
+    email: string
+  ) => Promise<{ error: Error | null; data?: { user: User | null; session: Session | null } }>;
+  verifyOtp: (
     email: string,
-    password: string
+    token: string,
+    type?: 'email' | 'sms'
   ) => Promise<{ error: Error | null; data?: { user: User | null; session: Session | null } }>;
   signOut: () => Promise<void>;
 }
@@ -41,26 +44,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signInWithOtp = async (email: string) => {
     const redirectUrl = `${window.location.origin}/`;
-
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signInWithOtp({
       email,
-      password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
-        },
       },
     });
-    return { error };
+    return { error, data };
   };
 
-  const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
+  const verifyOtp = async (email: string, token: string, type: 'email' | 'sms' = 'email') => {
+    const { error, data } = await supabase.auth.verifyOtp({
       email,
-      password,
+      token,
+      type,
     });
     return { error, data };
   };
@@ -73,8 +72,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     loading,
-    signUp,
-    signIn,
+    signInWithOtp,
+    verifyOtp,
     signOut,
   };
 
