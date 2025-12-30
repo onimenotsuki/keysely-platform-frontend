@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import Auth from './pages/Auth';
+import AuthCallback from './pages/AuthCallback';
 import Bookings from './pages/Bookings';
 import Explore from './pages/Explore';
 import Favorites from './pages/Favorites';
@@ -53,6 +54,9 @@ const App = () => (
 
               {/* Onboarding route - no language prefix, accessible right after signup */}
               <Route path="/onboarding" element={<Onboarding />} />
+
+              {/* Magic Link Callback */}
+              <Route path="/auth/callback" element={<AuthCallback />} />
 
               {/* Language-prefixed routes */}
               <Route
