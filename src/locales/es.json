@@ -882,10 +882,15 @@
       "label": "Nombre completo",
       "placeholder": "Tu nombre completo"
     },
+    "personInfo": {
+      "title": "Información Personal",
+      "fullName": "Nombre Completo",
+      "fullNamePlaceholder": "Ej. Juan Pérez"
+    },
     "occupation": {
-      "title": "¿A qué te dedicas?",
+      "title": "Tú ocupación",
       "label": "Ocupación",
-      "placeholder": "Ej: Diseñador, Desarrollador, Emprendedor"
+      "placeholder": "Ej. Ingeniero de Software, Diseñador, Estudiante"
     },
     "birthday": {
       "title": "¿Cuándo es tu cumpleaños?",

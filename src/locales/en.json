@@ -880,6 +880,11 @@
       "label": "Full name",
       "placeholder": "Your full name"
     },
+    "personInfo": {
+      "title": "Personal Information",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "e.g. John Doe"
+    },
     "occupation": {
       "title": "What do you do?",
       "label": "Occupation",

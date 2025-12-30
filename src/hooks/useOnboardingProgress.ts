@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface AddressData {
   streetAddress: string;
@@ -9,6 +9,7 @@ export interface AddressData {
 }
 
 export interface OnboardingData {
+  fullName: string;
   occupation: string;
   dateOfBirth: string;
   address: AddressData;
@@ -25,6 +26,7 @@ const STORAGE_KEY = 'keysely_onboarding_progress';
 const TOTAL_STEPS = 4;
 
 const initialData: OnboardingData = {
+  fullName: '',
   occupation: '',
   dateOfBirth: '',
   address: {
@@ -147,12 +149,18 @@ export const useOnboardingProgress = () => {
   const validateStep = useCallback(
     (step: number): { isValid: boolean; error?: string } => {
       switch (step) {
-        case 1: // Occupation
+        case 1: // Personal Info
+          if (!formData.fullName.trim()) {
+            return { isValid: false, error: 'Name is required' };
+          }
+          if (formData.fullName.trim().split(' ').length < 2) {
+            return { isValid: false, error: 'Please enter your full name' };
+          }
           if (!formData.occupation.trim()) {
-            return { isValid: false, error: 'La ocupación es requerida' };
+            return { isValid: false, error: 'Occupation is required' };
           }
           if (formData.occupation.trim().length < 2) {
-            return { isValid: false, error: 'La ocupación debe tener al menos 2 caracteres' };
+            return { isValid: false, error: 'Occupation must be at least 2 characters' };
           }
           return { isValid: true };
 
