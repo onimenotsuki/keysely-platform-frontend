@@ -68,7 +68,6 @@ const Auth = () => {
     // Existence check limitation:
     // We proceed with signInWithOtp directly as we cannot securely check existence from frontend
     // without leaking email information. Supabase will handle user creation/login.
-
     const { error } = await signInWithOtp(email);
 
     if (error) {
@@ -85,6 +84,14 @@ const Auth = () => {
       });
       setStep('otp');
       setIsLoading(false);
+    }
+  };
+
+  const handleOtpChange = (value: string) => {
+    setOtpCode(value);
+
+    if (value.length === 6) {
+      handleVerifyOtp(value);
     }
   };
 
@@ -116,13 +123,6 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
-
-  // Auto-submit OTP when 6 digits are filled
-  useEffect(() => {
-    if (otpCode.length === 6) {
-      handleVerifyOtp(otpCode);
-    }
-  }, [otpCode]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
@@ -193,7 +193,7 @@ const Auth = () => {
                 <InputOTP
                   maxLength={6}
                   value={otpCode}
-                  onChange={(value) => setOtpCode(value)}
+                  onChange={handleOtpChange}
                   disabled={isLoading}
                 >
                   <InputOTPGroup>
