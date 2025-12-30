@@ -45,23 +45,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithOtp = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    const { error, data } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectUrl,
+    const { data, error } = await supabase.functions.invoke('auth-email-handler', {
+      body: {
+        user: { email },
+        email_data: {
+          redirect_to: `${window.location.origin}/auth/callback`,
+        },
       },
     });
     return { error, data };
   };
 
   const verifyOtp = async (email: string, token: string, type: 'email' | 'sms' = 'email') => {
-    const { error, data } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type,
+    // We ignore 'type' here as the custom edge function handles it specifically for this flow
+    const { data, error } = await supabase.functions.invoke('validate-session-custom', {
+      body: {
+        email,
+        otp_code: token,
+      },
     });
-    return { error, data };
+
+    if (error) {
+      return { error, data: null };
+    }
+
+    if (data?.session) {
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession(
+        data.session
+      );
+      return { error: sessionError, data: sessionData };
+    }
+
+    return { error: new Error('No session returned from validation'), data: null };
   };
 
   const signOut = async () => {
