@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ProgressIndicator } from '@/components/onboarding/ProgressIndicator';
+import { StepAddress } from '@/components/onboarding/StepAddress';
+import { StepBio } from '@/components/onboarding/StepBio';
+import { StepBirthday } from '@/components/onboarding/StepBirthday';
+import { StepPersonInfo } from '@/components/onboarding/StepPersonInfo';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from '@/hooks/useTranslation';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
-import { ProgressIndicator } from '@/components/onboarding/ProgressIndicator';
-import { StepOccupation } from '@/components/onboarding/StepOccupation';
-import { StepBirthday } from '@/components/onboarding/StepBirthday';
-import { StepAddress } from '@/components/onboarding/StepAddress';
-import { StepBio } from '@/components/onboarding/StepBio';
+import { useTranslation } from '@/hooks/useTranslation';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logoImage from '../assets/logo.png';
 
 const Onboarding = () => {
@@ -91,7 +92,8 @@ const Onboarding = () => {
         .update({
           occupation: formData.occupation,
           date_of_birth: formData.dateOfBirth,
-          address: formData.address.streetAddress ? formData.address : null,
+          full_name: formData.fullName,
+          address: formData.address.streetAddress ? (formData.address as unknown as Json) : null,
           bio: formData.bio || null,
           onboarding_completed: true,
           onboarding_completed_at: new Date().toISOString(),
@@ -99,6 +101,19 @@ const Onboarding = () => {
         .eq('user_id', user.id);
 
       if (error) throw error;
+
+      // Update user metadata with full name
+      const { error: updateAuthError } = await supabase.auth.updateUser({
+        data: {
+          full_name: formData.fullName,
+        },
+      });
+
+      if (updateAuthError) {
+        console.error('Error updating user metadata:', updateAuthError);
+        // We don't throw here to allow completion even if name update fails, or should we?
+        // Better to log it and proceed as profile update is critical.
+      }
 
       // Clear localStorage after successful submission
       clearProgress();
@@ -127,9 +142,11 @@ const Onboarding = () => {
     switch (currentStep) {
       case 1:
         return (
-          <StepOccupation
-            value={formData.occupation}
-            onChange={(value) => updateFormData({ occupation: value })}
+          <StepPersonInfo
+            fullName={formData.fullName}
+            occupation={formData.occupation}
+            onFullNameChange={(value) => updateFormData({ fullName: value })}
+            onOccupationChange={(value) => updateFormData({ occupation: value })}
             error={validationError}
           />
         );

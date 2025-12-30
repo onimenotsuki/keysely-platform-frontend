@@ -6,10 +6,13 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
-  signIn: (
+  signInWithOtp: (
+    email: string
+  ) => Promise<{ error: Error | null; data?: { user: User | null; session: Session | null } }>;
+  verifyOtp: (
     email: string,
-    password: string
+    token: string,
+    type?: 'email' | 'sms'
   ) => Promise<{ error: Error | null; data?: { user: User | null; session: Session | null } }>;
   signOut: () => Promise<void>;
 }
@@ -41,28 +44,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
+  const signInWithOtp = async (email: string) => {
+    const { data, error } = await supabase.functions.invoke('auth-email-handler', {
+      body: {
+        user: { email },
+        email_data: {
+          redirect_to: `${window.location.origin}/auth/callback`,
         },
       },
     });
-    return { error };
+
+    return { error, data };
   };
 
-  const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+  const verifyOtp = async (email: string, token: string, type: 'email' | 'sms' = 'email') => {
+    // We ignore 'type' here as the custom edge function handles it specifically for this flow
+    const { data, error } = await supabase.functions.invoke('validate-session-custom', {
+      body: {
+        email,
+        otp_code: token,
+      },
     });
-    return { error, data };
+
+    if (error) {
+      return { error, data: null };
+    }
+
+    if (data?.session) {
+      const { data: sessionData, error: sessionError } = await supabase.auth.setSession(
+        data.session
+      );
+      return { error: sessionError, data: sessionData };
+    }
+
+    return { error: new Error('No session returned from validation'), data: null };
   };
 
   const signOut = async () => {
@@ -73,8 +88,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     loading,
-    signUp,
-    signIn,
+    signInWithOtp,
+    verifyOtp,
     signOut,
   };
 
