@@ -23,10 +23,10 @@ Keysely is a marketplace platform that connects users with flexible workspaces i
 
 ## ✨ Key Features
 
-- 🔐 **Complete authentication** with Supabase Auth
+- 🔐 **Complete authentication** system
 - 🏢 **Booking system** with availability management
 - 💳 **Stripe payments** integrated with Stripe Connect for owners
-- 💬 **Real-time chat** with Supabase Realtime
+- 💬 **Real-time chat** system
 - ⭐ **Reviews and ratings system**
 - ❤️ **Favorites and advanced search**
 - 🌐 **Bilingual** (Spanish/English)
@@ -46,7 +46,7 @@ Keysely is a marketplace platform that connects users with flexible workspaces i
 
 ### Backend & Services
 
-- **Supabase** - Backend as a Service (Auth, PostgreSQL, Storage, Realtime)
+- **Backend Service** - Backend as a Service (Auth, PostgreSQL, Storage, Realtime)
 - **Contentful** - Headless CMS for dynamic content
 - **Stripe** - Payment processing
 
@@ -68,7 +68,7 @@ Keysely is a marketplace platform that connects users with flexible workspaces i
 ### Prerequisites
 
 - **Node.js 18+** or **Bun** (recommended)
-- **Supabase** account
+- **Backend** service account
 - **Stripe** account (for payments)
 - **Contentful** account (optional, for CMS)
 
@@ -99,7 +99,7 @@ The server will be available at **http://localhost:8080**
 Create a `.env` file in the project root with the following variables:
 
 ```bash
-# Supabase (Required)
+# Backend Services (Required)
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
 
@@ -146,7 +146,7 @@ keysely-platform-fe/
 │   ├── contexts/         # React Contexts (Auth, Language)
 │   ├── hooks/            # Custom hooks
 │   ├── integrations/     # External integrations
-│   │   ├── supabase/    # Supabase client and types
+│   │   ├── supabase/    # Backend client and types
 │   │   └── contentful/  # Contentful client and types
 │   ├── locales/          # Translations (en/es)
 │   ├── lib/              # Utilities
@@ -173,7 +173,7 @@ See complete diagram in [DATABASE_DIAGRAMS.md](./src/docs/DATABASE_DIAGRAMS.md)
 
 ### Authentication Flow
 
-1. User registers via Supabase Auth
+1. User registers via Auth service
 2. Automatic trigger creates profile in `profiles` table
 3. User can act as Client or Owner
 4. RLS (Row Level Security) protects data per user
@@ -182,7 +182,7 @@ See complete diagram in [DATABASE_DIAGRAMS.md](./src/docs/DATABASE_DIAGRAMS.md)
 
 - **Stripe Connect** for owners (receive payments)
 - **Stripe Checkout** for clients (make payments)
-- Supabase Edge Functions handle webhooks
+- Edge Functions handle webhooks
 
 ## 📦 Available Scripts
 
@@ -266,7 +266,7 @@ This project is private and confidential.
 ## 🙏 Acknowledgments
 
 - [shadcn/ui](https://ui.shadcn.com/) - UI Components
-- [Supabase](https://supabase.com/) - Backend as a Service
+- **Backend Services** - Auth & Database
 - [Contentful](https://www.contentful.com/) - Headless CMS
 - [Stripe](https://stripe.com/) - Payment processing
 
