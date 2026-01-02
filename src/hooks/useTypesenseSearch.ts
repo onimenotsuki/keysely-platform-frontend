@@ -138,10 +138,26 @@ export const useTypesenseSearch = (options: UseTypesenseSearchOptions = {}) => {
         facet_by: 'category_id,amenities,city,state,price_per_hour,capacity,rating',
       };
 
-      const result = await typesenseClient
-        .collections(SPACES_COLLECTION_NAME)
-        .documents()
-        .search(searchParameters);
+      let result;
+      try {
+        result = await typesenseClient
+          .collections(SPACES_COLLECTION_NAME)
+          .documents()
+          .search(searchParameters);
+      } catch (err: unknown) {
+        // Handle "Collection not found" error (404)
+        const error = err as { httpStatus?: number };
+        if (error?.httpStatus === 404) {
+          return {
+            spaces: [],
+            total: 0,
+            page: 0,
+            nbPages: 0,
+            facets: {},
+          };
+        }
+        throw error;
+      }
 
       // Process facets
       const facets: FacetCounts = {};
