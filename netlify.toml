@@ -1,3 +1,25 @@
 [build]
   environment = { BUN_VERSION = "latest" }
   command = "bun install && bun run build"
+
+# Geolocation-based language redirects
+# Redirect users from Spanish-speaking countries to /es
+[[redirects]]
+  from = "/"
+  to = "/es"
+  status = 302
+  force = true
+  conditions = {Country = ["ES", "MX", "AR", "CO", "VE", "PE", "CL", "EC", "GT", "CU", "BO", "DO", "HN", "PY", "SV", "NI", "CR", "PR", "PA", "UY", "GQ"]}
+
+# Redirect all other countries to /en (default)
+[[redirects]]
+  from = "/"
+  to = "/en"
+  status = 302
+  force = true
+
+# SPA fallback - ensure all routes work correctly
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
